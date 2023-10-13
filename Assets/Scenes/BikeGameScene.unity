@@ -1022,13 +1022,15 @@ MonoBehaviour:
   BikeHandleTurn: 2
   BikeSteerScreenWidth: 50
   BikeSteerSwipeScale: 0.1
-  BikeSteerSwipeScaleLimit: 40
+  BikeSteerSwipeScaleLimit: 20
   BikeJumpStartSpeed: 12
   BikeJumpDecelRise: 40
   BikeJumpDecelFall: 20
   BikeJumpTilt: 0
   BikeJumpTiltThreshold: 10
   BikeJumpSailTimeout: 1.2
+  MinBikeSpeedToJump: 4
+  MinTimeBetweenJumps: 0.1
   BikeCycleClip: {fileID: 8300000, guid: a2dffad87b27c024abbd59447be322c7, type: 3}
   BikeCrashClip: {fileID: 8300000, guid: d826ddf1f140e8248aa44551938f34dd, type: 3}
   BikeJumpClip: {fileID: 8300000, guid: 8815404026075a84e805a498d1a72b3d, type: 3}
