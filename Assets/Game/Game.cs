@@ -27,6 +27,8 @@ public class Game : MonoBehaviour
     //public float NoPedalTimeout = 0.2f;
     public float MinBikeSpeedToJump = 4f;
     public float MinTimeBetweenJumps = 0.5f;
+    public float JumpHoldElapsedRequired = 0.2f;
+    public float JumpHoldElapsedExpired = 0.4f; // should be greater than JumpHoldElapsedRequired
 
     public AudioClip BikeCycleClip;
     public AudioClip BikeCrashClip;
@@ -74,6 +76,7 @@ public class Game : MonoBehaviour
     float sailElapsed = 0f;
     float noPedalElapsed;
     float noJumpElapsed;
+    float holdElapsed;
 
     Camera gameCam;
     AudioSource audioSource;
@@ -322,7 +325,7 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
 
     void Update()
     {
-        Game.Inst = this;
+        //Game.Inst = this;
 
         // Cache some values.
         float dt = Time.deltaTime;
@@ -346,7 +349,6 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
             gameCam.transform.localEulerAngles = currentCamEulers;
 
         }
-
 
         if (IsRestarting)
             return;
@@ -376,18 +378,8 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
         if (Input.GetMouseButton(0)) // button is being held down now
 #endif
         {
-            // Jumping (pressed when not accelerating for a while).
-            if (!isJumping && bikeSpeed > MinBikeSpeedToJump && noJumpElapsed > MinTimeBetweenJumps) //bikeSpeed > MinBikeSpeedToJump && noPedalElapsed > NoPedalTimeout)
-            {
-                PlayOneShot(BikeJumpClip);
-                isJumping = true;
-                bikeJumpSpeed = BikeJumpStartSpeed;
-                //noPedalElapsed = 0f;
-                noJumpElapsed = 0f;
-            }
-
             // Accel & Steering (pressed while not in air).
-            else if(!isJumping)// && mousePos.x > screenMiddleBorderLeft && mousePos.x < screenMiddleBorderRight)
+            if(!isJumping)// && mousePos.x > screenMiddleBorderLeft && mousePos.x < screenMiddleBorderRight)
             {
 #if UNITY_TOUCH_SUPPORTED
                 Touch firstTouch = Input.GetTouch(0);
@@ -416,11 +408,42 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
                 bikeSpeed += BikeAccel;
                 if (bikeSpeed > BikeMaxSpeed)
                     bikeSpeed = BikeMaxSpeed;
+
+                holdElapsed += dt;
             }
         }
         else
         {
             noPedalElapsed += dt;
+        }
+
+#if UNITY_TOUCH_SUPPORTED
+        if (Input.touchCount > 0 && Input.touches[0].phase == TouchPhase.Ended)
+#else
+        if (Input.GetMouseButtonUp(0)) // button is let go now
+#endif
+        {
+            if (!isJumping && holdElapsed < JumpHoldElapsedExpired)
+            {
+                PlayOneShot(BikeJumpClip);
+                isJumping = true;
+                bikeJumpSpeed = BikeJumpStartSpeed;    
+            }
+
+            holdElapsed = 0;
+
+            /*
+            // Jumping (pressed when not accelerating for a while).
+            if (!isJumping && bikeSpeed > MinBikeSpeedToJump && noJumpElapsed > MinTimeBetweenJumps) //bikeSpeed > MinBikeSpeedToJump && noPedalElapsed > NoPedalTimeout)
+            {
+                PlayOneShot(BikeJumpClip);
+                isJumping = true;
+                bikeJumpSpeed = BikeJumpStartSpeed;
+                //noPedalElapsed = 0f;
+                noJumpElapsed = 0f;
+            }
+            */
+
         }
 
         // Jumping sail.
@@ -515,9 +538,6 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
 
     public void ResetBikeRotation()
     {
-        //HandleBars.transform.localEulerAngles = new Vector3(0, originalHandleBarEulerY, 0);
-        //Bike.transform.localEulerAngles = new Vector3(0, originalBikeEulerY, 0);
-
         Vector3 currentHandleEulers = HandleBars.transform.localEulerAngles;
         currentHandleEulers.y = originalHandleBarEulerY;
         HandleBars.transform.localEulerAngles = currentHandleEulers;
@@ -534,25 +554,25 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
 
     public void Restart()
     {
-        Debug.Log("Restart, before DoRestart.");
+        //Debug.Log("Restart, before DoRestart.");
         StartCoroutine(DoRestart());
-        Debug.Log("Restart, after DoRestart.");
+       // Debug.Log("Restart, after DoRestart.");
     }
 
     IEnumerator DoRestart()
     {
-        Debug.Log("DoRestart, before yield null.");
+        //Debug.Log("DoRestart, before yield null.");
 
         // Skip a frame to prevent lockup?
         yield return null;
 
-        Debug.Log("DoRestart, aftger yield null.");
+        //Debug.Log("DoRestart, aftger yield null.");
 
 
         IsRestarting = true;
         yield return Game.WaitRestartFinish;
 
-        Debug.Log("DoRestart, aftger yield WaitRestartFinish.");
+        //Debug.Log("DoRestart, aftger yield WaitRestartFinish.");
 
 
 
@@ -560,7 +580,7 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
         ResetBikeRotation();
         IsRestarting = false;
 
-        Debug.Log("DoRestart, aftger everything.");
+        //Debug.Log("DoRestart, aftger everything.");
 
 
     }
