@@ -36,7 +36,7 @@ public class Bike : MonoBehaviour
             crashParticlesPrefab.transform.GetChild(1).gameObject.SetActive(true); // Child particle too.
             Game.Inst.PlayOneShot(Game.Inst.BikeCrashClip);
             Game.Inst.BikeStopped();
-            Debug.Log("Bike Stopped.");
+            //Debug.Log("Bike Stopped.");
             StartCoroutine(StopEverything());
         }
 
@@ -44,16 +44,16 @@ public class Bike : MonoBehaviour
 
     IEnumerator StopEverything()
     {
-        Debug.Log("- In Stop Everything.");
+        //Debug.Log("- In Stop Everything.");
         yield return null;
-        Debug.Log("- After yield null.");
+        //Debug.Log("- After yield null.");
         Game.Inst.Restart();
-        Debug.Log("- After Restart.");
+        //Debug.Log("- After Restart.");
 
         yield return Game.WaitParticlesStop;
-        Debug.Log("- After WaitParticlesStop.");
+        //Debug.Log("- After WaitParticlesStop.");
         //crashParticlesPrefab.Stop();//.gameObject.SetActive(false);
-        Debug.Log("- After SetActive(false).");
+        //Debug.Log("- After SetActive(false).");
     }
 
     void OnCollisionExit(Collision collision)
