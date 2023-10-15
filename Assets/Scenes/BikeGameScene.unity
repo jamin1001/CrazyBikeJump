@@ -375,10 +375,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 2000, y: 1000}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -1191,8 +1191,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 50.5}
-  m_SizeDelta: {x: 12, y: 100}
+  m_AnchoredPosition: {x: 0, y: 500}
+  m_SizeDelta: {x: 50, y: 750}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &726359348
 MonoBehaviour:
@@ -1324,7 +1324,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 12, y: 100}
+  m_SizeDelta: {x: 50, y: 750}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1012328836
 MonoBehaviour:
@@ -1338,7 +1338,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Padding: {x: -1, y: -1, z: -1, w: -1}
+  m_Padding: {x: -10, y: -10, z: -10, w: -10}
   m_Softness: {x: 0, y: 0}
 --- !u!114 &1012328837
 MonoBehaviour:
@@ -1414,9 +1414,9 @@ MonoBehaviour:
   SpeedGaugeMain: {fileID: 2120340722}
   SpeedGaugeImage: {fileID: 726359348}
   SpeedGaugeAdjuster: {fileID: 726359347}
-  BikeAccel: 0.09
-  BikeDecel: 0.02
-  BikeMaxSpeed: 20
+  BikeAccel: 20
+  BikeDecel: 5
+  BikeMaxSpeed: 15
   BikeTurn: 1.4
   BikeTurnTranslation: 0.1
   BikeHandleTurn: 2
@@ -1427,11 +1427,11 @@ MonoBehaviour:
   BikeJumpStartSpeed: 12
   BikeJumpDecelRise: 40
   BikeJumpDecelFall: 20
-  BikeJumpTilt: 0
-  BikeJumpTiltThreshold: 10
+  BikeJumpDecelForward: 4
+  BikeJumpLandingSlowdown: 2
+  BikeJumpTilt: -14
+  BikeJumpTiltThreshold: 0.8
   BikeJumpSailTimeout: 1.2
-  JumpHoldElapsedRequired: 0.2
-  JumpHoldElapsedExpired: 0.4
   BikeCycleClip: {fileID: 8300000, guid: a2dffad87b27c024abbd59447be322c7, type: 3}
   BikeCrashClip: {fileID: 8300000, guid: d826ddf1f140e8248aa44551938f34dd, type: 3}
   BikeJumpClip: {fileID: 8300000, guid: 8815404026075a84e805a498d1a72b3d, type: 3}
@@ -2619,8 +2619,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 20, y: 20}
-  m_SizeDelta: {x: 18, y: 106}
+  m_AnchoredPosition: {x: 100, y: 100}
+  m_SizeDelta: {x: 100, y: 800}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &2120340723
 MonoBehaviour:
@@ -2635,7 +2635,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.5882353}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.92941177}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 0

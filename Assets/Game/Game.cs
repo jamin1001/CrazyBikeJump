@@ -23,15 +23,17 @@ public class Game : MonoBehaviour
     public float BikeSteerSwipeScale = 0.2f;
     public float BikeSteerPercentEasyJump = 0.4f;
     public int BikeSteerSwipeScaleLimit = 20;
+    
 
-    public float BikeJumpStartSpeed = 30;
+    public float BikeJumpStartSpeed = 30f;
     public float BikeJumpDecelRise = 0.02f;
     public float BikeJumpDecelFall = 0.02f;
+    public float BikeJumpDecelForward = 2f;
+    public float BikeJumpLandingSlowdown = 5f;
+
     public float BikeJumpTilt = 0.5f;
     public float BikeJumpTiltThreshold = 0.8f;
     public float BikeJumpSailTimeout = 1.2f;
-    public float JumpHoldElapsedRequired = 0.2f;
-    public float JumpHoldElapsedExpired = 0.4f; // should be greater than JumpHoldElapsedRequired
 
     public AudioClip BikeCycleClip;
     public AudioClip BikeCrashClip;
@@ -77,7 +79,6 @@ public class Game : MonoBehaviour
     public bool IsRestarting { get; set; } = false;
     public bool IsFinished { get; set; } = false;
     float sailElapsed = 0f;
-    float holdElapsed;
 
     Camera gameCam;
     AudioSource audioSource;
@@ -95,7 +96,7 @@ public class Game : MonoBehaviour
     List<List<GameObject>> obstaclePools = new();
 
     static public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
-    static public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(2.0f);
+    static public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(1.0f);
     static public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(4.0f);
     static public WaitForSecondsRealtime WaitGaugeBorderFade = new WaitForSecondsRealtime(0.2f);
@@ -165,8 +166,8 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
 
         // Scale GUI appopriate to device.
 
-        SpeedGaugeMain.position = 10f * SpeedGaugeMain.position;
-        SpeedGaugeMain.localScale = 10f * SpeedGaugeMain.localScale;
+        //SpeedGaugeMain.position = 10f * SpeedGaugeMain.position;
+        //SpeedGaugeMain.localScale = 10f * SpeedGaugeMain.localScale;
 
 
         audioSource = GetComponent<AudioSource>(); // continuous chug chug
@@ -359,6 +360,8 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
 
         }
 
+        SpeedGaugeAdjuster.localPosition = new Vector3(0, SpeedGaugeAdjuster.rect.height * (bikeSpeed / BikeMaxSpeed), 0);
+
         if (IsRestarting)
             return;
 
@@ -375,27 +378,19 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
             }
         }
 
-        // DEBUG
-        if (Input.GetMouseButtonUp(0))
-        {
-            //audioSource.PlayOneShot(FinishedGood);
-        }
-
-        SpeedGaugeAdjuster.localPosition = new Vector3(0, 100f * (bikeSpeed / BikeMaxSpeed), 0);
-        SpeedGaugeImage.color = new Color(0, 0, 0, 0.8f);
+        //SpeedGaugeImage.color = new Color(0, 0, 0, 0.7f);
 
 
 #if UNITY_TOUCH_SUPPORTED
-        if (Input.touchCount > 0)
+        if (Input.touchCount > 0 && Input.touches[0].phase != TouchPhase.Canceled)
 #else
         if (Input.GetMouseButton(0)) // button is being held down now
 #endif
         {
             // Accel & Steering (pressed while not in air).
-            if(!isJumping)// && mousePos.x > screenMiddleBorderLeft && mousePos.x < screenMiddleBorderRight)
+            if (!isJumping)// && mousePos.x > screenMiddleBorderLeft && mousePos.x < screenMiddleBorderRight)
             {
                 
-
 #if UNITY_TOUCH_SUPPORTED
                 Touch firstTouch = Input.GetTouch(0);
                 Vector2 contactPos = firstTouch.position;
@@ -408,40 +403,21 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
                 //Debug.Log($"Accel contact from mid: {pixelsAwayFromMiddle}             X: {contactPos.x}");
                 fromMiddle = Mathf.Sign(pixelsAwayFromMiddle) * Mathf.Min(BikeSteerSwipeScaleLimit, BikeSteerSwipeScale * Mathf.Abs(pixelsAwayFromMiddle));
 
-                float percentFromMiddle = Mathf.Abs(fromMiddle) / BikeSteerSwipeScaleLimit;
-                if (Input.GetMouseButtonDown(0) && percentFromMiddle > BikeSteerPercentEasyJump) // Steering hard
-                {
-                    // "Easy jump", no hold just immediate since we are turned funny.
-                    Debug.Log("EASY jump");
-                    PlayOneShot(BikeJumpClip);
-                    isJumping = true;
-                    bikeJumpSpeed = BikeJumpStartSpeed;
-                    holdElapsed = 0;
-                }
-                else
-                {
-                    Vector3 currentHandleEulers = HandleBars.transform.localEulerAngles;
-                    currentHandleEulers.y = originalHandleBarEulerY - BikeHandleTurn * fromMiddle; // rot y is opposite of bike direction so need minus sign
-                    HandleBars.transform.localEulerAngles = currentHandleEulers;
+                Vector3 currentHandleEulers = HandleBars.transform.localEulerAngles;
+                currentHandleEulers.y = originalHandleBarEulerY - BikeHandleTurn * fromMiddle; // rot y is opposite of bike direction so need minus sign
+                HandleBars.transform.localEulerAngles = currentHandleEulers;
 
-                    Vector3 currentBikeEulers = GameBike.transform.localEulerAngles;
-                    currentBikeEulers.y = originalBikeEulerY + BikeTurn * fromMiddle;
-                    GameBike.transform.localEulerAngles = currentBikeEulers;
+                Vector3 currentBikeEulers = GameBike.transform.localEulerAngles;
+                currentBikeEulers.y = originalBikeEulerY + BikeTurn * fromMiddle;
+                GameBike.transform.localEulerAngles = currentBikeEulers;
 
-                    bikeSpeed += BikeAccel;
-                    if (bikeSpeed > BikeMaxSpeed)
-                        bikeSpeed = BikeMaxSpeed;
+                bikeSpeed += BikeAccel * dt;
+                if (bikeSpeed > BikeMaxSpeed)
+                    bikeSpeed = BikeMaxSpeed;
 
-     
-                    SpeedGaugeImage.color = new Color(0, 0, 0, 0.3f);
-
-                    holdElapsed += dt;
-                }
+                //SpeedGaugeImage.color = new Color(0, 0, 0, 0.3f);
             }
-
-
         }
-
 
 #if UNITY_TOUCH_SUPPORTED
         if (Input.touchCount > 0 && Input.touches[0].phase == TouchPhase.Ended)
@@ -449,20 +425,18 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
         if (Input.GetMouseButtonUp(0)) // button is let go now
 #endif
         {
-            if (!isJumping && holdElapsed < JumpHoldElapsedExpired)
+            if (!isJumping)
             {
                 PlayOneShot(BikeJumpClip);
                 isJumping = true;
-                bikeJumpSpeed = BikeJumpStartSpeed;    
+                bikeJumpSpeed = BikeJumpStartSpeed;
             }
-
-            holdElapsed = 0;
         }
 
         // Jumping sail.
         if (isJumping)
         {
-            if (sailElapsed < BikeJumpSailTimeout && Input.GetMouseButton(0))// && mousePos.y > Screen.height / 2) // Sailing extended jump
+            if (sailElapsed < BikeJumpSailTimeout && Input.GetMouseButton(0))
             {
                 if (!isSailing)
                 {
@@ -483,19 +457,15 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
                 isSailing = false;
             }
         }
-        else // grounded and slowing down
+        else
         {
-            bikeSpeed -= BikeDecel;
+            // Grounded and slowing down.
+            bikeSpeed -= BikeDecel * dt;
             if (bikeSpeed < 0)
                 bikeSpeed = 0;
         }
 
-        // Moving.
-        if (bikeSpeed > 0)
-        {
-            GameBike.transform.position += new Vector3(dt * BikeTurnTranslation * fromMiddle, 0, dt * bikeSpeed + transform.position.z);
-        }
-
+        
         // Jumping Vertical Accel/Decel.
         if (isJumping)
         {
@@ -516,16 +486,21 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
                     //    isSailing = false;
                 }
                 else
+                {
                     bikeJumpSpeed += dt * -BikeJumpDecelFall;
 
+                    bikeSpeed -= BikeJumpDecelForward * dt;
+                    if (bikeSpeed < 0)
+                        bikeSpeed = 0;
+                }
             }
 
-            //float bikeTilt = 0;
-            //if(Bike.transform.position.y > BikeJumpTiltThreshold)
-            //    bikeTilt = BikeJumpTilt * Bike.transform.position.y;
+            // Tilting back.
+            float bikeTilt = 0;
+            if (GameBike.transform.position.y > BikeJumpTiltThreshold)
+                bikeTilt = BikeJumpTilt * GameBike.transform.position.y;
 
-            float bikeTilt = BikeJumpTilt * GameBike.transform.position.y;
-
+            // Hitting the ground.            
             if (GameBike.transform.position.y < 0)
             {
                 GameBike.transform.position = new Vector3(GameBike.transform.position.x, 0, GameBike.transform.position.z);
@@ -533,18 +508,22 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
                 isJumping = false;
                 bikeTilt = 0f;
                 sailElapsed = 0f;
+                bikeSpeed -= BikeJumpLandingSlowdown; // skitter slow as you hit the ground
+                if (bikeSpeed < 0)
+                    bikeSpeed = 0;
             }
 
-            // Apply jump tilt.
+            // Apply jump tilt (if any).
             Vector3 currentBikeEulers = GameBike.transform.localEulerAngles;
             currentBikeEulers.x = bikeTilt;
             GameBike.transform.localEulerAngles = currentBikeEulers;
         }
-        else
-        {
-            //Bike.transform.position = new Vector3(Bike.transform.position.x, 0, Bike.transform.position.z);
-        }
 
+        // Moving.
+        if (bikeSpeed > 0)
+        {
+            GameBike.transform.position += new Vector3(dt * BikeTurnTranslation * fromMiddle, 0, dt * bikeSpeed + transform.position.z);
+        }
     }
 
     public void ResetBikeRotation()
