@@ -5,18 +5,18 @@ using UnityEngine;
 public class Bike : MonoBehaviour
 {
     public ParticleSystem crashParticlesPrefab; // world
+    public ParticleSystem swerveParticlesPrefab; // world
+    public ParticleSystem collectParticlesPrefab; // world
     public ParticleSystem windParticlesPrefab;  // local to bike
     public float HittingAtDistance = 0.5f;
 
     public void StartWind()
     {
         windParticlesPrefab.Play();
-        //windParticlesPrefab.gameObject.SetActive(true);
     }
 
     public void StopWind()
     {
-        //windParticlesPrefab.gameObject.SetActive(false);
         windParticlesPrefab.Stop();
     }
 
@@ -31,15 +31,12 @@ public class Bike : MonoBehaviour
         {
             Debug.Log("HIT!");// Collided with :" + collision.collider.gameObject);
             crashParticlesPrefab.transform.position = collision.transform.position + new Vector3(0, 1f, -0.5f);
-            //crashParticlesPrefab.gameObject.SetActive(true);
             crashParticlesPrefab.Play();
             crashParticlesPrefab.transform.GetChild(1).gameObject.SetActive(true); // Child particle too.
             Game.Inst.PlayOneShot(Game.Inst.BikeCrashClip);
             Game.Inst.BikeStopped();
-            //Debug.Log("Bike Stopped.");
             StartCoroutine(StopEverything());
         }
-
     }
 
     IEnumerator StopEverything()
@@ -65,6 +62,8 @@ public class Bike : MonoBehaviour
                 if (collision.collider.gameObject.name.Contains("swerve"))
                 {
                     Game.Inst.PlayOneShot(Game.Inst.BikeSwerveClip);
+                    swerveParticlesPrefab.transform.localPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
+                    swerveParticlesPrefab.Play();
 
                     if (collision.collider.gameObject.name.Contains("cow"))
                     {
@@ -74,6 +73,8 @@ public class Bike : MonoBehaviour
                 else
                 {
                     Game.Inst.PlayOneShot(Game.Inst.BikeCollectClip);
+                    collectParticlesPrefab.transform.localPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
+                    collectParticlesPrefab.Play();
                 }
 
             }
