@@ -4,21 +4,35 @@ using UnityEngine;
 
 public class Bike : MonoBehaviour
 {
-    public GameObject crashParticlesPrefab;
+    public ParticleSystem crashParticlesPrefab; // world
+    public ParticleSystem windParticlesPrefab;  // local to bike
     public float HittingAtDistance = 0.5f;
+
+    public void StartWind()
+    {
+        windParticlesPrefab.Play();
+        //windParticlesPrefab.gameObject.SetActive(true);
+    }
+
+    public void StopWind()
+    {
+        //windParticlesPrefab.gameObject.SetActive(false);
+        windParticlesPrefab.Stop();
+    }
 
     void OnCollisionEnter(Collision collision)
     {
-        if (collision.collider.name.Contains("cow"))
+        if (collision.collider.gameObject.name.Contains("cow"))
         {
-            // do moo
+            Game.Inst.PlayOneShot(Game.Inst.CowHitClip);    
         }
 
         if (collision.collider is CapsuleCollider)
         {
             Debug.Log("HIT!");// Collided with :" + collision.collider.gameObject);
             crashParticlesPrefab.transform.position = collision.transform.position + new Vector3(0, 1f, -0.5f);
-            crashParticlesPrefab.SetActive(true);
+            //crashParticlesPrefab.gameObject.SetActive(true);
+            crashParticlesPrefab.Play();
             crashParticlesPrefab.transform.GetChild(1).gameObject.SetActive(true); // Child particle too.
             Game.Inst.PlayOneShot(Game.Inst.BikeCrashClip);
             Game.Inst.BikeStopped();
@@ -38,7 +52,7 @@ public class Bike : MonoBehaviour
 
         yield return Game.WaitParticlesStop;
         Debug.Log("- After WaitParticlesStop.");
-        crashParticlesPrefab.SetActive(false);
+        //crashParticlesPrefab.Stop();//.gameObject.SetActive(false);
         Debug.Log("- After SetActive(false).");
     }
 
@@ -46,9 +60,23 @@ public class Bike : MonoBehaviour
     {
         if (collision.collider is BoxCollider)
         {
-            if(!Game.Inst.IsRestarting)
-                Game.Inst.PlayOneShot(Game.Inst.BikeCollectClip);
-            Debug.Log("JUMPED OVER!");
+            if (!Game.Inst.IsRestarting)
+            {
+                if (collision.collider.gameObject.name.Contains("swerve"))
+                {
+                    Game.Inst.PlayOneShot(Game.Inst.BikeSwerveClip);
+
+                    if (collision.collider.gameObject.name.Contains("cow"))
+                    {
+                        Game.Inst.PlayOneShot(Game.Inst.CowSwerveClip);
+                    }
+                }
+                else
+                {
+                    Game.Inst.PlayOneShot(Game.Inst.BikeCollectClip);
+                }
+
+            }
         }
     }
 

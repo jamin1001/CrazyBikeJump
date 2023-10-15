@@ -13,6 +13,7 @@ public class FinishLevel : MonoBehaviour
     {
         Game.Inst.BikeStopped();
         Game.Inst.IsFinished = true;
+        Game.Inst.PlayOneShot(Game.Inst.FinishLineClip);
         StartCoroutine(PopPopPop()); 
     }
 
@@ -27,42 +28,37 @@ public class FinishLevel : MonoBehaviour
         float offsetX = Camera.main.transform.position.x;
         float offsetY = HeightY;
 
-        Game.Inst.PlayOneShot(Game.Inst.ConfettiBangClip);
-        //randomWait = Random.Range(0, waitCount);
-        //yield return Game.WaitList2[randomWait];
+        yield return Game.WaitConfettiStart;
 
-        Game.Inst.PlayOneShotRandom(Game.Inst.ConfettiPopClips);
+        // 1
+        Game.Inst.PlayOneShot(Game.Inst.ConfettiBangClip);
         confettiParent.GetChild(0).gameObject.SetActive(true);
         confettiParent.GetChild(0).position = new Vector3(offsetX + Random.Range(-VariationX, +VariationX), offsetY + Random.Range(-VariationY, +VariationY), sameZ);
         
-        Debug.Log("Pop 1");
-
+        // 2
         randomWait = Random.Range(0, waitCount);
         yield return waitTimes[randomWait];
         Game.Inst.PlayOneShotRandom(Game.Inst.ConfettiPopClips);
         confettiParent.GetChild(1).gameObject.SetActive(true);
         confettiParent.GetChild(1).position = new Vector3(offsetX + Random.Range(-VariationX, +VariationX), offsetY + Random.Range(-VariationY, +VariationY), sameZ);
-        
-        Debug.Log("Pop 2");
-
+       
+        // 3
         randomWait = Random.Range(0, waitCount);
         yield return waitTimes[randomWait];
-        Game.Inst.PlayOneShot(Game.Inst.ConfettiBangClip);
+        Game.Inst.PlayOneShotRandom(Game.Inst.ConfettiPopClips);
         confettiParent.GetChild(2).gameObject.SetActive(true);
         confettiParent.GetChild(2).position = new Vector3(offsetX + Random.Range(-VariationX, +VariationX), offsetY + Random.Range(-VariationY, +VariationY), sameZ);
 
-        Debug.Log("Pop 3");
-
         yield return Game.WaitConfettiStop;
-
-        Debug.Log("Confetti stopped");
 
         confettiParent.GetChild(0).gameObject.SetActive(false);
         confettiParent.GetChild(1).gameObject.SetActive(false);
         confettiParent.GetChild(2).gameObject.SetActive(false);
 
-        Debug.Log("Turned off confettis");
-
+        // Check score and pick here.
+        //Game.Inst.PlayOneShot(Game.Inst.FinishedBadClip);
+        Game.Inst.PlayOneShot(Game.Inst.FinishedGoodClip);
+        //Game.Inst.PlayOneShot(Game.Inst.FinishedWonderfulClip);
 
         Game.Inst.IsFinished = false;
         Game.Inst.Restart();
