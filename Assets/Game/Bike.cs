@@ -29,7 +29,7 @@ public class Bike : MonoBehaviour
 
         if (collision.collider is CapsuleCollider)
         {
-            Debug.Log("HIT!");// Collided with :" + collision.collider.gameObject);
+            //Debug.Log("HIT!");// Collided with :" + collision.collider.gameObject);
             crashParticlesPrefab.transform.position = collision.transform.position + new Vector3(0, 1f, -0.5f);
             crashParticlesPrefab.Play();
             crashParticlesPrefab.transform.GetChild(1).gameObject.SetActive(true); // Child particle too.
