@@ -383,10 +383,12 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
                 dt * CamFollowSpeedY * (GameBike.transform.position.y + CamFollowDistY - gameCam.transform.position.y),
                 dt * CamFollowSpeedZ * (GameBike.transform.position.z + CamFollowDistZ - gameCam.transform.position.z));
 
-            Vector3 currentCamEulers = gameCam.transform.localEulerAngles;
-            currentCamEulers.x = originalCamEulerX + CamTiltScaleJump * GameBike.transform.position.y;
-            gameCam.transform.localEulerAngles = currentCamEulers;
-
+            if (jumpCount == 2 || jumpCount == 3)
+            {
+                Vector3 currentCamEulers = gameCam.transform.localEulerAngles;
+                currentCamEulers.x = originalCamEulerX + CamTiltScaleJump * Mathf.Sqrt(GameBike.transform.position.y);
+                gameCam.transform.localEulerAngles = currentCamEulers;
+            }
         }
 
         SpeedGaugeAdjuster.localPosition = new Vector3(0, SpeedGaugeAdjuster.rect.height * (bikeSpeed / BikeMaxSpeed), 0);
