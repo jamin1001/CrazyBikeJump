@@ -44,7 +44,7 @@ public class Bike : MonoBehaviour
         //Debug.Log("- In Stop Everything.");
         yield return null;
         //Debug.Log("- After yield null.");
-        Game.Inst.Restart();
+        Game.Inst.Restart(false);
         //Debug.Log("- After Restart.");
 
         yield return Game.WaitParticlesStop;

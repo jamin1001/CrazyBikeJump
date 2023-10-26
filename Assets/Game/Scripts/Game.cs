@@ -4,7 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(AudioSource))]
-//[RequireComponent(typeof(GridPicker))]
+//[RequireComponent(typeof(GridPicker))] // Add this back when done mucking with it.
+[RequireComponent(typeof(StartLevel))]
 public class Game : MonoBehaviour
 {
     public Bike GameBike;
@@ -115,6 +116,7 @@ public class Game : MonoBehaviour
     AudioSource audioSourceOneShot;
     AudioSource audioSourceOnOff;
     GridPicker gridPicker;
+    StartLevel startLevel;
 
     int levelCount;
     List<int> gridCounts;
@@ -138,7 +140,7 @@ public class Game : MonoBehaviour
     static public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(1.0f);
     static public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(2.0f);
-    static public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(4.0f);
+    static public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitGaugeBorderFade = new WaitForSecondsRealtime(0.2f);
 
     /*
@@ -210,6 +212,7 @@ public class Game : MonoBehaviour
         //SpeedGaugeMain.position = 10f * SpeedGaugeMain.position;
         //SpeedGaugeMain.localScale = 10f * SpeedGaugeMain.localScale;
 
+        //// REF REQUIRED COMPONENTS
 
         audioSource = GetComponent<AudioSource>(); // continuous chug chug
         audioSourceOneShot = gameObject.AddComponent<AudioSource>(); // jump, collect, etc
@@ -219,8 +222,17 @@ public class Game : MonoBehaviour
         audioSourceOnOff.playOnAwake = false;
 
         gridPicker = GetComponent<GridPicker>();
+        
+        startLevel = GetComponent<StartLevel>();
+
+
+        //// CAMERA
 
         gameCam = Camera.main;
+        
+
+        //// LEVEL LOADING
+
 
         // Go through all the levels and determine how many instances you need of each type.
         GridPickerUtil.SerialToGrid(choicesGrid, gridPicker.LevelStats, gridPicker.GridChoices); // populates choicesGrid
@@ -336,13 +348,15 @@ public class Game : MonoBehaviour
 
         // Instance the required seas and intially disable them. (TODO) 
 
-        NextLevel();
+        StartTheNextLevel();
 
     }
 
-    public void NextLevel()
+    public void StartTheNextLevel()
     {
         currentLevel++;
+
+        startLevel.StartAnimatedText(gridPicker.LevelNames[currentLevel]);
 
         // Disable all obstacles to prepare for the next level. Also prep the obstacle counter.
         Dictionary<int, int> obstacleCountNextLevel = new();
@@ -506,8 +520,8 @@ public class Game : MonoBehaviour
         if (IsRestarting)
             return;
 
-        if (IsFinished)
-            return;
+        //if (IsFinished)
+        //    return;
 
         // Bike chug sound mechanism.
         if (!isJumping && bikeSpeed > 2f)
@@ -788,14 +802,16 @@ public class Game : MonoBehaviour
         sailElapsed = 0f;
     }
 
-    public void Restart()
+    public void Restart(bool nextLevel)
     {
         //Debug.Log("Restart, before DoRestart.");
-        StartCoroutine(DoRestart());
-       // Debug.Log("Restart, after DoRestart.");
+        StartCoroutine(DoRestart(nextLevel));
+        // Debug.Log("Restart, after DoRestart.");
+
+       
     }
 
-    IEnumerator DoRestart()
+    IEnumerator DoRestart(bool nextLevel)
     {
         //Debug.Log("DoRestart, before yield null.");
 
@@ -815,6 +831,12 @@ public class Game : MonoBehaviour
         GameBike.transform.position = Vector3.zero;
         ResetBikeRotation();
         IsRestarting = false;
+        IsFinished = false;
+
+        if (nextLevel)
+        {
+            StartTheNextLevel();
+        }
 
         //Debug.Log("DoRestart, aftger everything.");
 

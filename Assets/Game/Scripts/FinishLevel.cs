@@ -61,7 +61,7 @@ public class FinishLevel : MonoBehaviour
         //Game.Inst.PlayOneShot(Game.Inst.FinishedWonderfulClip);
 
         Game.Inst.IsFinished = false;
-        Game.Inst.Restart();
+        Game.Inst.Restart(true);
 
     }
 
