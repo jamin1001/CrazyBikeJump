@@ -5,13 +5,30 @@ using UnityEngine;
 [ExecuteInEditMode]
 public class GridPicker : MonoBehaviour
 {
-    static public string[] Emojis = { "x", "🐂", "🐴", "🐑", "🛢️", "🚧", "⚫", "⭕", "🏎️", "🚌", "🚗", "🚓", "🚚", "f1", "f2", "f3" };
+    static public string[] Emojis = { "x", "🐂", "🐴", "🐑", "🛢️", "🚧", "⚫", "⭕", "🏎️", "🚌", "🚗", "🚓", "🚚", "f1", "f2", "f3" }; // grid choice indexes this
     static public int NumRows = 3; // Number of rows in each grid
     static public int NumCols = 3; // Number of columns in each grid
 
-    public List<bool> LevelOpen    = new(); // Size is how many levels, each entry is whether level is opened (not folded) or not.
-    public List<int>  LevelStats   = new(); // Size is how many levels, each entry is how many grids per level.
-    public List<int>  GridChoices  = new(); // All the grid choice content from fixed sized grids
+    static public string[] LevelLand = // land choice indexes this
+    {
+        "Grass",
+        "Dirt",
+        "City",
+    };
+
+    static public string[] LevelSea = // sea choice indexes this
+    {
+        "BlueWater",
+        "GreenWater",
+        "RedWater",
+    };
+
+    public List<bool>       LevelOpen    = new(); // Size is how many levels, each entry is whether level is opened (not folded) or not.
+    public List<int>        LevelStats   = new(); // Size is how many levels, each entry is how many grids per level.
+    public List<string>     LevelNames   = new(); // Size is how many levels, each entry is the level name.
+    public List<int>        LevelLands   = new();
+    public List<int>        LevelSeas    = new();
+    public List<int>        GridChoices  = new(); // All the grid choice content from fixed sized grids
 }
 
 public class GridPickerUtil

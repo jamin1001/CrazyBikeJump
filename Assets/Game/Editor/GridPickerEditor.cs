@@ -16,10 +16,14 @@ public class GridPickerEditor : Editor
     static public int Rows = GridPicker.NumRows; // Number of rows in each grid
     static public int Cols = GridPicker.NumCols; // Number of columns in each grid
     static private float popupWidth = 30;
+    static private float popupLandWidth = 100;
+    static private float popupSeaWidth  = 100;
 
     // Initialize the list of lists for selected indices
     private List<List<List<int>>> choicesGrid = new();// List<List<List<int>>>();
-
+    private List<string> levelNames = new();
+    private List<int> levelLands = new();
+    private List<int> levelSeas = new();
     private List<Texture2D> optionTextures = new();
 
     private void OnEnable()
@@ -38,6 +42,9 @@ public class GridPickerEditor : Editor
         serializedObject.Update();
         SerializedProperty levelOpenProperty = serializedObject.FindProperty("LevelOpen");
         SerializedProperty levelStatsProperty = serializedObject.FindProperty("LevelStats");
+        SerializedProperty levelNamesProperty = serializedObject.FindProperty("LevelNames");
+        SerializedProperty levelLandsProperty = serializedObject.FindProperty("LevelLands");
+        SerializedProperty levelSeasProperty = serializedObject.FindProperty("LevelSeas");
         SerializedProperty gridChoicesProperty = serializedObject.FindProperty("GridChoices");
         
 
@@ -47,11 +54,17 @@ public class GridPickerEditor : Editor
             int choiceIndex = 0;
 
             int levels = levelStatsProperty.arraySize;
+
             for (int l = 0; l < levels; l++)
             {
                 // Add Level.
                 choicesGrid.Add(new List<List<int>>());
-                
+
+                // Add Level Name.
+                levelNames.Add(levelNamesProperty.GetArrayElementAtIndex(l).stringValue);
+                levelLands.Add(levelLandsProperty.GetArrayElementAtIndex(l).intValue);
+                levelSeas.Add(levelSeasProperty.GetArrayElementAtIndex(l).intValue);
+
                 int gridsThisLevel = levelStatsProperty.GetArrayElementAtIndex(l).intValue;
                 for (int g = 0; g < gridsThisLevel; g++)
                 {
@@ -96,6 +109,20 @@ public class GridPickerEditor : Editor
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
+               
+                // Custom Level Name.
+                levelNames[level] = EditorGUILayout.TextField(levelNames[level]);
+
+                // Land choice.
+                Rect popupRectLand = EditorGUILayout.GetControlRect(GUILayout.Width(popupLandWidth));
+                int landChoice = levelLands[level];
+                levelLands[level] = EditorGUI.Popup(popupRectLand, landChoice, GridPicker.LevelLand);
+
+                // Sea choice.
+                Rect popupRectSea = EditorGUILayout.GetControlRect(GUILayout.Width(popupSeaWidth));
+                int seaChoice = levelSeas[level];
+                levelSeas[level] = EditorGUI.Popup(popupRectSea, seaChoice, GridPicker.LevelSea);
+
                 // Loop through each grid in the current level
                 for (int grid = 0; grid < choicesGrid[level].Count; grid++)
                 {
@@ -116,9 +143,9 @@ public class GridPickerEditor : Editor
                             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
                             // Property field for the array element with fixed width
-                            Rect popupRect = EditorGUILayout.GetControlRect(GUILayout.Width(popupWidth));
+                            Rect popupRectChoice = EditorGUILayout.GetControlRect(GUILayout.Width(popupWidth));
 
-                            choicesGrid[level][grid][row * Cols + col] = EditorGUI.Popup(popupRect, choice, GridPicker.Emojis);//, customStyle);//, styles[styleIndex]);
+                            choicesGrid[level][grid][row * Cols + col] = EditorGUI.Popup(popupRectChoice, choice, GridPicker.Emojis);//, customStyle);//, styles[styleIndex]);
 
                             GUIStyle style = new GUIStyle(GUI.skin.label);
                             style.normal.background = optionTextures[choice];
@@ -162,20 +189,38 @@ public class GridPickerEditor : Editor
             levelOpenProperty.GetArrayElementAtIndex(choicesGrid.Count).boolValue = true;
 
             choicesGrid.Add(new List<List<int>>());
-            
+            levelNames.Add("The Level Name");
+            levelLands.Add(0);
+            levelSeas.Add(0);
         }
 
 
         // Sync the serialized version now that it has been updated above.
         levelStatsProperty.ClearArray(); // No entries means no levels.
         gridChoicesProperty.ClearArray();
-           
+        levelNamesProperty.ClearArray();
+        levelLandsProperty.ClearArray();
+        levelSeasProperty.ClearArray();
+
         int arraySize = 0;// selectedOptionIndicesProperty.arraySize;
         for (int level = 0; level < choicesGrid.Count; level++)
         {
             // Following numbers are how many grids for each level.
             levelStatsProperty.InsertArrayElementAtIndex(level); // This level index.
             levelStatsProperty.GetArrayElementAtIndex(level).intValue = choicesGrid[level].Count; // How many grids there are in this level.
+
+            // Level name, for each level, too.
+            levelNamesProperty.InsertArrayElementAtIndex(level); // This level index.
+            levelNamesProperty.GetArrayElementAtIndex(level).stringValue = levelNames[level];
+
+            // Level land, for each level, too.
+            levelLandsProperty.InsertArrayElementAtIndex(level); // This level index.
+            levelLandsProperty.GetArrayElementAtIndex(level).intValue = levelLands[level];
+
+            // Level sea, for each level, too.
+            levelSeasProperty.InsertArrayElementAtIndex(level); // This level index.
+            levelSeasProperty.GetArrayElementAtIndex(level).intValue = levelSeas[level];
+
 
             for (int grid = 0; grid < choicesGrid[level].Count; grid++)
             {

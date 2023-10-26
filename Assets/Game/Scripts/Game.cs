@@ -11,6 +11,7 @@ public class Game : MonoBehaviour
     public GameObject FrontWheel;
     public GameObject BackWheel;
     public GameObject HandleBars;
+    public GameObject FinishBlock;
     public RectTransform SpeedGaugeMain;
     public Image SpeedGaugeImage;
     public RectTransform SpeedGaugeAdjuster;
@@ -86,7 +87,9 @@ public class Game : MonoBehaviour
     public float CamFollowSpeedY = 4.0f;
     public float CamFollowSpeedZ = 6.0f;
     public float CamTiltScaleJump = 30f;
-    public List<GameObject> obstaclePrefabs; // For instancing the obstacles.
+    public List<GameObject> ObstaclePrefabs; // For instancing the obstacles.
+    public List<GameObject> LandPrefabs; // Must match Land enum in GridPicker.
+    public List<GameObject> SeaPrefabs; // Must match Sea enum in GridPicker.
 
     float originalBikeEulerY;
     float originalHandleBarEulerY;
@@ -116,11 +119,21 @@ public class Game : MonoBehaviour
     int levelCount;
     List<int> gridCounts;
     int obstacleCount;
+    int landCount;
+    int seaCount;
     Dictionary<int, int> obstacleMaxAnyLevel = new();
+    Dictionary<int, int> landMaxAnyLevel = new();
+    Dictionary<int, int> seaMaxAnyLevel = new();
     Dictionary<string, int> emojiToObstacle = new();
 
     List<List<List<int>>> choicesGrid = new();
     List<List<GameObject>> obstaclePools = new();
+    List<List<GameObject>> landPools = new();
+    List<List<GameObject>> seaPools = new();
+
+    Transform obstacleFolder;
+    Transform landFolder;
+    Transform seaFolder;
 
     static public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(1.0f);
@@ -156,7 +169,7 @@ public class Game : MonoBehaviour
         new WaitForSecondsRealtime(2.0f),
     };
 
-static public int Rows = GridPicker.NumRows; // Number of rows in each grid
+    static public int Rows = GridPicker.NumRows; // Number of rows in each grid
     static public int Cols = GridPicker.NumCols; // Number of columns in each grid
 
     static public Game Inst;
@@ -214,15 +227,30 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
         levelCount = gridPicker.LevelStats.Count;
         gridCounts = gridPicker.LevelStats;
         obstacleCount = GridPicker.Emojis.Length - 1; // minus the zero space
-        Debug.Assert(obstacleCount == obstaclePrefabs.Count); // Should be as many prefabs linked as defined obstacles
+        Debug.Assert(obstacleCount == ObstaclePrefabs.Count); // Should be as many prefabs linked as defined obstacles
 
-        for (int i = 0; i < obstacleCount; i++) obstaclePools.Add(new());// List<GameObject>())
+        landCount = GridPicker.LevelLand.Length;
+        seaCount = GridPicker.LevelSea.Length;
+
+        for (int i = 0; i < obstacleCount; i++) obstaclePools.Add(new());
+        for (int i = 0; i < landCount; i++) landPools.Add(new());
+        for (int i = 0; i < seaCount; i++) seaPools.Add(new());
         for (int i = 0; i < GridPicker.Emojis.Length; i++) emojiToObstacle[GridPicker.Emojis[i]] = i;
         for (int i = 0; i < obstacleCount; i++) obstacleMaxAnyLevel[i] = 0;
+        for (int i = 0; i < landCount; i++) landMaxAnyLevel[i] = 0;
+        for (int i = 0; i < seaCount; i++) seaMaxAnyLevel[i] = 0;
 
-        Dictionary<int, int> obstacleMaxThisLevel = new();
+        obstacleFolder = GameObject.Find("Obstacles").transform;
+        landFolder = GameObject.Find("Lands").transform; ;
+        seaFolder = GameObject.Find("Seas").transform; ;
+
+        Dictionary<int, int> obstacleMaxThisLevel = new(); // obstacle type -> max
+        Dictionary<int, int> landMaxThisLevel = new(); // land type -> max
+        Dictionary<int, int> seaMaxThisLevel = new(); // sea type -> max
         for (int l = 0; l < levelCount; l++)
         {
+            // OBSTACLE
+
             // Clear it, since we recount each level.
             for (int i = 0; i < obstacleCount; i++)
                 obstacleMaxThisLevel[i] = 0;
@@ -237,6 +265,7 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
                         obstacleMaxThisLevel[choice - 1]++;
                     }
                 }
+
             }
 
             // Update the maxes with what was just found. We only need to know the max per level in order
@@ -244,6 +273,40 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
             for (int i = 0; i < obstacleCount; i++)
                 if (obstacleMaxThisLevel[i] > obstacleMaxAnyLevel[i])
                     obstacleMaxAnyLevel[i] = obstacleMaxThisLevel[i];
+
+
+            // LAND, similar
+
+            for (int i = 0; i < landCount; i++)
+                landMaxThisLevel[i] = 0;
+
+            for (int i = 0; i < landCount; i++)
+                if (i == gridPicker.LevelLands[l]) // if the land for this level matches with type i
+                    landMaxThisLevel[i] = gridCounts[l];
+                else
+                    landMaxThisLevel[i] = 0;
+
+            for (int i = 0; i < landCount; i++)
+                if (landMaxThisLevel[i] > landMaxAnyLevel[i])
+                    landMaxAnyLevel[i] = landMaxThisLevel[i];
+
+
+
+            // SEA, similar
+
+            for (int i = 0; i < seaCount; i++)
+                seaMaxThisLevel[i] = 0;
+
+            for (int i = 0; i < seaCount; i++)
+                if (i == gridPicker.LevelSeas[l]) // if the sea for this level matches with type i
+                    seaMaxThisLevel[i] = gridCounts[l];
+                else
+                    seaMaxThisLevel[i] = 0;
+
+            for (int i = 0; i < seaCount; i++)
+                if (seaMaxThisLevel[i] > seaMaxAnyLevel[i])
+                    seaMaxAnyLevel[i] = seaMaxThisLevel[i];
+
         }
 
         // Instance the required obstacles and intially disable them.
@@ -251,11 +314,27 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
         {
             for (int j = 0; j < obstacleMaxAnyLevel[i]; j++)
             {
-                GameObject newObstacle = Instantiate(obstaclePrefabs[i]);
+                GameObject newObstacle = Instantiate(ObstaclePrefabs[i], obstacleFolder);
                 obstaclePools[i].Add(newObstacle);
-                newObstacle.SetActive(false); // reactivate per level spec
+                newObstacle.SetActive(false); // reactivate later per level spec
             }
         }
+
+        // Instance the required lands and intially disable them.
+        for (int i = 0; i < landCount; i++)
+        {
+            for (int j = 0; j < landMaxAnyLevel[i]; j++)
+            {
+                GameObject newLand = Instantiate(LandPrefabs[i], landFolder);
+                landPools[i].Add(newLand);
+                newLand.SetActive(false); // reactivate later per level spec
+
+                // Custom stuff for land piece placement.
+                newLand.transform.position = new Vector3(0, -0.15f, 15f * j);
+            }
+        }
+
+        // Instance the required seas and intially disable them. (TODO) 
 
         NextLevel();
 
@@ -274,6 +353,16 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
 
             obstacleCountNextLevel[i] = 0;
         }
+
+        // Disable all the lands.
+        for (int i = 0; i < landCount; i++)
+            foreach (GameObject landOb in landPools[i])
+                landOb.SetActive(false);
+
+        // Disable all the seas.
+        for (int i = 0; i < seaCount; i++)
+            foreach (GameObject seaOb in seaPools[i])
+                seaOb.SetActive(false);
 
         // Polyperfect terrain tiles are 15 x 15 units square X and Z. Each platform should be raised 0.15 in Y.
         // The first tile is centered at the world origin.
@@ -342,6 +431,27 @@ static public int Rows = GridPicker.NumRows; // Number of rows in each grid
                         obstacleCountNextLevel[obstacle]++;
                     }
                 }
+
+
+        // Enable the land objects.
+        for (int g = 0; g < grids; g++)
+        {
+            int landType = gridPicker.LevelLands[currentLevel];
+            GameObject landOb = landPools[landType][g];
+            landOb.SetActive(true);
+        }
+
+        // Enable the sea objects. (TODO: per grid or whole level?)
+        /*
+        for (int g = 0; g < grids; g++)
+        {
+            int seaType = gridPicker.LevelSeas[currentLevel];
+            GameObject seaOb = seaPools[seaType][g];
+            seaOb.SetActive(true);
+        }
+        */
+
+        FinishBlock.transform.position = new Vector3(0, 0, grids * 15f);
 
         if (currentLevel == levelCount)
         {
