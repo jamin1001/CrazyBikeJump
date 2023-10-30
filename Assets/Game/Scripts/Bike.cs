@@ -4,20 +4,26 @@ using UnityEngine;
 
 public class Bike : MonoBehaviour
 {
-    public ParticleSystem crashParticlesPrefab; // world
-    public ParticleSystem swerveParticlesPrefab; // world
-    public ParticleSystem collectParticlesPrefab; // world
-    public ParticleSystem windParticlesPrefab;  // local to bike
+    public ParticleSystem CrashParticlesPrefab; // world
+    public ParticleSystem SwerveParticlesPrefab; // world
+    public ParticleSystem CollectBronzeParticlesPrefab; // world
+    public ParticleSystem CollectSilverParticlesPrefab; // world
+    public ParticleSystem CollectGoldParticlesPrefab; // world
+    public ParticleSystem CollectFlagYellowParticlesPrefab; // world
+    public ParticleSystem CollectFlagRedParticlesPrefab; // world
+    public ParticleSystem CollectFlagBlueParticlesPrefab; // world
+
+    public ParticleSystem WindParticlesPrefab;  // local to bike
     public float HittingAtDistance = 0.5f;
 
     public void StartWind()
     {
-        windParticlesPrefab.Play();
+        WindParticlesPrefab.Play();
     }
 
     public void StopWind()
     {
-        windParticlesPrefab.Stop();
+        WindParticlesPrefab.Stop();
     }
 
     void OnCollisionEnter(Collision collision)
@@ -30,9 +36,18 @@ public class Bike : MonoBehaviour
         if (collision.collider is CapsuleCollider)
         {
             //Debug.Log("HIT!");// Collided with :" + collision.collider.gameObject);
-            crashParticlesPrefab.transform.position = collision.transform.position + new Vector3(0, 1f, -0.5f);
-            crashParticlesPrefab.Play();
-            crashParticlesPrefab.transform.GetChild(1).gameObject.SetActive(true); // Child particle too.
+
+            // Looks better for a flagpole if the crash explosion is sitting directly in line with the pole.
+            float xOffset = 0;
+            if (collision.gameObject.tag.Contains("Flag"))
+                if (transform.position.x < collision.transform.position.x)
+                    xOffset = -1f;
+                else
+                    xOffset = 1f;
+
+            CrashParticlesPrefab.transform.position = collision.transform.position + new Vector3(xOffset, 1f, -0.5f);
+            CrashParticlesPrefab.Play();
+            CrashParticlesPrefab.transform.GetChild(1).gameObject.SetActive(true); // Child particle too.
             Game.Inst.PlayOneShot(Game.Inst.BikeCrashClip);
             Game.Inst.BikeStopped();
             StartCoroutine(StopEverything());
@@ -62,19 +77,22 @@ public class Bike : MonoBehaviour
                 if (collision.collider.gameObject.name.Contains("swerve"))
                 {
                     Game.Inst.PlayOneShot(Game.Inst.BikeSwerveClip);
-                    swerveParticlesPrefab.transform.localPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
-                    swerveParticlesPrefab.Play();
+                    SwerveParticlesPrefab.transform.localPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
+                    SwerveParticlesPrefab.Play();
 
                     if (collision.collider.gameObject.name.Contains("cow"))
                     {
                         Game.Inst.PlayOneShot(Game.Inst.CowSwerveClip);
                     }
+
+                    Game.Inst.PlayOnOff(Game.Inst.BikeSailClip, 0.1f);
+                    StartWind();
                 }
                 else
                 {
                     Game.Inst.PlayOneShot(Game.Inst.BikeCollectClip);
-                    collectParticlesPrefab.transform.localPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
-                    collectParticlesPrefab.Play();
+                    CollectGoldParticlesPrefab.transform.localPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
+                    CollectGoldParticlesPrefab.Play();
                 }
 
             }

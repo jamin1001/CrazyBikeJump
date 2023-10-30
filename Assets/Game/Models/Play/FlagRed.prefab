@@ -382,7 +382,7 @@ GameObject:
   - component: {fileID: 5854660792196783141}
   m_Layer: 0
   m_Name: FlagRed
-  m_TagString: Untagged
+  m_TagString: Flag2
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

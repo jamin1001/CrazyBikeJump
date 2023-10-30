@@ -8,15 +8,17 @@ using UnityEngine.UI;
 [RequireComponent(typeof(StartLevel))]
 public class Game : MonoBehaviour
 {
+    // Object Refs
     public Bike GameBike;
     public GameObject FrontWheel;
     public GameObject BackWheel;
     public GameObject HandleBars;
     public GameObject FinishBlock;
-    public RectTransform SpeedGaugeMain;
-    public Image SpeedGaugeImage;
+    //public RectTransform SpeedGaugeMain;
+    //public RawImage SpeedGaugeImage;
     public RectTransform SpeedGaugeAdjuster;
 
+    // Bike Params
     public float BikeAccel = 10;
     public float BikeDecel = 5;
     public float BikeMaxSpeed = 40;
@@ -28,7 +30,6 @@ public class Game : MonoBehaviour
     public float BikeSteerPercentEasyJump = 0.4f;
     public int BikeSteerSwipeScaleLimit = 20;
     
-
     public float BikeJumpStartSpeed = 30f;
     public float BikeJumpDecelRise = 0.02f;
     public float BikeJumpDecelFall = 0.02f;
@@ -58,6 +59,7 @@ public class Game : MonoBehaviour
    
     public float BikeWheelSpeedVisualFactor = 0.2f;
 
+    // Sounds
     public AudioClip BikeCycleClip;
     public AudioClip BikeCrashClip;
     public AudioClip BikeJumpClip;
@@ -92,6 +94,7 @@ public class Game : MonoBehaviour
     public List<GameObject> LandPrefabs; // Must match Land enum in GridPicker.
     public List<GameObject> SeaPrefabs; // Must match Sea enum in GridPicker.
 
+    // Bike Controls
     float originalBikeEulerY;
     float originalHandleBarEulerY;
     float originalCamEulerX;
@@ -118,6 +121,7 @@ public class Game : MonoBehaviour
     GridPicker gridPicker;
     StartLevel startLevel;
 
+    // Game Layout
     int levelCount;
     List<int> gridCounts;
     int obstacleCount;
@@ -137,16 +141,16 @@ public class Game : MonoBehaviour
     Transform landFolder;
     Transform seaFolder;
 
+    // Game State
+    int[] starCount = new int[3];
+    int[] flagCount = new int[3];
+
+    // Timings
     static public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(1.0f);
     static public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitGaugeBorderFade = new WaitForSecondsRealtime(0.2f);
-
-    /*
-    static public List<WaitForSecondsRealtime> = 
-        new(){ new WaitForSecondsRealtime(0.2f), new WaitForSecondsRealtime(2.0f) };
-    */
 
     static public List<WaitForSecondsRealtime> WaitTimes1 = new List<WaitForSecondsRealtime>
     {
@@ -620,8 +624,8 @@ public class Game : MonoBehaviour
             {
                 if (!isSailing)
                 {
-                    PlayOnOff(BikeSailClip, 0.1f);
-                    GameBike.StartWind();
+                    //PlayOnOff(BikeSailClip, 0.1f);
+                    //GameBike.StartWind();
                 }
 
                 isSailing = true;
@@ -841,5 +845,17 @@ public class Game : MonoBehaviour
         //Debug.Log("DoRestart, aftger everything.");
 
 
+    }
+
+    //// GUI HANDLING
+    ///
+    public void CollectStar(int kind) // 0-2
+    {
+        starCount[kind]++;
+    }
+
+    public void CollectFlag(int kind) // 0-2
+    {
+        flagCount[kind]++;
     }
 }
