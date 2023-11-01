@@ -10,7 +10,8 @@ Material:
   m_Name: banner2Yellow
   m_Shader: {fileID: -6465566751694194690, guid: d863bb853c97e534cb0ce77dd242bb9e,
     type: 3}
-  m_Parent: {fileID: 2100000, guid: d77773dae2086c446a02ee41c4eb9934, type: 2}
+  m_Parent: {fileID: -876546973899608171, guid: d863bb853c97e534cb0ce77dd242bb9e,
+    type: 3}
   m_ModifiedSerializedProperties: 2
   m_ValidKeywords: []
   m_InvalidKeywords: []

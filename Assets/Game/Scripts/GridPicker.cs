@@ -28,6 +28,9 @@ public class GridPicker : MonoBehaviour
     public List<string>     LevelNames   = new(); // Size is how many levels, each entry is the level name.
     public List<int>        LevelLands   = new();
     public List<int>        LevelSeas    = new();
+    public List<int>        LevelBronzeSeconds = new();
+    public List<int>        LevelSilverSeconds = new();
+    public List<int>        LevelGoldSeconds = new();
     public List<int>        GridChoices  = new(); // All the grid choice content from fixed sized grids
 }
 

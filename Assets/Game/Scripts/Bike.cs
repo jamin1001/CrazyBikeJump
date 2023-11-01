@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class Bike : MonoBehaviour
 {
@@ -14,7 +17,6 @@ public class Bike : MonoBehaviour
     public ParticleSystem CollectFlagBlueParticlesPrefab; // world
 
     public ParticleSystem WindParticlesPrefab;  // local to bike
-    public float HittingAtDistance = 0.5f;
 
     public void StartWind()
     {
@@ -28,11 +30,13 @@ public class Bike : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
+        
         if (collision.collider.gameObject.name.Contains("cow"))
         {
-            Game.Inst.PlayOneShot(Game.Inst.CowHitClip);    
+            Game.Inst.PlayAnimal(Game.Inst.CowHitClip);    
         }
 
+        // HIT
         if (collision.collider is CapsuleCollider)
         {
             //Debug.Log("HIT!");// Collided with :" + collision.collider.gameObject);
@@ -74,25 +78,73 @@ public class Bike : MonoBehaviour
         {
             if (!Game.Inst.IsRestarting)
             {
-                if (collision.collider.gameObject.name.Contains("swerve"))
+                string obName = collision.collider.gameObject.name;
+
+                // BOXES ARE SWERVE AROUND
+                if (obName.Contains("swerve"))
                 {
                     Game.Inst.PlayOneShot(Game.Inst.BikeSwerveClip);
-                    SwerveParticlesPrefab.transform.localPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
                     SwerveParticlesPrefab.Play();
+                    Game.Inst.Swerve();
 
-                    if (collision.collider.gameObject.name.Contains("cow"))
+                    if (obName.Contains("cow"))
                     {
-                        Game.Inst.PlayOneShot(Game.Inst.CowSwerveClip);
+                        Game.Inst.PlayAnimal(Game.Inst.CowSwerveClip);
                     }
 
                     Game.Inst.PlayOnOff(Game.Inst.BikeSailClip, 0.1f);
-                    StartWind();
                 }
+                // EXCEPT FOR FLAGS
+                else if(obName.Contains("Flag"))
+                {
+                    Game.Inst.PlayOneShot(Game.Inst.BikeCollectFlagClip);
+                    Vector3 flagFxPosition = transform.localPosition + new Vector3(0, 0.7f, 0); // add a little height
+
+                    if (obName.Contains("Yellow"))
+                    {
+                        CollectFlagYellowParticlesPrefab.transform.localPosition = flagFxPosition;
+                        CollectFlagYellowParticlesPrefab.Play();
+                        Game.Inst.CollectFlag(0);
+                    }
+                    else if(obName.Contains("Red"))
+                    {
+                        CollectFlagRedParticlesPrefab.transform.localPosition = flagFxPosition;
+                        CollectFlagRedParticlesPrefab.Play();
+                        Game.Inst.CollectFlag(1);
+                    }
+                    else if (obName.Contains("Blue"))
+                    {
+                        CollectFlagBlueParticlesPrefab.transform.localPosition = flagFxPosition;
+                        CollectFlagBlueParticlesPrefab.Play();
+                        Game.Inst.CollectFlag(2);
+                    }
+                }
+                // AND EXCEPT FOR PRIZE BOXES
                 else
                 {
-                    Game.Inst.PlayOneShot(Game.Inst.BikeCollectClip);
-                    CollectGoldParticlesPrefab.transform.localPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
-                    CollectGoldParticlesPrefab.Play();
+                    Game.Inst.PlayOneShot(Game.Inst.BikeCollectStarClip);
+                    Vector3 starFxPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
+
+                    if (Game.Inst.JumpCount == 1)
+                    {
+                        CollectBronzeParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectBronzeParticlesPrefab.Play();
+                        Game.Inst.CollectStar(0);
+                    }
+                    else if(Game.Inst.JumpCount == 2)
+                    {
+                        CollectSilverParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectSilverParticlesPrefab.Play();
+                        Game.Inst.CollectStar(1);
+                    }
+                    else if(Game.Inst.JumpCount == 3)
+                    {
+                        CollectGoldParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectGoldParticlesPrefab.Play();
+                        Game.Inst.CollectStar(2);
+                    }
+
+                    
                 }
 
             }
@@ -101,19 +153,6 @@ public class Bike : MonoBehaviour
 
     void OnCollisionStay(Collision collision)
     {
-        /*
-        Vector3 diff = collision.collider.gameObject.transform.position - transform.position;
-        if(diff.sqrMagnitude < HittingAtDistance * HittingAtDistance)
-        {
-            Debug.Log("HITTING!");
-            Game.Inst.PlaySound(Game.GameSound.BikeCrash);
-        }
-        */
-
-
-        //Debug.Log("Stay Collided with :" + collision.collider.gameObject);
-
-
 
     }
 

@@ -2,10 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEngine.InputManagerEntry;
 
 [RequireComponent(typeof(AudioSource))]
 //[RequireComponent(typeof(GridPicker))] // Add this back when done mucking with it.
-[RequireComponent(typeof(StartLevel))]
+[RequireComponent(typeof(GameGui))]
 public class Game : MonoBehaviour
 {
     // Object Refs
@@ -17,11 +18,13 @@ public class Game : MonoBehaviour
     //public RectTransform SpeedGaugeMain;
     //public RawImage SpeedGaugeImage;
     public RectTransform SpeedGaugeAdjuster;
-
+    public float FinishBlockPullback = 4f;
     // Bike Params
     public float BikeAccel = 10;
     public float BikeDecel = 5;
+    public float BikeSwerveDecel = 12; // Should be greater than BikeAccel, since we are overcompensating.
     public float BikeMaxSpeed = 40;
+    public float BikeMaxSpeed2 = 42;
     public float BikeTurn = 3;
     public float BikeTurnTranslation = 3;
     public float BikeHandleTurn = 20;
@@ -58,6 +61,7 @@ public class Game : MonoBehaviour
     public float BikeJumpFlipDecelFall = 0.01f;
    
     public float BikeWheelSpeedVisualFactor = 0.2f;
+    public float BikeSwerveTimeout = 0.5f;
 
     // Sounds
     public AudioClip BikeCycleClip;
@@ -66,7 +70,8 @@ public class Game : MonoBehaviour
     public AudioClip BikeJump2Clip;
     public AudioClip BikeJump3Clip;
     public AudioClip BikeSailClip;
-    public AudioClip BikeCollectClip;
+    public AudioClip BikeCollectStarClip;
+    public AudioClip BikeCollectFlagClip;
     public AudioClip BikeSwerveClip;
     public AudioClip FinishLineClip;
     public AudioClip FinishedBadClip;
@@ -106,20 +111,24 @@ public class Game : MonoBehaviour
     bool isSailing = false;
     //bool isFlipping = false;
     int currentLevel = -1;
-    int jumpCount = 0;
+
+
+    public int JumpCount { get; set; } = 0;
     public bool IsRestarting { get; set; } = false;
     public bool IsFinished { get; set; } = false;
     float sailElapsed = 0f;
     float jumpElapsed = 0f;
     float savedBikeTilt = 0f;
     //float flipAngle = 0f;
+    float swerveRemaining = 0f;
 
     Camera gameCam;
     AudioSource audioSource;
     AudioSource audioSourceOneShot;
     AudioSource audioSourceOnOff;
+    AudioSource audioSourceAnimal;
     GridPicker gridPicker;
-    StartLevel startLevel;
+    GameGui gameGui;
 
     // Game Layout
     int levelCount;
@@ -151,6 +160,7 @@ public class Game : MonoBehaviour
     static public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitGaugeBorderFade = new WaitForSecondsRealtime(0.2f);
+
 
     static public List<WaitForSecondsRealtime> WaitTimes1 = new List<WaitForSecondsRealtime>
     {
@@ -194,6 +204,11 @@ public class Game : MonoBehaviour
         //audioSourceOneShot.PlayOneShot(clip);
     }
 
+    public void PlayAnimal(AudioClip clip)
+    {
+        audioSourceAnimal.PlayOneShot(clip);
+    }
+
     public void PlayOnOff(AudioClip clip, float pitch = 1.0f)
     {
         StopOnOff();
@@ -221,13 +236,14 @@ public class Game : MonoBehaviour
         audioSource = GetComponent<AudioSource>(); // continuous chug chug
         audioSourceOneShot = gameObject.AddComponent<AudioSource>(); // jump, collect, etc
         audioSourceOnOff = gameObject.AddComponent<AudioSource>(); // sailing, bumping, etc
+        audioSourceAnimal = gameObject.AddComponent<AudioSource>(); // animal moo, etc
 
         audioSourceOneShot.playOnAwake = false;
         audioSourceOnOff.playOnAwake = false;
 
         gridPicker = GetComponent<GridPicker>();
         
-        startLevel = GetComponent<StartLevel>();
+        gameGui = GetComponent<GameGui>();
 
 
         //// CAMERA
@@ -352,7 +368,7 @@ public class Game : MonoBehaviour
 
         // Instance the required seas and intially disable them. (TODO) 
 
-        StartTheNextLevel();
+        //StartTheNextLevel();
 
     }
 
@@ -360,7 +376,8 @@ public class Game : MonoBehaviour
     {
         currentLevel++;
 
-        startLevel.StartAnimatedText(gridPicker.LevelNames[currentLevel]);
+        gameGui.ResetRaceTime();
+        gameGui.StartAnimatedText(gridPicker.LevelNames[currentLevel]);
 
         // Disable all obstacles to prepare for the next level. Also prep the obstacle counter.
         Dictionary<int, int> obstacleCountNextLevel = new();
@@ -469,7 +486,7 @@ public class Game : MonoBehaviour
         }
         */
 
-        FinishBlock.transform.position = new Vector3(0, 0, grids * 15f);
+        FinishBlock.transform.position = new Vector3(0, 0, grids * 15f - FinishBlockPullback);
 
         if (currentLevel == levelCount)
         {
@@ -486,6 +503,9 @@ public class Game : MonoBehaviour
 
         screenMiddleBorderLeft = Screen.width / 2 - BikeSteerScreenWidth / 2;
         screenMiddleBorderRight = Screen.width / 2 + BikeSteerScreenWidth / 2;
+
+        ResetGui();
+        StartTheNextLevel();
     }
 
     void Update()
@@ -511,7 +531,7 @@ public class Game : MonoBehaviour
                 dt * CamFollowSpeedY * (GameBike.transform.position.y + CamFollowDistY - gameCam.transform.position.y),
                 dt * CamFollowSpeedZ * (GameBike.transform.position.z + CamFollowDistZ - gameCam.transform.position.z));
 
-            if (jumpCount == 2 || jumpCount == 3)
+            if (JumpCount == 2 || JumpCount == 3)
             {
                 Vector3 currentCamEulers = gameCam.transform.localEulerAngles;
                 currentCamEulers.x = originalCamEulerX + CamTiltScaleJump * Mathf.Sqrt(GameBike.transform.position.y);
@@ -519,7 +539,7 @@ public class Game : MonoBehaviour
             }
         }
 
-        SpeedGaugeAdjuster.localPosition = new Vector3(0, SpeedGaugeAdjuster.rect.height * (bikeSpeed / BikeMaxSpeed), 0);
+        SpeedGaugeAdjuster.localPosition = new Vector3(0, SpeedGaugeAdjuster.rect.height * (bikeSpeed / BikeMaxSpeed2), 0);
 
         if (IsRestarting)
             return;
@@ -571,8 +591,27 @@ public class Game : MonoBehaviour
                 GameBike.transform.localEulerAngles = currentBikeEulers;
 
                 bikeSpeed += BikeAccel * dt;
-                if (bikeSpeed > BikeMaxSpeed)
-                    bikeSpeed = BikeMaxSpeed;
+
+                //if (bikeSpeed > BikeMaxSpeed)
+                //    bikeSpeed = BikeMaxSpeed;
+
+                
+                if (swerveRemaining > 0)
+                {
+                    bikeSpeed -= BikeSwerveDecel * dt; // Should be greater than BikeAcel, so we reduce in time.
+                    if(bikeSpeed < BikeMaxSpeed) // Keep at max until time runs out.
+                        bikeSpeed = BikeMaxSpeed;
+
+                    swerveRemaining -= dt;
+                    if (swerveRemaining < 0)
+                        swerveRemaining = 0;
+                }
+                else
+                {
+                    if (bikeSpeed > BikeMaxSpeed)
+                        bikeSpeed = BikeMaxSpeed;
+                }
+                
 
                 //SpeedGaugeImage.color = new Color(0, 0, 0, 0.3f);
             }
@@ -588,7 +627,7 @@ public class Game : MonoBehaviour
             {
                 PlayOneShot(BikeJumpClip);
                 isJumping = true;
-                jumpCount++;
+                JumpCount++;
                 bikeJumpSpeed = BikeJumpStartSpeed;
             }
         }
@@ -598,21 +637,25 @@ public class Game : MonoBehaviour
         {
             jumpElapsed += dt;
             //Debug.Log("jumpElapsed: " + jumpElapsed);
-            if (jumpCount == 1 && jumpElapsed > BikeJump2Wait && Input.GetMouseButtonDown(0) && jumpElapsed < BikeJump2Timeout)
+            if (JumpCount == 1 && jumpElapsed > BikeJump2Wait && Input.GetMouseButtonDown(0) && jumpElapsed < BikeJump2Timeout)
             {
                 PlayOneShot(BikeJump2Clip, 2.0f);
                 bikeJumpSpeed += BikeJump2SpeedBoost;
-                jumpCount++;
+                JumpCount++;
                 jumpElapsed = 0;
                 //Debug.Log("START FLIPPING!");
             }
-            else if(jumpCount == 2 && jumpElapsed > BikeJump3Wait && Input.GetMouseButtonDown(0) && jumpElapsed < BikeJump3Timeout)
+            else if(JumpCount == 2 && jumpElapsed > BikeJump3Wait && Input.GetMouseButtonDown(0) && jumpElapsed < BikeJump3Timeout)
             {
                 PlayOneShot(BikeJump3Clip);
                 bikeJumpSpeed += BikeJump3SpeedBoost;
-                jumpCount++;
+                JumpCount++;
                 jumpElapsed = 0;
                 savedBikeTilt = BikeJumpTilt * GameBike.transform.position.y;
+
+                // Special FX since this is the 3RD jump after all...
+                GameBike.StartWind();
+
                 //Debug.Log("START FLIPPING!");
             }
             else if (sailElapsed > BikeJump2Timeout && sailElapsed < BikeJumpSailTimeout &&
@@ -705,11 +748,11 @@ public class Game : MonoBehaviour
 
             if (GameBike.transform.position.y > oldPos.y) // rising
             {
-                if(jumpCount == 1)
+                if(JumpCount == 1)
                     bikeJumpSpeed += dt * -BikeJumpDecelRise;
-                else if(jumpCount == 2)
+                else if(JumpCount == 2)
                     bikeJumpSpeed += dt * -BikeJump2DecelRise;
-                else if(jumpCount == 3)
+                else if(JumpCount == 3)
                     bikeJumpSpeed += dt * -BikeJump3DecelRise;
             }
             else // falling
@@ -722,11 +765,11 @@ public class Game : MonoBehaviour
                 }
                 else
                 {
-                    if (jumpCount == 1)
+                    if (JumpCount == 1)
                         bikeJumpSpeed += dt * -BikeJumpDecelFall;
-                    else if (jumpCount == 2)
+                    else if (JumpCount == 2)
                         bikeJumpSpeed += dt * -BikeJump2DecelFall;
-                    else if (jumpCount == 3)
+                    else if (JumpCount == 3)
                         bikeJumpSpeed += dt * -BikeJump3DecelFall;
 
                     bikeSpeed -= BikeJumpDecelForward * dt;
@@ -737,12 +780,12 @@ public class Game : MonoBehaviour
 
             // Tilting back.
             float bikeTilt = 0;
-            if (GameBike.transform.position.y > BikeJumpTiltThreshold || jumpCount == 3)
+            if (GameBike.transform.position.y > BikeJumpTiltThreshold || JumpCount == 3)
             {
                 //if (jumpCount == 3)
                 //    Debug.Log("AAA savedBikeTilt: " + savedBikeTilt);
 
-                if (jumpCount == 3)
+                if (JumpCount == 3)
                 {
                     //Debug.Log("savedBikeTilt: " + savedBikeTilt);
 
@@ -759,7 +802,7 @@ public class Game : MonoBehaviour
                 GameBike.transform.position = new Vector3(GameBike.transform.position.x, 0, GameBike.transform.position.z);
                 bikeJumpSpeed = 0f;
                 isJumping = false;
-                jumpCount = 0;
+                JumpCount = 0;
                 bikeTilt = 0f;
                 savedBikeTilt = 0f;
                 jumpElapsed = 0f;
@@ -767,6 +810,8 @@ public class Game : MonoBehaviour
                 bikeSpeed -= BikeJumpLandingSlowdown; // skitter slow as you hit the ground
                 if (bikeSpeed < 0f)
                     bikeSpeed = 0f;
+
+                GameBike.StopWind();
             }
 
             // Apply jump tilt (if any).
@@ -804,31 +849,39 @@ public class Game : MonoBehaviour
         //isFlipping = false;
         jumpElapsed = 0f;
         sailElapsed = 0f;
+
+        gameGui.StopTime();
+    }
+
+    public void Swerve()
+    {
+        bikeSpeed = BikeMaxSpeed2;
+        swerveRemaining = BikeSwerveTimeout; 
     }
 
     public void Restart(bool nextLevel)
     {
-        //Debug.Log("Restart, before DoRestart.");
+        Debug.Log("Restart, before DoRestart.");
         StartCoroutine(DoRestart(nextLevel));
-        // Debug.Log("Restart, after DoRestart.");
+        Debug.Log("Restart, after DoRestart.");
 
        
     }
 
     IEnumerator DoRestart(bool nextLevel)
     {
-        //Debug.Log("DoRestart, before yield null.");
+        Debug.Log("DoRestart, before yield null.");
 
         // Skip a frame to prevent lockup?
         yield return null;
 
-        //Debug.Log("DoRestart, aftger yield null.");
+        Debug.Log("DoRestart, aftger yield null.");
 
 
         IsRestarting = true;
         yield return Game.WaitRestartFinish;
 
-        //Debug.Log("DoRestart, aftger yield WaitRestartFinish.");
+        Debug.Log("DoRestart, aftger yield WaitRestartFinish.");
 
 
 
@@ -842,20 +895,34 @@ public class Game : MonoBehaviour
             StartTheNextLevel();
         }
 
-        //Debug.Log("DoRestart, aftger everything.");
+        Debug.Log("DoRestart, aftger everything.");
 
 
     }
 
     //// GUI HANDLING
-    ///
+    /// <summary>
+    /// 
+    /// 
+    public void ResetGui()
+    {
+        for (int i = 0; i < 3; i++) { starCount[i] = 0; gameGui.ShowStar(i, 0); }
+        for (int i = 0; i < 3; i++) { flagCount[i] = 0; gameGui.ShowFlag(i, 0); }
+    }
+
+    /// </summary>
+    /// <param name="kind"></param>
     public void CollectStar(int kind) // 0-2
     {
         starCount[kind]++;
+
+        gameGui.ShowStar(kind, starCount[kind]);
     }
 
     public void CollectFlag(int kind) // 0-2
     {
         flagCount[kind]++;
+
+        gameGui.ShowFlag(kind, flagCount[kind]);
     }
 }

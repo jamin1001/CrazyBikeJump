@@ -18,12 +18,16 @@ public class GridPickerEditor : Editor
     static private float popupWidth = 30;
     static private float popupLandWidth = 100;
     static private float popupSeaWidth  = 100;
+    static private float buttonWidth = 180;
 
     // Initialize the list of lists for selected indices
     private List<List<List<int>>> choicesGrid = new();// List<List<List<int>>>();
     private List<string> levelNames = new();
     private List<int> levelLands = new();
     private List<int> levelSeas = new();
+    private List<int> levelBronzes = new();
+    private List<int> levelSilvers = new();
+    private List<int> levelGolds = new();
     private List<Texture2D> optionTextures = new();
 
     private void OnEnable()
@@ -45,6 +49,9 @@ public class GridPickerEditor : Editor
         SerializedProperty levelNamesProperty = serializedObject.FindProperty("LevelNames");
         SerializedProperty levelLandsProperty = serializedObject.FindProperty("LevelLands");
         SerializedProperty levelSeasProperty = serializedObject.FindProperty("LevelSeas");
+        SerializedProperty levelBronzesProperty = serializedObject.FindProperty("LevelBronzeSeconds");
+        SerializedProperty levelSilversProperty = serializedObject.FindProperty("LevelSilverSeconds");
+        SerializedProperty levelGoldsProperty = serializedObject.FindProperty("LevelGoldSeconds");
         SerializedProperty gridChoicesProperty = serializedObject.FindProperty("GridChoices");
         
 
@@ -64,6 +71,9 @@ public class GridPickerEditor : Editor
                 levelNames.Add(levelNamesProperty.GetArrayElementAtIndex(l).stringValue);
                 levelLands.Add(levelLandsProperty.GetArrayElementAtIndex(l).intValue);
                 levelSeas.Add(levelSeasProperty.GetArrayElementAtIndex(l).intValue);
+                levelBronzes.Add(levelBronzesProperty.GetArrayElementAtIndex(l).intValue);
+                levelSilvers.Add(levelSilversProperty.GetArrayElementAtIndex(l).intValue);
+                levelGolds.Add(levelGoldsProperty.GetArrayElementAtIndex(l).intValue);
 
                 int gridsThisLevel = levelStatsProperty.GetArrayElementAtIndex(l).intValue;
                 for (int g = 0; g < gridsThisLevel; g++)
@@ -122,6 +132,43 @@ public class GridPickerEditor : Editor
                 Rect popupRectSea = EditorGUILayout.GetControlRect(GUILayout.Width(popupSeaWidth));
                 int seaChoice = levelSeas[level];
                 levelSeas[level] = EditorGUI.Popup(popupRectSea, seaChoice, GridPicker.LevelSea);
+
+                // Custom Finish Seconds (3 types).
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Seconds to get gold:");
+                string updatedGold = EditorGUILayout.TextField(levelGolds[level].ToString());
+                int gold = 0;
+                int.TryParse(updatedGold, out gold);
+                levelGolds[level] = gold;
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Seconds to get silver:");
+                string updatedSilver = EditorGUILayout.TextField(levelSilvers[level].ToString());
+                int silver = 0;
+                int.TryParse(updatedSilver, out silver);
+                levelSilvers[level] = silver;
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Seconds to get bronze:");
+                string updatedBronze = EditorGUILayout.TextField(levelBronzes[level].ToString());
+                int bronze = 0;
+                int.TryParse(updatedBronze, out bronze);
+                levelBronzes[level] = bronze;
+                EditorGUILayout.EndHorizontal();
+
+                Rect buttonRect = EditorGUILayout.GetControlRect(GUILayout.Width(buttonWidth));
+                bool clicked = GUI.Button(buttonRect, "Re-estimate seconds");
+                if (clicked)
+                {
+                    int bronzeEstimate = choicesGrid[level].Count;
+
+                    levelBronzes[level] = Math.Max(1, bronzeEstimate + 1);
+                    levelSilvers[level] = Math.Max(1, bronzeEstimate - 0);
+                    levelGolds[level]   = Math.Max(1, bronzeEstimate - 1);
+                }
+
 
                 // Loop through each grid in the current level
                 for (int grid = 0; grid < choicesGrid[level].Count; grid++)
@@ -192,6 +239,9 @@ public class GridPickerEditor : Editor
             levelNames.Add("The Level Name");
             levelLands.Add(0);
             levelSeas.Add(0);
+            levelBronzes.Add(6); // Sensible defaults.
+            levelSilvers.Add(5);
+            levelGolds.Add(4);
         }
 
 
@@ -201,6 +251,9 @@ public class GridPickerEditor : Editor
         levelNamesProperty.ClearArray();
         levelLandsProperty.ClearArray();
         levelSeasProperty.ClearArray();
+        levelBronzesProperty.ClearArray();
+        levelSilversProperty.ClearArray();
+        levelGoldsProperty.ClearArray();
 
         int arraySize = 0;// selectedOptionIndicesProperty.arraySize;
         for (int level = 0; level < choicesGrid.Count; level++)
@@ -220,6 +273,18 @@ public class GridPickerEditor : Editor
             // Level sea, for each level, too.
             levelSeasProperty.InsertArrayElementAtIndex(level); // This level index.
             levelSeasProperty.GetArrayElementAtIndex(level).intValue = levelSeas[level];
+
+            // Level seconds (bronze)
+            levelBronzesProperty.InsertArrayElementAtIndex(level); // This level index.
+            levelBronzesProperty.GetArrayElementAtIndex(level).intValue = levelBronzes[level];
+
+            // Level seconds (silver)
+            levelSilversProperty.InsertArrayElementAtIndex(level); // This level index.
+            levelSilversProperty.GetArrayElementAtIndex(level).intValue = levelSilvers[level];
+
+            // Level seconds (gold)
+            levelGoldsProperty.InsertArrayElementAtIndex(level); // This level index.
+            levelGoldsProperty.GetArrayElementAtIndex(level).intValue = levelGolds[level];
 
 
             for (int grid = 0; grid < choicesGrid[level].Count; grid++)
