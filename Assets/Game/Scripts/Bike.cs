@@ -1,9 +1,5 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Xml.Linq;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 public class Bike : MonoBehaviour
 {
@@ -15,6 +11,7 @@ public class Bike : MonoBehaviour
     public ParticleSystem CollectFlagYellowParticlesPrefab; // world
     public ParticleSystem CollectFlagRedParticlesPrefab; // world
     public ParticleSystem CollectFlagBlueParticlesPrefab; // world
+    public ParticleSystem AtmParticlesPrefab;
 
     public ParticleSystem WindParticlesPrefab;  // local to bike
 
@@ -30,8 +27,9 @@ public class Bike : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        
-        if (collision.collider.gameObject.name.Contains("cow"))
+        string obName = collision.collider.gameObject.name;
+
+        if (obName.Contains("cow"))
         {
             Game.Inst.PlayAnimal(Game.Inst.CowHitClip);    
         }
@@ -48,6 +46,9 @@ public class Bike : MonoBehaviour
                     xOffset = -1f;
                 else
                     xOffset = 1f;
+            if (collision.gameObject.tag.Contains("Atm"))
+                xOffset = -1f;
+
 
             CrashParticlesPrefab.transform.position = collision.transform.position + new Vector3(xOffset, 1f, -0.5f);
             CrashParticlesPrefab.Play();
@@ -56,6 +57,13 @@ public class Bike : MonoBehaviour
             Game.Inst.BikeStopped();
             StartCoroutine(StopEverything());
         }
+        else if(collision.collider is BoxCollider)
+        {
+            if(obName.Contains("Atm"))
+            {
+                Game.Inst.StartAtm();
+            }
+        }    
     }
 
     IEnumerator StopEverything()
@@ -120,7 +128,7 @@ public class Bike : MonoBehaviour
                     }
                 }
                 // AND EXCEPT FOR PRIZE BOXES
-                else
+                else if(!obName.Contains("Atm"))
                 {
                     Game.Inst.PlayOneShot(Game.Inst.BikeCollectStarClip);
                     Vector3 starFxPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height

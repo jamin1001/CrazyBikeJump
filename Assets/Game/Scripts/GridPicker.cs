@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 [ExecuteInEditMode]
 public class GridPicker : MonoBehaviour
 {
-    static public string[] Emojis = { "x", "🐂", "🐴", "🐑", "🛢️", "🚧", "⚫", "⭕", "🏎️", "🚌", "🚗", "🚓", "🚚", "f1", "f2", "f3" }; // grid choice indexes this
+    static public string[] Emojis = { "x", "🐂", "🐴", "🐑", "🛢️", "🚧", "⚫", "⭕", "🏎️", "🚌", "🚗", "🚓", "🚚", "f1", "f2", "f3", "atm" }; // grid choice indexes this
     static public int NumRows = 3; // Number of rows in each grid
     static public int NumCols = 3; // Number of columns in each grid
 

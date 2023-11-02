@@ -1,8 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+#if UNITY_EDITOR
 using UnityEngine.UI;
 using static UnityEngine.InputManagerEntry;
+#endif
 
 [RequireComponent(typeof(AudioSource))]
 //[RequireComponent(typeof(GridPicker))] // Add this back when done mucking with it.
@@ -15,10 +17,10 @@ public class Game : MonoBehaviour
     public GameObject BackWheel;
     public GameObject HandleBars;
     public GameObject FinishBlock;
-    //public RectTransform SpeedGaugeMain;
-    //public RawImage SpeedGaugeImage;
+
+    // Gui Params
     public RectTransform SpeedGaugeAdjuster;
-    public float FinishBlockPullback = 4f;
+
     // Bike Params
     public float BikeAccel = 10;
     public float BikeDecel = 5;
@@ -32,7 +34,7 @@ public class Game : MonoBehaviour
     public float BikeSteerSwipeScale = 0.2f;
     public float BikeSteerPercentEasyJump = 0.4f;
     public int BikeSteerSwipeScaleLimit = 20;
-    
+
     public float BikeJumpStartSpeed = 30f;
     public float BikeJumpDecelRise = 0.02f;
     public float BikeJumpDecelFall = 0.02f;
@@ -59,7 +61,7 @@ public class Game : MonoBehaviour
     public float BikeJumpFlipSpeedBoost = 30f;
     public float BikeJumpFlipDecelRise = 0.01f;
     public float BikeJumpFlipDecelFall = 0.01f;
-   
+
     public float BikeWheelSpeedVisualFactor = 0.2f;
     public float BikeSwerveTimeout = 0.5f;
 
@@ -86,7 +88,6 @@ public class Game : MonoBehaviour
     public AudioClip SheepSwerveClip;
     public List<AudioClip> ConfettiPopClips;
 
-
     public float BikeCyclePitchScale = 2.0f;
     public float CamFollowDistX = 0f;
     public float CamFollowDistY = 2f;
@@ -103,23 +104,20 @@ public class Game : MonoBehaviour
     float originalBikeEulerY;
     float originalHandleBarEulerY;
     float originalCamEulerX;
-    float screenMiddleBorderLeft;
-    float screenMiddleBorderRight;
     float bikeSpeed = 0f;
     float bikeJumpSpeed = 0;
     bool isJumping = false;
     bool isSailing = false;
-    //bool isFlipping = false;
     int currentLevel = -1;
 
 
     public int JumpCount { get; set; } = 0;
     public bool IsRestarting { get; set; } = false;
     public bool IsFinished { get; set; } = false;
+
     float sailElapsed = 0f;
     float jumpElapsed = 0f;
     float savedBikeTilt = 0f;
-    //float flipAngle = 0f;
     float swerveRemaining = 0f;
 
     Camera gameCam;
@@ -222,11 +220,28 @@ public class Game : MonoBehaviour
             audioSourceOnOff.Stop();
     }
 
+    public void StartAtm()
+    {
+        gameGui.TransactAtm();
+    }
+
+    public int GetExtraStarSeconds(int starKind)
+    {
+        if(starKind == 0)
+            return gridPicker.LevelBronzeSeconds[currentLevel];
+        else if(starKind == 1)
+            return gridPicker.LevelSilverSeconds[currentLevel];
+        else if (starKind == 2)
+            return gridPicker.LevelGoldSeconds[currentLevel];
+
+        return 0;
+    }
+
     void Awake()
     {
         Inst = this;
 
-        // Scale GUI appopriate to device.
+        // TODO: Scale GUI appopriate to device.
 
         //SpeedGaugeMain.position = 10f * SpeedGaugeMain.position;
         //SpeedGaugeMain.localScale = 10f * SpeedGaugeMain.localScale;
@@ -237,13 +252,11 @@ public class Game : MonoBehaviour
         audioSourceOneShot = gameObject.AddComponent<AudioSource>(); // jump, collect, etc
         audioSourceOnOff = gameObject.AddComponent<AudioSource>(); // sailing, bumping, etc
         audioSourceAnimal = gameObject.AddComponent<AudioSource>(); // animal moo, etc
+        gridPicker = GetComponent<GridPicker>();
+        gameGui = GetComponent<GameGui>();
 
         audioSourceOneShot.playOnAwake = false;
         audioSourceOnOff.playOnAwake = false;
-
-        gridPicker = GetComponent<GridPicker>();
-        
-        gameGui = GetComponent<GameGui>();
 
 
         //// CAMERA
@@ -362,7 +375,7 @@ public class Game : MonoBehaviour
                 newLand.SetActive(false); // reactivate later per level spec
 
                 // Custom stuff for land piece placement.
-                newLand.transform.position = new Vector3(0, -0.15f, 15f * j);
+                newLand.transform.position = new Vector3(0, -0.24f, 15f * j);
             }
         }
 
@@ -486,7 +499,7 @@ public class Game : MonoBehaviour
         }
         */
 
-        FinishBlock.transform.position = new Vector3(0, 0, grids * 15f - FinishBlockPullback);
+        FinishBlock.transform.position = new Vector3(0, -0.24f, grids * 15f);
 
         if (currentLevel == levelCount)
         {
@@ -500,9 +513,6 @@ public class Game : MonoBehaviour
         originalHandleBarEulerY = HandleBars.transform.localEulerAngles.y;
 
         originalCamEulerX = gameCam.transform.localEulerAngles.x;
-
-        screenMiddleBorderLeft = Screen.width / 2 - BikeSteerScreenWidth / 2;
-        screenMiddleBorderRight = Screen.width / 2 + BikeSteerScreenWidth / 2;
 
         ResetGui();
         StartTheNextLevel();
@@ -544,8 +554,8 @@ public class Game : MonoBehaviour
         if (IsRestarting)
             return;
 
-        //if (IsFinished)
-        //    return;
+        if (IsFinished)
+            return;
 
         // Bike chug sound mechanism.
         if (!isJumping && bikeSpeed > 2f)
@@ -692,55 +702,6 @@ public class Game : MonoBehaviour
                 bikeSpeed = 0;
         }
 
-#if false
-        if(isFlipping)
-        {
-            float tiltAmount = BikeJumpFlipSpeed * dt;
-            flipAngle += tiltAmount;
-
-            if (Mathf.Abs(flipAngle) < BikeJumpFlipAmount)
-            {
-                //Debug.Log("flipAngle: " + flipAngle);
-                // Keep flipping...
-
-                /* This was producing gimbol lock on the x axis, so let's use quaternions instead.
-                 
-                  Vector3 currentBikeEulers = GameBike.transform.localEulerAngles;
-                  currentBikeEulers.x = flipAngle;
-                  GameBike.transform.localEulerAngles = currentBikeEulers;
-                  */
-
-                /*
-                Quaternion currentOrientation = GameBike.transform.localRotation;
-                Quaternion extraTilt = Quaternion.Euler(new Vector3(tiltAmount, 0, 0)); // Quaternion.AngleAxis(flipAngle, Vector3.right);
-                GameBike.transform.localRotation = currentOrientation * extraTilt;
-                */
-
-                // Continue at same rate up ...
-                GameBike.transform.position += new Vector3(0, dt * bikeJumpSpeed, 0);
-
-
-                if (GameBike.transform.position.y > oldPos.y) // rising
-                {
-                    bikeJumpSpeed += dt * -BikeJumpFlipDecelRise;
-                }
-                else // falling
-                {
-                    bikeJumpSpeed += dt * -BikeJumpFlipDecelFall;
-                }
-
-            }
-            else
-            {
-                // Stop.
-                isFlipping = false;
-                flipAngle = 0;
-                //Debug.Log("#### STOPPED FLIPPING");
-            }
-
-            
-        }
-#endif
         // Jumping Vertical Accel/Decel.
         if (isJumping)
         {
@@ -782,15 +743,10 @@ public class Game : MonoBehaviour
             float bikeTilt = 0;
             if (GameBike.transform.position.y > BikeJumpTiltThreshold || JumpCount == 3)
             {
-                //if (jumpCount == 3)
-                //    Debug.Log("AAA savedBikeTilt: " + savedBikeTilt);
-
                 if (JumpCount == 3)
                 {
-                    //Debug.Log("savedBikeTilt: " + savedBikeTilt);
-
-                    bikeTilt = savedBikeTilt; // tilt down more for the 3rd one
-                    savedBikeTilt += BikeJumpUntiltSpeed * dt; // Will continue to keep tilting forward
+                    bikeTilt = savedBikeTilt; // Tilt down more for the 3rd one.
+                    savedBikeTilt += BikeJumpUntiltSpeed * dt; // Will continue to keep tilting forward.
                 }
                 else
                     bikeTilt = BikeJumpTilt * GameBike.transform.position.y;
@@ -807,7 +763,7 @@ public class Game : MonoBehaviour
                 savedBikeTilt = 0f;
                 jumpElapsed = 0f;
                 sailElapsed = 0f;
-                bikeSpeed -= BikeJumpLandingSlowdown; // skitter slow as you hit the ground
+                bikeSpeed -= BikeJumpLandingSlowdown; // Skitter slow as you hit the ground.
                 if (bikeSpeed < 0f)
                     bikeSpeed = 0f;
 
@@ -846,7 +802,6 @@ public class Game : MonoBehaviour
     public void BikeStopped()
     {
         bikeSpeed = 0f;
-        //isFlipping = false;
         jumpElapsed = 0f;
         sailElapsed = 0f;
 
@@ -864,8 +819,6 @@ public class Game : MonoBehaviour
         Debug.Log("Restart, before DoRestart.");
         StartCoroutine(DoRestart(nextLevel));
         Debug.Log("Restart, after DoRestart.");
-
-       
     }
 
     IEnumerator DoRestart(bool nextLevel)
@@ -883,12 +836,9 @@ public class Game : MonoBehaviour
 
         Debug.Log("DoRestart, aftger yield WaitRestartFinish.");
 
-
-
         GameBike.transform.position = Vector3.zero;
         ResetBikeRotation();
         IsRestarting = false;
-        IsFinished = false;
 
         if (nextLevel)
         {
@@ -897,13 +847,41 @@ public class Game : MonoBehaviour
 
         Debug.Log("DoRestart, aftger everything.");
 
-
     }
 
     //// GUI HANDLING
     /// <summary>
     /// 
     /// 
+
+
+    public int StarCount(int kind) // 0-2
+    {
+        if (kind >= 0 && kind <= 2)
+            return starCount[kind];
+
+        return -1;
+    }
+
+    public int FlagCount(int kind) // 0-2
+    {
+        if (kind >= 0 && kind <= 2)
+            return flagCount[kind];
+
+        return -1;
+    }
+
+    public int StarFlagCount(int kind) // 0-5 (s1, s2, s3, f1, f2, f3)
+    {
+        if (kind >= 0 && kind <= 2)
+            return starCount[kind];
+        else if (kind >= 3 && kind <= 5)
+            return flagCount[kind - 3];
+
+        return -1;
+    }
+
+
     public void ResetGui()
     {
         for (int i = 0; i < 3; i++) { starCount[i] = 0; gameGui.ShowStar(i, 0); }
@@ -924,5 +902,25 @@ public class Game : MonoBehaviour
         flagCount[kind]++;
 
         gameGui.ShowFlag(kind, flagCount[kind]);
+    }
+
+    public int TransactStar(int kind) // 0-2
+    {
+        if (starCount[kind] > 0)
+        {
+            starCount[kind]--;
+            gameGui.ShowStar(kind, starCount[kind]);
+        }
+        return starCount[kind];
+    }
+
+    public int TransactFlag(int kind) // 0-2
+    {
+        if (flagCount[kind] > 0)
+        {
+            flagCount[kind]--;
+            gameGui.ShowStar(kind, flagCount[kind]);
+        }
+        return flagCount[kind];
     }
 }
