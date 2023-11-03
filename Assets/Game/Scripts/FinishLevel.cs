@@ -63,7 +63,9 @@ public class FinishLevel : MonoBehaviour
         Game.Inst.PlayOneShot(Game.Inst.FinishedGoodClip);
         //Game.Inst.PlayOneShot(Game.Inst.FinishedWonderfulClip);
 
+        Debug.Log("Before IsFinished FALSE");
         Game.Inst.IsFinished = false;
+        Debug.Log("After IsFinished FALSE");
 
         // Give a chance to update IsFinished before we exit here. It seems there was an issue with this
         // not getting set to false correctly, and then getting stuck in the update loop by returning early all the time.

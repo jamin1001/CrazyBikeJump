@@ -515,6 +515,7 @@ RectTransform:
   m_Children:
   - {fileID: 490291017}
   - {fileID: 2120340722}
+  - {fileID: 342477664}
   - {fileID: 948185263}
   - {fileID: 1046211012}
   - {fileID: 1140055487}
@@ -870,6 +871,41 @@ MonoBehaviour:
     mipBias: 0
     varianceClampScale: 0.9
     contrastAdaptiveSharpening: 0
+--- !u!1 &342477663
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 342477664}
+  m_Layer: 5
+  m_Name: GuiPooled
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &342477664
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 342477663}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 259362907}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &380771894
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1653,74 +1689,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 765540376}
   m_CullTransparentMesh: 1
---- !u!1001 &795269188
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4578839375225337061, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_Name
-      value: AtmStation
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8870698559485966362, guid: 19395861e2625684987c032085606609,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 19395861e2625684987c032085606609, type: 3}
 --- !u!1 &824506237
 GameObject:
   m_ObjectHideFlags: 0
@@ -2237,7 +2205,7 @@ MonoBehaviour:
   BikeAccel: 20
   BikeDecel: 5
   BikeSwerveDecel: 20.02
-  BikeMaxSpeed: 12
+  BikeMaxSpeed: 14
   BikeMaxSpeed2: 22
   BikeTurn: 1.5
   BikeTurnTranslation: 0.25
@@ -2276,14 +2244,14 @@ MonoBehaviour:
   BikeCrashClip: {fileID: 8300000, guid: d826ddf1f140e8248aa44551938f34dd, type: 3}
   BikeJumpClip: {fileID: 8300000, guid: 8815404026075a84e805a498d1a72b3d, type: 3}
   BikeJump2Clip: {fileID: 8300000, guid: c926f8bbee091614fb84590abcb9ea26, type: 3}
-  BikeJump3Clip: {fileID: 8300000, guid: 0c1e6fabdcdb96a45ad31006be8579ac, type: 3}
+  BikeJump3Clip: {fileID: 8300000, guid: 84a4d6351e93d0b4a9111cf16084cb13, type: 3}
   BikeSailClip: {fileID: 8300000, guid: e256163d29180b64f876a055e77acee9, type: 3}
   BikeCollectStarClip: {fileID: 8300000, guid: 34c7077d35226ad42a98d29b9c213e62, type: 3}
   BikeCollectFlagClip: {fileID: 8300000, guid: 21dbf0b1be0d1124faa88b997098f577, type: 3}
   BikeSwerveClip: {fileID: 8300000, guid: 002f23c325e589f4b8af69d5f1f5680d, type: 3}
   FinishLineClip: {fileID: 8300000, guid: d4991a63672d64841a075e3adbd34b00, type: 3}
   FinishedBadClip: {fileID: 0}
-  FinishedGoodClip: {fileID: 0}
+  FinishedGoodClip: {fileID: 8300000, guid: 745adf4fa305ce6489f577c66d0c5083, type: 3}
   FinishedWonderfulClip: {fileID: 8300000, guid: 9f79cc7fdb3d31240957e726baac0377,
     type: 3}
   ConfettiBangClip: {fileID: 8300000, guid: f2459949f78187c4292d5cd25212ee75, type: 3}
@@ -2293,6 +2261,7 @@ MonoBehaviour:
   HorseSwerveClip: {fileID: 8300000, guid: 50baa8d94238f824fb51f03a5253a4a6, type: 3}
   SheepHitClip: {fileID: 0}
   SheepSwerveClip: {fileID: 0}
+  CoinTransferClip: {fileID: 8300000, guid: 5be9e65530a3f82488674c689bc784e8, type: 3}
   ConfettiPopClips:
   - {fileID: 8300000, guid: 2bc4e4504d480424dbbda094b14dc2f2, type: 3}
   - {fileID: 8300000, guid: e142badf8ca16e849b9455293a74baa2, type: 3}
@@ -2457,7 +2426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b6ecd34c20341141b48ae9ec4a97d73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GuiPoolFolder: {fileID: 938792965}
+  GuiPoolFolder: {fileID: 342477664}
   TextMeshProText: {fileID: 490291018}
   StarsOff:
   - {fileID: 1500567476}
@@ -2490,8 +2459,11 @@ MonoBehaviour:
   - {fileID: 1174346204}
   - {fileID: 1730826447}
   SpinningCoin: {fileID: 1557456468}
-  AtmNextStarFlagTimeout: 0.5
+  SpinningCoinCount: {fileID: 1117686232}
+  AtmNextStarFlagTimeout: 0.1
   AtmTravelSpeed: 10
+  CoinSpinAccel: 220
+  CoinSpinDecel: 60
 --- !u!114 &1029705823
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2504,17 +2476,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f688d78eda325334baf7185a9494a21c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LevelOpen: 0000
-  LevelStats: 0600000005000000
+  LevelOpen: 0001
+  LevelStats: 0800000005000000
   LevelNames:
-  - The Level Name
-  - The Level Name
+  - Atm Try!
+  - Blank Level 2
   LevelLands: 0000000000000000
   LevelSeas: 0000000000000000
   LevelBronzeSeconds: 0700000006000000
   LevelSilverSeconds: 0600000005000000
   LevelGoldSeconds: 0500000004000000
-  GridChoices: 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  GridChoices: 000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000f00000000000000000000000000000000000000000000000000000000000000000000000e00000000000000000000000e00000000000000000000000000000000000000000000000d00000000000000000000000d00000000000000000000000d00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 --- !u!1 &1041008921
 GameObject:
   m_ObjectHideFlags: 0
@@ -3855,7 +3827,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 20, y: 50, z: 5}
-  m_Center: {x: 0, y: 0, z: -5}
+  m_Center: {x: 0, y: 0, z: -4.5}
 --- !u!33 &1333551498
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -6408,4 +6380,3 @@ SceneRoots:
   - {fileID: 1333551499}
   - {fileID: 1375809477}
   - {fileID: 1357544641}
-  - {fileID: 795269188}

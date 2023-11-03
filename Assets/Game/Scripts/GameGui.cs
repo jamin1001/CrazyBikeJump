@@ -28,29 +28,40 @@ public class GameGui : MonoBehaviour
     public Image[] ExtraStars = new Image[3];
 
     public RawImage SpinningCoin;
+    public TMP_Text SpinningCoinCount;
 
     private float elapsedRaceSeconds;
     private bool isRaceTimeStopped = false;
     private int extraStar = -1;
-    private bool isTransactingAtm = false;
+    private int atmTransactionsRemaining = 0;
 
-    const int ATM_TRANSACT_POOL = 10;
+    const int ATM_TRANSACT_POOL = 4;
 
     public float AtmNextStarFlagTimeout = 0.5f;
     public float AtmTravelSpeed = 10f;
+    public float CoinSpinAccel = 60f;
+    public float CoinSpinDecel = 0.1f;
 
-    
     private Image[,] atmTransferImages = new Image[6, ATM_TRANSACT_POOL]; // (StarFlagIndex) x 10
     private int[,] atmTransferStates = new int[6, 2];                     // (StarFlagIndex) x (startIndex, endIndex)
-    private readonly int[] IndexToStarFlag = new int[] { 2, 3, 1, 4, 0, 5 };
+    private readonly int[] IndexToStarFlag = new int[] { 0, 3, 1, 4, 2, 5 };
     private readonly Image[] StarFlagImages = new Image[6];
     private float starFlagElapsed = 0f;
     private int starFlagIndex = 0;
+    private float coinSpinSpeed = 0;
+    private float coinSpinDistance = 0;
+    private int coinSpinIndex = 0;
+    private float[,] coinSpinUvs = new float[4, 2] {
+        { 0.0f, 0.5f },
+        { 0.5f, 0.5f },
+        { 0.0f, 0.0f },
+        { 0.5f, 0.0f },
+    };
 
     // indexToStarFlag:
     // stars (b s g)   flags (y r b)
     // 0 1 2           3 4 5   
-    // 4 2 0           1 3 5
+    // 0 2 4           1 3 5
 
     private void Awake()
     {
@@ -71,23 +82,11 @@ public class GameGui : MonoBehaviour
             for (int j = 0; j < ATM_TRANSACT_POOL; j++)
             {
                 atmTransferImages[i, j] = Instantiate<Image>(StarFlagImages[i], GuiPoolFolder);
-
-                /*
-                if (i == 0)
-                    atmTransferImages[i, j] = Instantiate<Image>(StarsOn[0]);
-                else if (i == 1)
-                    atmTransferImages[i, j] = Instantiate<Image>(StarsOn[1]);
-                else if (i == 2)
-                    atmTransferImages[i, j] = Instantiate<Image>(StarsOn[2]);
-                else if (i == 3)
-                    atmTransferImages[i, j] = Instantiate<Image>(FlagsOn[0]);
-                else if (i == 4)
-                    atmTransferImages[i, j] = Instantiate<Image>(FlagsOn[1]);
-                else if (i == 5)
-                    atmTransferImages[i, j] = Instantiate<Image>(FlagsOn[2]);
-                */
+                atmTransferImages[i, j].gameObject.SetActive(false);
             }
         }
+
+        SpinningCoinCount.text = Game.Inst.CoinCount().ToString();
     }
 
     private void Update()
@@ -108,10 +107,10 @@ public class GameGui : MonoBehaviour
             elapsedRaceSeconds = nextElapsedSeconds;
         }
 
-        if(isTransactingAtm)
+        if(atmTransactionsRemaining > 0)
         {
             // Shoot out the next star or flag.
-            if(starFlagElapsed > AtmNextStarFlagTimeout)
+            if(starFlagElapsed >= AtmNextStarFlagTimeout)
             {
                 starFlagElapsed -= AtmNextStarFlagTimeout;
 
@@ -122,31 +121,43 @@ public class GameGui : MonoBehaviour
 
                     if(Game.Inst.StarFlagCount(starFlag) > 0) // Still a star/flag to transfer.
                     {
-                        int extendIndex = -1;
-                        if (atmTransferStates[starFlag, 0] == -1)
-                        {
-                            Debug.Assert(atmTransferStates[starFlag, 1] == -1);
+                        // Turn on the back of the queue, and advance it for next time.
+                        int newImageIndexToActivate = atmTransferStates[starFlag, 1];
+                        atmTransferImages[starFlag, newImageIndexToActivate].transform.position = StarFlagImages[starFlag].transform.position; // start from original position
+                        atmTransferImages[starFlag, newImageIndexToActivate].gameObject.SetActive(true);
 
-                            atmTransferStates[starFlag, 0] = 0;
-                            atmTransferStates[starFlag, 1] = 0;
-                            extendIndex = 0;
-                        }
-                        else
-                        {
-                            atmTransferStates[starFlag, 1] = (atmTransferStates[starFlag, 1] + 1) % ATM_TRANSACT_POOL;
-                            extendIndex = atmTransferStates[starFlag, 1];
+                        atmTransferStates[starFlag, 1] = (newImageIndexToActivate + 1) % ATM_TRANSACT_POOL;
+                        Debug.Log($"Start transfer starFlag={starFlag} ({atmTransferStates[starFlag, 0]},{atmTransferStates[starFlag, 1]})");
 
-                            if(extendIndex == atmTransferStates[starFlag, 0])
-                            {
-                                Debug.LogError("Cannot start another star/flag because pool is full - exiting early.");
-                                return;
-                            }
-                        }
+                        // Deduct the star from what the game is counting.
+                        Game.Inst.TransactStarFlag(starFlag);
+                        //Debug.Log("Transacted starFlag index: " + starFlag);
 
-                        // Turn on the next one on in the circular queue.
-                        atmTransferImages[starFlag, extendIndex].transform.position = StarFlagImages[starFlag].transform.position; // start from original position
-                        atmTransferImages[starFlag, extendIndex].gameObject.SetActive(true);
 
+                        if (starFlag == 0)
+                            Game.Inst.AddCoins(1);
+                        if (starFlag == 1)
+                            Game.Inst.AddCoins(2);
+                        if (starFlag == 2)
+                            Game.Inst.AddCoins(3);
+                        if (starFlag == 3)
+                            Game.Inst.AddCoins(1);
+                        if (starFlag == 4)
+                            Game.Inst.AddCoins(2);
+                        if (starFlag == 5)
+                            Game.Inst.AddCoins(3);
+
+                        // Update the coins just added.
+                        SpinningCoinCount.text = Game.Inst.CoinCount().ToString();
+
+                        // We are only transfering one star/flag at this time. Wait for timeout for next one.
+                        starFlagIndex = (starFlagIndex + 1) % 6;
+
+
+                        if (coinSpinSpeed < 130)
+                            coinSpinSpeed = 130;
+
+                        break;
                     }
 
                     starFlagIndex = (starFlagIndex + 1) % 6;
@@ -154,13 +165,13 @@ public class GameGui : MonoBehaviour
                 }
             }
 
-            int transactingCount = 0;
+            // Continue moving the star(s) or flag(s) that were launched.
             Vector3 targetPos = SpinningCoin.transform.position;
             for (int i = 0; i < 6; i++)
             {
                 for (int j = 0; j < ATM_TRANSACT_POOL; j++)
                 {
-                    // All active towards SpinningCoin!
+                    // All active ones go towards the SpinningCoin targetPos!
                     GameObject starFlagOb = atmTransferImages[i, j].gameObject;
                     
                     if (starFlagOb.activeSelf)
@@ -168,40 +179,79 @@ public class GameGui : MonoBehaviour
                         Vector3 startPos = starFlagOb.transform.position;
                         starFlagOb.transform.position = Vector3.Lerp(startPos, targetPos, AtmTravelSpeed * dt);
 
-                        if((starFlagOb.transform.position - targetPos).sqrMagnitude < Vector3.kEpsilon)
+                        if((starFlagOb.transform.position - targetPos).sqrMagnitude < 100 * Vector3.kEpsilon)
                         {
                             // Close enough, now do the tabulation and update the list.
                             starFlagOb.SetActive(false);
+                            Debug.Log($"SetActive FALSE of {starFlagOb.name}");
+
+                            // Advance front of queue, since we are done with this one.
                             atmTransferStates[i, 0] = (atmTransferStates[i, 0] + 1) % 6;
-                        }
-                        else
-                        {
-                            transactingCount++;
+
+                            // This one transacted.
+                            atmTransactionsRemaining--;
+
+                            int starFlag = -1;
+                            for(int k = 0; k < 6; k++)
+                            {
+                                if (starFlagOb.name.Contains(StarFlagImages[i].name)) // e.g. "Flag1(Clone)" contains "Flag1"
+                                {
+                                    starFlag = i;
+                                    break;
+                                }
+                            }
+                            Debug.Assert(starFlag != -1);
+                            Debug.Log($"End transfer transfer starFlag={starFlag} ({atmTransferStates[starFlag, 0]},{atmTransferStates[starFlag, 1]})");
+
+
+                            coinSpinSpeed += CoinSpinAccel * dt;
+
+                            if (coinSpinSpeed > 600)
+                                coinSpinSpeed = 600;
+
+                            //Game.Inst.PlayOneShot(Game.Inst.CoinTransferClip, 0.2f, 0.1f);
+                            //Game.Inst.PlayOneShot(Game.Inst.CoinTransferClip, 0.4f, 0.2f);
+                            Game.Inst.PlayOneShot(Game.Inst.CoinTransferClip);//, 0.6f, 0.3f);
+
+                            Debug.Log("Transaction remaining is now: " + atmTransactionsRemaining);
                         }
                     }
                 }
             }
 
-            if (transactingCount == 0)
+            if (atmTransactionsRemaining == 0)
             {
-                // All done, nothing left to transact.
-                isTransactingAtm = false;
-                if (starFlagElapsed == 0)
-                {
-                    // Already at zero, yet we never counted! Means that there was nothing to transact, play a buzz or something.
-                    Game.Inst.PlayAnimal(Game.Inst.CowHitClip);
-                }
-                else
-                {
-                    // Reset.
-                    starFlagElapsed = 0;
-                }
+                // Reset.
+                starFlagElapsed = 0;
             }
             else
             {
                 starFlagElapsed += Time.deltaTime;
             }
         }
+
+        coinSpinDistance += coinSpinSpeed * dt;
+        if (coinSpinDistance > 4)
+        {
+            coinSpinDistance -= 4;
+            coinSpinIndex = (coinSpinIndex + 1) % 4;
+        }
+
+        Rect uvRect = SpinningCoin.uvRect;
+        uvRect.x = coinSpinUvs[coinSpinIndex, 0];
+        uvRect.y = coinSpinUvs[coinSpinIndex, 1];
+        SpinningCoin.uvRect = uvRect;
+
+        coinSpinSpeed -= CoinSpinDecel * dt;
+        if (coinSpinSpeed < 0)
+            coinSpinSpeed = 0;
+
+        if(atmTransactionsRemaining == 0 && coinSpinIndex != 0)
+        {
+            // Give a little last oomph to get it to the starting frame again.
+            coinSpinSpeed = 15f;
+        }
+
     }
 
     public void ResetAtm()
@@ -209,8 +259,8 @@ public class GameGui : MonoBehaviour
         for (int i = 0; i < 6; i++)
         {
             // Reset ranges.
-            atmTransferStates[i, 0] = -1;
-            atmTransferStates[i, 1] = -1;
+            atmTransferStates[i, 0] = 0;
+            atmTransferStates[i, 1] = 0;
             for (int j = 0; j < ATM_TRANSACT_POOL; j++)
             {
                 atmTransferImages[i, j].gameObject.SetActive(false);
@@ -220,7 +270,17 @@ public class GameGui : MonoBehaviour
 
     public void TransactAtm()
     {
-        isTransactingAtm = true;
+        atmTransactionsRemaining = Game.Inst.StarFlagCountTotal();
+
+        if (atmTransactionsRemaining > 0)
+        {
+            starFlagElapsed = AtmNextStarFlagTimeout; // To force start the first one.
+        }
+        else
+        {
+            // Play empty sound.
+
+        }
     }
 
     public void StopTime()

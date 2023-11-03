@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -86,6 +87,7 @@ public class Game : MonoBehaviour
     public AudioClip HorseSwerveClip;
     public AudioClip SheepHitClip;
     public AudioClip SheepSwerveClip;
+    public AudioClip CoinTransferClip;
     public List<AudioClip> ConfettiPopClips;
 
     public float BikeCyclePitchScale = 2.0f;
@@ -151,6 +153,7 @@ public class Game : MonoBehaviour
     // Game State
     int[] starCount = new int[3];
     int[] flagCount = new int[3];
+    int coinCount = 0;
 
     // Timings
     static public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
@@ -838,8 +841,14 @@ public class Game : MonoBehaviour
 
         GameBike.transform.position = Vector3.zero;
         ResetBikeRotation();
+
+        yield return null;
+        
         IsRestarting = false;
 
+
+        yield return null;
+        
         if (nextLevel)
         {
             StartTheNextLevel();
@@ -881,6 +890,19 @@ public class Game : MonoBehaviour
         return -1;
     }
 
+    public int StarFlagCountTotal()
+    {
+        int total = 0;
+        for(int i = 0; i < 6; i++)
+            total += Game.Inst.StarFlagCount(i);
+
+        return total;
+    }
+
+    public int CoinCount()
+    {
+        return coinCount;
+    }
 
     public void ResetGui()
     {
@@ -919,8 +941,28 @@ public class Game : MonoBehaviour
         if (flagCount[kind] > 0)
         {
             flagCount[kind]--;
-            gameGui.ShowStar(kind, flagCount[kind]);
+            gameGui.ShowFlag(kind, flagCount[kind]);
         }
         return flagCount[kind];
+    }
+
+    public int TransactStarFlag(int kind) // 0-5 (s1, s2, s3, f1, f2, f3)
+    {
+        if (kind >= 0 && kind <= 2)
+            return TransactStar(kind);
+        else if (kind >= 3 && kind <= 5)
+            return TransactFlag(kind - 3);
+
+        return -1;
+    }
+
+    public void ResetCoins()
+    {
+        coinCount = 0;
+    }
+
+    public void AddCoins(int number)
+    {
+        coinCount += number;
     }
 }

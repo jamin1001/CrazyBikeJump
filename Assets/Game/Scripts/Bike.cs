@@ -27,7 +27,8 @@ public class Bike : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        string obName = collision.collider.gameObject.name;
+        GameObject otherOb = collision.collider.gameObject;
+        string obName = otherOb.name;
 
         if (obName.Contains("cow"))
         {
@@ -61,7 +62,36 @@ public class Bike : MonoBehaviour
         {
             if(obName.Contains("Atm"))
             {
+                Debug.LogWarning("Starting ATM...");
                 Game.Inst.StartAtm();
+            }
+            // EXCEPT FOR FLAGS
+            else if (obName.Contains("Flag"))
+            {
+                Game.Inst.PlayOneShot(Game.Inst.BikeCollectFlagClip);
+                Vector3 flagFxPosition = transform.localPosition + new Vector3(0, 1.7f, 0); // add a little height
+
+                if (obName.Contains("Yellow"))
+                {
+                    CollectFlagYellowParticlesPrefab.transform.localPosition = flagFxPosition;
+                    CollectFlagYellowParticlesPrefab.Play();
+                    otherOb.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                    Game.Inst.CollectFlag(0);
+                }
+                else if (obName.Contains("Red"))
+                {
+                    CollectFlagRedParticlesPrefab.transform.localPosition = flagFxPosition;
+                    CollectFlagRedParticlesPrefab.Play();
+                    otherOb.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                    Game.Inst.CollectFlag(1);
+                }
+                else if (obName.Contains("Blue"))
+                {
+                    CollectFlagBlueParticlesPrefab.transform.localPosition = flagFxPosition;
+                    CollectFlagBlueParticlesPrefab.Play();
+                    otherOb.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                    Game.Inst.CollectFlag(2);
+                }
             }
         }    
     }
@@ -84,9 +114,11 @@ public class Bike : MonoBehaviour
     {
         if (collision.collider is BoxCollider)
         {
+            GameObject otherOb = collision.collider.gameObject;
+
             if (!Game.Inst.IsRestarting)
             {
-                string obName = collision.collider.gameObject.name;
+                string obName = otherOb.name;
 
                 // BOXES ARE SWERVE AROUND
                 if (obName.Contains("swerve"))
@@ -102,33 +134,9 @@ public class Bike : MonoBehaviour
 
                     Game.Inst.PlayOnOff(Game.Inst.BikeSailClip, 0.1f);
                 }
-                // EXCEPT FOR FLAGS
-                else if(obName.Contains("Flag"))
-                {
-                    Game.Inst.PlayOneShot(Game.Inst.BikeCollectFlagClip);
-                    Vector3 flagFxPosition = transform.localPosition + new Vector3(0, 0.7f, 0); // add a little height
-
-                    if (obName.Contains("Yellow"))
-                    {
-                        CollectFlagYellowParticlesPrefab.transform.localPosition = flagFxPosition;
-                        CollectFlagYellowParticlesPrefab.Play();
-                        Game.Inst.CollectFlag(0);
-                    }
-                    else if(obName.Contains("Red"))
-                    {
-                        CollectFlagRedParticlesPrefab.transform.localPosition = flagFxPosition;
-                        CollectFlagRedParticlesPrefab.Play();
-                        Game.Inst.CollectFlag(1);
-                    }
-                    else if (obName.Contains("Blue"))
-                    {
-                        CollectFlagBlueParticlesPrefab.transform.localPosition = flagFxPosition;
-                        CollectFlagBlueParticlesPrefab.Play();
-                        Game.Inst.CollectFlag(2);
-                    }
-                }
+                
                 // AND EXCEPT FOR PRIZE BOXES
-                else if(!obName.Contains("Atm"))
+                else if(!obName.Contains("Atm") && !obName.Contains("Flag"))
                 {
                     Game.Inst.PlayOneShot(Game.Inst.BikeCollectStarClip);
                     Vector3 starFxPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
