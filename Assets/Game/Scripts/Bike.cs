@@ -38,8 +38,6 @@ public class Bike : MonoBehaviour
         // HIT
         if (collision.collider is CapsuleCollider)
         {
-            //Debug.Log("HIT!");// Collided with :" + collision.collider.gameObject);
-
             // Looks better for a flagpole if the crash explosion is sitting directly in line with the pole.
             float xOffset = 0;
             if (collision.gameObject.tag.Contains("Flag"))
@@ -50,12 +48,13 @@ public class Bike : MonoBehaviour
             if (collision.gameObject.tag.Contains("Atm"))
                 xOffset = -1f;
 
+            
 
             CrashParticlesPrefab.transform.position = collision.transform.position + new Vector3(xOffset, 1f, -0.5f);
             CrashParticlesPrefab.Play();
             CrashParticlesPrefab.transform.GetChild(1).gameObject.SetActive(true); // Child particle too.
             Game.Inst.PlayOneShot(Game.Inst.BikeCrashClip);
-            Game.Inst.BikeStopped();
+            Game.Inst.BikeCrashed();
             StartCoroutine(StopEverything());
         }
         else if(collision.collider is BoxCollider)
@@ -75,21 +74,31 @@ public class Bike : MonoBehaviour
                 {
                     CollectFlagYellowParticlesPrefab.transform.localPosition = flagFxPosition;
                     CollectFlagYellowParticlesPrefab.Play();
+
+                    // Disable flag and hit box now that we've collected.
                     otherOb.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                    otherOb.GetComponent<BoxCollider>().enabled = false;
+
                     Game.Inst.CollectFlag(0);
                 }
                 else if (obName.Contains("Red"))
                 {
                     CollectFlagRedParticlesPrefab.transform.localPosition = flagFxPosition;
                     CollectFlagRedParticlesPrefab.Play();
+
                     otherOb.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                    otherOb.GetComponent<BoxCollider>().enabled = false;
+
                     Game.Inst.CollectFlag(1);
                 }
                 else if (obName.Contains("Blue"))
                 {
                     CollectFlagBlueParticlesPrefab.transform.localPosition = flagFxPosition;
                     CollectFlagBlueParticlesPrefab.Play();
+                    
                     otherOb.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                    otherOb.GetComponent<BoxCollider>().enabled = false;
+
                     Game.Inst.CollectFlag(2);
                 }
             }

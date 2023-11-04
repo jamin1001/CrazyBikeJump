@@ -811,6 +811,12 @@ public class Game : MonoBehaviour
         gameGui.StopTime();
     }
 
+    public void BikeCrashed()
+    {
+        BikeStopped();
+        gameGui.LoseStarFlags();
+    }
+
     public void Swerve()
     {
         bikeSpeed = BikeMaxSpeed2;
