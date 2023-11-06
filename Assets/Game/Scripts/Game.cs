@@ -28,6 +28,7 @@ public class Game : MonoBehaviour
     public float BikeSwerveDecel = 12; // Should be greater than BikeAccel, since we are overcompensating.
     public float BikeMaxSpeed = 40;
     public float BikeMaxSpeed2 = 42;
+    public float BikeMaxSpeedGaugePercent = 60;
     public float BikeTurn = 3;
     public float BikeTurnTranslation = 3;
     public float BikeHandleTurn = 20;
@@ -64,11 +65,11 @@ public class Game : MonoBehaviour
     public float BikeJumpFlipDecelFall = 0.01f;
 
     public float BikeWheelSpeedVisualFactor = 0.2f;
-    public float BikeSwerveTimeout = 0.5f;
 
     // Sounds
     public AudioClip BikeCycleClip;
     public AudioClip BikeCrashClip;
+    public AudioClip BikeCrashWallClip;
     public AudioClip BikeJumpClip;
     public AudioClip BikeJump2Clip;
     public AudioClip BikeJump3Clip;
@@ -120,7 +121,7 @@ public class Game : MonoBehaviour
     float sailElapsed = 0f;
     float jumpElapsed = 0f;
     float savedBikeTilt = 0f;
-    float swerveRemaining = 0f;
+    bool swerveApplied = false;
 
     Camera gameCam;
     AudioSource audioSource;
@@ -128,7 +129,7 @@ public class Game : MonoBehaviour
     AudioSource audioSourceOnOff;
     AudioSource audioSourceAnimal;
     GridPicker gridPicker;
-    GameGui gameGui;
+    public GameGui GameGui { get; set; }
 
     // Game Layout
     int levelCount;
@@ -157,10 +158,9 @@ public class Game : MonoBehaviour
 
     // Timings
     static public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
-    static public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(1.0f);
+    static public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(1.4f);
     static public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(2.0f);
     static public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(2.0f);
-    static public WaitForSecondsRealtime WaitGaugeBorderFade = new WaitForSecondsRealtime(0.2f);
 
 
     static public List<WaitForSecondsRealtime> WaitTimes1 = new List<WaitForSecondsRealtime>
@@ -225,7 +225,7 @@ public class Game : MonoBehaviour
 
     public void StartAtm()
     {
-        gameGui.TransactAtm();
+        GameGui.TransactAtm();
     }
 
     public int GetExtraStarSeconds(int starKind)
@@ -256,7 +256,7 @@ public class Game : MonoBehaviour
         audioSourceOnOff = gameObject.AddComponent<AudioSource>(); // sailing, bumping, etc
         audioSourceAnimal = gameObject.AddComponent<AudioSource>(); // animal moo, etc
         gridPicker = GetComponent<GridPicker>();
-        gameGui = GetComponent<GameGui>();
+        GameGui = GetComponent<GameGui>();
 
         audioSourceOneShot.playOnAwake = false;
         audioSourceOnOff.playOnAwake = false;
@@ -392,8 +392,8 @@ public class Game : MonoBehaviour
     {
         currentLevel++;
 
-        gameGui.ResetRaceTime();
-        gameGui.StartAnimatedText(gridPicker.LevelNames[currentLevel]);
+        GameGui.ResetRaceTime();
+        GameGui.StartAnimatedText(gridPicker.LevelNames[currentLevel]);
 
         // Disable all obstacles to prepare for the next level. Also prep the obstacle counter.
         Dictionary<int, int> obstacleCountNextLevel = new();
@@ -552,7 +552,28 @@ public class Game : MonoBehaviour
             }
         }
 
-        SpeedGaugeAdjuster.localPosition = new Vector3(0, SpeedGaugeAdjuster.rect.height * (bikeSpeed / BikeMaxSpeed2), 0);
+        float newGaugeHeight;
+        if (bikeSpeed < BikeMaxSpeed)
+        {
+            // partial up to BikeMaxSpeed
+            newGaugeHeight = SpeedGaugeAdjuster.rect.height * ((BikeMaxSpeedGaugePercent / 100f) * (bikeSpeed / BikeMaxSpeed));
+            Debug.Log("newGaugeHeight: " + newGaugeHeight);
+        }
+        else
+        {
+            if(!swerveApplied)
+            {
+                int x = 0;
+            }
+
+            // full up to BikeMaxSpeed + remaining percent per BikeMaxSpeed2.
+            //float firstPart = 
+            //float secondPart = 
+            newGaugeHeight = SpeedGaugeAdjuster.rect.height * (BikeMaxSpeedGaugePercent / 100f) + SpeedGaugeAdjuster.rect.height * ((1f - BikeMaxSpeedGaugePercent / 100f) * ((bikeSpeed - BikeMaxSpeed) / (BikeMaxSpeed2 - BikeMaxSpeed)));
+            Debug.Log("+++++++ newGaugeHeight: " + newGaugeHeight);
+        }
+        
+        SpeedGaugeAdjuster.localPosition = new Vector3(0, newGaugeHeight, 0);
 
         if (IsRestarting)
             return;
@@ -603,30 +624,24 @@ public class Game : MonoBehaviour
                 currentBikeEulers.y = originalBikeEulerY + BikeTurn * fromMiddle;
                 GameBike.transform.localEulerAngles = currentBikeEulers;
 
-                bikeSpeed += BikeAccel * dt;
-
-                //if (bikeSpeed > BikeMaxSpeed)
-                //    bikeSpeed = BikeMaxSpeed;
-
-                
-                if (swerveRemaining > 0)
+                if (swerveApplied)
                 {
-                    bikeSpeed -= BikeSwerveDecel * dt; // Should be greater than BikeAcel, so we reduce in time.
-                    if(bikeSpeed < BikeMaxSpeed) // Keep at max until time runs out.
-                        bikeSpeed = BikeMaxSpeed;
+                    bikeSpeed -= BikeSwerveDecel * dt;
 
-                    swerveRemaining -= dt;
-                    if (swerveRemaining < 0)
-                        swerveRemaining = 0;
+                    if(bikeSpeed < BikeMaxSpeed)
+                    {
+                        bikeSpeed = BikeMaxSpeed;
+                        swerveApplied = false;
+                    }
                 }
                 else
                 {
+                    bikeSpeed += BikeAccel * dt;
+
                     if (bikeSpeed > BikeMaxSpeed)
                         bikeSpeed = BikeMaxSpeed;
                 }
                 
-
-                //SpeedGaugeImage.color = new Color(0, 0, 0, 0.3f);
             }
         }
 
@@ -808,19 +823,19 @@ public class Game : MonoBehaviour
         jumpElapsed = 0f;
         sailElapsed = 0f;
 
-        gameGui.StopTime();
+        GameGui.StopTime();
     }
 
     public void BikeCrashed()
     {
         BikeStopped();
-        gameGui.LoseStarFlags();
+        GameGui.LoseStarFlags();
     }
 
     public void Swerve()
     {
+        swerveApplied = true;
         bikeSpeed = BikeMaxSpeed2;
-        swerveRemaining = BikeSwerveTimeout; 
     }
 
     public void Restart(bool nextLevel)
@@ -912,43 +927,53 @@ public class Game : MonoBehaviour
 
     public void ResetGui()
     {
-        for (int i = 0; i < 3; i++) { starCount[i] = 0; gameGui.ShowStar(i, 0); }
-        for (int i = 0; i < 3; i++) { flagCount[i] = 0; gameGui.ShowFlag(i, 0); }
+        for (int i = 0; i < 3; i++) { starCount[i] = 0; GameGui.ShowStar(i, 0); }
+        for (int i = 0; i < 3; i++) { flagCount[i] = 0; GameGui.ShowFlag(i, 0); }
     }
 
     /// </summary>
     /// <param name="kind"></param>
     public void CollectStar(int kind) // 0-2
     {
-        starCount[kind]++;
+        if (!GameGui.LosingTransaction)
+        {
+            starCount[kind]++;
 
-        gameGui.ShowStar(kind, starCount[kind]);
+            GameGui.ShowStar(kind, starCount[kind]);
+        }
     }
 
     public void CollectFlag(int kind) // 0-2
     {
-        flagCount[kind]++;
+        if (!GameGui.LosingTransaction)
+        {
+            flagCount[kind]++;
 
-        gameGui.ShowFlag(kind, flagCount[kind]);
+            GameGui.ShowFlag(kind, flagCount[kind]);
+        }
     }
 
     public int TransactStar(int kind) // 0-2
     {
+        
         if (starCount[kind] > 0)
         {
             starCount[kind]--;
-            gameGui.ShowStar(kind, starCount[kind]);
+            GameGui.ShowStar(kind, starCount[kind]);
         }
+        
         return starCount[kind];
     }
 
     public int TransactFlag(int kind) // 0-2
     {
+        
         if (flagCount[kind] > 0)
         {
             flagCount[kind]--;
-            gameGui.ShowFlag(kind, flagCount[kind]);
+            GameGui.ShowFlag(kind, flagCount[kind]);
         }
+        
         return flagCount[kind];
     }
 

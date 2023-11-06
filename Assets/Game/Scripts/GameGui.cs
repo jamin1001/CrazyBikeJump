@@ -76,9 +76,9 @@ public class GameGui : MonoBehaviour
     // 0 1 2           3 4 5   
     // 0 2 4           1 3 5
 
-    private bool losingTransaction = false;
-    private bool losingTransactionFalling = false;
-   
+    public bool LosingTransaction { get; set; }
+    public bool LosingTransactionFalling { get; set; }
+
     private void Awake()
     {
         TextMeshProText.text = "";
@@ -129,7 +129,7 @@ public class GameGui : MonoBehaviour
         {
             //Debug.LogError("star child 0 world pos is: " + atmTransferImages[0, 0].transform.GetChild(0).position);
 
-            if (losingTransaction)
+            if (LosingTransaction)
             {
                 starFlagWiggleDistance += StarFlagWiggleSpeed * dt;
 
@@ -158,12 +158,12 @@ public class GameGui : MonoBehaviour
                 if(starFlagElapsed > LosingTransactionFallingTimeout)
                 {
                     starFlagElapsed = AtmNextStarFlagTimeout;
-                    losingTransactionFalling = true;
+                    LosingTransactionFalling = true;
                 }
             }
             
 
-            if(!losingTransaction || losingTransactionFalling)
+            if(!LosingTransaction || LosingTransactionFalling)
             {
                 // Shoot out the next star or flag.
                 if (starFlagElapsed >= AtmNextStarFlagTimeout)
@@ -183,7 +183,7 @@ public class GameGui : MonoBehaviour
                             atmTransferImages[starFlag, newImageIndexToActivate].gameObject.SetActive(true);
 
                             atmTransferStates[starFlag, 1] = (newImageIndexToActivate + 1) % ATM_TRANSACT_POOL;
-                            Debug.LogWarning($"Start transfer starFlag={starFlag} ({atmTransferStates[starFlag, 0]},{atmTransferStates[starFlag, 1]})");
+                            //Debug.LogWarning($"Start transfer starFlag={starFlag} ({atmTransferStates[starFlag, 0]},{atmTransferStates[starFlag, 1]})");
 
                             // Deduct the star from what the game is counting.
                             Game.Inst.TransactStarFlag(starFlag);
@@ -193,7 +193,7 @@ public class GameGui : MonoBehaviour
                             // We are only transfering one star/flag at this time. Wait for timeout for next one.
                             starFlagIndex = (starFlagIndex + 1) % 6;
 
-                            if (!losingTransaction)
+                            if (!LosingTransaction)
                             {
                                 if (coinSpinSpeed < 130)
                                     coinSpinSpeed = 130;
@@ -212,7 +212,7 @@ public class GameGui : MonoBehaviour
             Vector3 targetPos;
             for (int i = 0; i < 6; i++)
             {
-                if (losingTransaction)
+                if (LosingTransaction)
                     targetPos = new Vector3(StarFlagImages[i].transform.position.x, -1, 0); // bottom of screen (NOT USED)
                 else
                     targetPos = SpinningCoin.transform.position; // towards coin
@@ -225,13 +225,13 @@ public class GameGui : MonoBehaviour
                     if (starFlagOb.activeSelf)
                     {
                         Vector3 startPos = starFlagOb.transform.position;
-                        if (losingTransaction)
+                        if (LosingTransaction)
                             starFlagOb.transform.position -= new Vector3(0, LoseTravelSpeed * dt, 0);// faster
                         else
                             starFlagOb.transform.position = Vector3.Lerp(startPos, targetPos, AtmTravelSpeed * dt);
 
                         bool closeEnough = false;
-                        if (losingTransaction)
+                        if (LosingTransaction)
                             closeEnough = starFlagOb.transform.position.y < -1.0f;
                         else
                             closeEnough = (starFlagOb.transform.position - targetPos).sqrMagnitude < 100 * Vector3.kEpsilon;
@@ -240,9 +240,9 @@ public class GameGui : MonoBehaviour
                         {
                             // Close enough, now do the tabulation and update the list.
                             starFlagOb.SetActive(false);
-                            Debug.LogError($"SetActive FALSE of {starFlagOb.name}");
+                            //Debug.LogError($"SetActive FALSE of {starFlagOb.name}");
 
-                            if (losingTransaction)
+                            if (LosingTransaction)
                             {
 
                             }
@@ -284,7 +284,7 @@ public class GameGui : MonoBehaviour
                             Debug.Assert(starFlag != -1);
                             Debug.Log($"End transfer transfer starFlag={starFlag} ({atmTransferStates[starFlag, 0]},{atmTransferStates[starFlag, 1]})");
 
-                            if (!losingTransaction)
+                            if (!LosingTransaction)
                             {
                                 coinSpinSpeed += CoinSpinAccel * dt;
 
@@ -310,8 +310,8 @@ public class GameGui : MonoBehaviour
             {
                 // Reset.
                 starFlagElapsed = 0;
-                losingTransaction = false; // if it WAS true
-                losingTransactionFalling = false;
+                LosingTransaction = false; // if it WAS true
+                LosingTransactionFalling = false;
             }
             else
             {
@@ -378,7 +378,7 @@ public class GameGui : MonoBehaviour
 
     public void LoseStarFlags()
     {
-        losingTransaction = true;
+        LosingTransaction = true;
         TransactAtm();
     }
 

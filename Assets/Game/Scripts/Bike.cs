@@ -4,6 +4,7 @@ using UnityEngine;
 public class Bike : MonoBehaviour
 {
     public ParticleSystem CrashParticlesPrefab; // world
+    public ParticleSystem CrashWallParticlesPrefab; // world
     public ParticleSystem SwerveParticlesPrefab; // world
     public ParticleSystem CollectBronzeParticlesPrefab; // world
     public ParticleSystem CollectSilverParticlesPrefab; // world
@@ -59,7 +60,24 @@ public class Bike : MonoBehaviour
         }
         else if(collision.collider is BoxCollider)
         {
-            if(obName.Contains("Atm"))
+            // HIT WALL
+            if(obName.Contains("race_track"))
+            {
+                float xOffset = 0;
+                if (transform.position.x < collision.transform.position.x)
+                    xOffset = -0.7f;
+                else
+                    xOffset = 0.7f;
+
+
+
+                CrashWallParticlesPrefab.transform.position = transform.position + new Vector3(xOffset, 0, 0);
+                CrashWallParticlesPrefab.Play();
+                Game.Inst.PlayOneShot(Game.Inst.BikeCrashWallClip);
+                Game.Inst.BikeCrashed();
+                StartCoroutine(StopEverything());
+            }
+            else if(obName.Contains("Atm"))
             {
                 Debug.LogWarning("Starting ATM...");
                 Game.Inst.StartAtm();
