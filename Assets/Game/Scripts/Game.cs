@@ -557,20 +557,10 @@ public class Game : MonoBehaviour
         {
             // partial up to BikeMaxSpeed
             newGaugeHeight = SpeedGaugeAdjuster.rect.height * ((BikeMaxSpeedGaugePercent / 100f) * (bikeSpeed / BikeMaxSpeed));
-            Debug.Log("newGaugeHeight: " + newGaugeHeight);
         }
         else
         {
-            if(!swerveApplied)
-            {
-                int x = 0;
-            }
-
-            // full up to BikeMaxSpeed + remaining percent per BikeMaxSpeed2.
-            //float firstPart = 
-            //float secondPart = 
             newGaugeHeight = SpeedGaugeAdjuster.rect.height * (BikeMaxSpeedGaugePercent / 100f) + SpeedGaugeAdjuster.rect.height * ((1f - BikeMaxSpeedGaugePercent / 100f) * ((bikeSpeed - BikeMaxSpeed) / (BikeMaxSpeed2 - BikeMaxSpeed)));
-            Debug.Log("+++++++ newGaugeHeight: " + newGaugeHeight);
         }
         
         SpeedGaugeAdjuster.localPosition = new Vector3(0, newGaugeHeight, 0);
