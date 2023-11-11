@@ -7,7 +7,6 @@ using UnityEngine.UI;
 using static UnityEngine.InputManagerEntry;
 #endif
 
-[RequireComponent(typeof(AudioSource))]
 //[RequireComponent(typeof(GridPicker))] // Add this back when done mucking with it.
 [RequireComponent(typeof(GameGui))]
 public class Game : MonoBehaviour
@@ -66,6 +65,7 @@ public class Game : MonoBehaviour
 
     public float BikeWheelSpeedVisualFactor = 0.2f;
 
+    /*
     // Sounds
     public AudioClip BikeCycleClip;
     public AudioClip BikeCrashClip;
@@ -90,8 +90,8 @@ public class Game : MonoBehaviour
     public AudioClip SheepSwerveClip;
     public AudioClip CoinTransferClip;
     public List<AudioClip> ConfettiPopClips;
+    */
 
-    public float BikeCyclePitchScale = 2.0f;
     public float CamFollowDistX = 0f;
     public float CamFollowDistY = 2f;
     public float CamFollowDistZ = 2f;
@@ -99,6 +99,7 @@ public class Game : MonoBehaviour
     public float CamFollowSpeedY = 4.0f;
     public float CamFollowSpeedZ = 6.0f;
     public float CamTiltScaleJump = 30f;
+    public float CamStillAdjustingRange = 5.0f;
     public List<GameObject> ObstaclePrefabs; // For instancing the obstacles.
     public List<GameObject> LandPrefabs; // Must match Land enum in GridPicker.
     public List<GameObject> SeaPrefabs; // Must match Sea enum in GridPicker.
@@ -112,11 +113,15 @@ public class Game : MonoBehaviour
     bool isJumping = false;
     bool isSailing = false;
     int currentLevel = -1;
+    
 
+    public int JumpCount { get; set; }
+    public bool IsRestarting { get; set; }
+    public bool IsFinished { get; set; }
+    public bool IsCrashed { get; set; }
+    public bool IsCameraAdjusting { get; set; }
 
-    public int JumpCount { get; set; } = 0;
-    public bool IsRestarting { get; set; } = false;
-    public bool IsFinished { get; set; } = false;
+    public int[] StarsThisLevel { get; set; } = new int[3];
 
     float sailElapsed = 0f;
     float jumpElapsed = 0f;
@@ -124,10 +129,6 @@ public class Game : MonoBehaviour
     bool swerveApplied = false;
 
     Camera gameCam;
-    AudioSource audioSource;
-    AudioSource audioSourceOneShot;
-    AudioSource audioSourceOnOff;
-    AudioSource audioSourceAnimal;
     GridPicker gridPicker;
     public GameGui GameGui { get; set; }
 
@@ -157,10 +158,10 @@ public class Game : MonoBehaviour
     int coinCount = 0;
 
     // Timings
-    static public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
-    static public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(1.4f);
-    static public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(2.0f);
-    static public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(2.0f);
+    public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
+    public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(2.0f);
+    public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(1.4f);
+    public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(2.0f);
 
 
     static public List<WaitForSecondsRealtime> WaitTimes1 = new List<WaitForSecondsRealtime>
@@ -191,38 +192,6 @@ public class Game : MonoBehaviour
 
     static public Game Inst;
 
-    public void PlayOneShotRandom(List<AudioClip> clips)
-    {
-        AudioClip randomClip = clips[Random.Range(0, clips.Count)];
-        PlayOneShot(randomClip);
-    }
-
-    public void PlayOneShot(AudioClip clip, float pitch = 1f, float delay = 0)
-    {
-        audioSourceOneShot.clip = clip;
-        audioSourceOneShot.pitch = pitch;
-        audioSourceOneShot.PlayDelayed(delay);
-        //audioSourceOneShot.PlayOneShot(clip);
-    }
-
-    public void PlayAnimal(AudioClip clip)
-    {
-        audioSourceAnimal.PlayOneShot(clip);
-    }
-
-    public void PlayOnOff(AudioClip clip, float pitch = 1.0f)
-    {
-        StopOnOff();
-        audioSourceOnOff.pitch = pitch;
-        audioSourceOnOff.PlayOneShot(clip);
-    }
-
-    public void StopOnOff()
-    {
-        if (audioSourceOnOff.isPlaying)
-            audioSourceOnOff.Stop();
-    }
-
     public void StartAtm()
     {
         GameGui.TransactAtm();
@@ -251,16 +220,20 @@ public class Game : MonoBehaviour
 
         //// REF REQUIRED COMPONENTS
 
+        /*
         audioSource = GetComponent<AudioSource>(); // continuous chug chug
         audioSourceOneShot = gameObject.AddComponent<AudioSource>(); // jump, collect, etc
         audioSourceOnOff = gameObject.AddComponent<AudioSource>(); // sailing, bumping, etc
         audioSourceAnimal = gameObject.AddComponent<AudioSource>(); // animal moo, etc
+        */
+
         gridPicker = GetComponent<GridPicker>();
         GameGui = GetComponent<GameGui>();
 
+        /*
         audioSourceOneShot.playOnAwake = false;
         audioSourceOnOff.playOnAwake = false;
-
+        */
 
         //// CAMERA
 
@@ -392,8 +365,14 @@ public class Game : MonoBehaviour
     {
         currentLevel++;
 
+        // Reset awards.
+        StarsThisLevel[0] = 0;
+        StarsThisLevel[1] = 0;
+        StarsThisLevel[2] = 0;
+
+        // Reset GUI.
         GameGui.ResetRaceTime();
-        GameGui.StartAnimatedText(gridPicker.LevelNames[currentLevel]);
+        GameGui.StartAnimatedText(gridPicker.LevelNames[currentLevel], Color.white);
 
         // Disable all obstacles to prepare for the next level. Also prep the obstacle counter.
         Dictionary<int, int> obstacleCountNextLevel = new();
@@ -452,7 +431,7 @@ public class Game : MonoBehaviour
         // G1 (world origin)
 
         int grids = gridCounts[currentLevel];
-        Vector3 gridOrigin = new Vector3(-5f, 0.15f, 5f);
+        Vector3 gridOrigin = new Vector3(-5f, -0.24f, 5f);
         float gridExtent = 15;
         float tileExtent = gridExtent / Rows; // or Cols
 
@@ -536,7 +515,14 @@ public class Game : MonoBehaviour
         Vector3 camPos = gameCam.transform.position;
         //float magDiff = (Bike.transform.position - (gameCam.transform.position + new Vector3(CamFollowDistX, CamFollowDistY, CamFollowDistZ))).sqrMagnitude;
         float magDiff = (GameBike.transform.position - gameCam.transform.position + new Vector3(CamFollowDistX, CamFollowDistY, CamFollowDistZ)).sqrMagnitude;
+        
+        /*
+        float magDiff2 = magDiff * magDiff;
         //if (magDiff > 2.0f)
+        Debug.LogWarning("cam magDiff2: " + magDiff2);
+        IsCameraAdjusting = magDiff2 > CamStillAdjustingRange;
+        */
+
         if (magDiff > 0.2f)
         {
             gameCam.transform.position += new Vector3(
@@ -552,6 +538,15 @@ public class Game : MonoBehaviour
             }
         }
 
+        if (IsCrashed)
+            return;
+
+        if (IsRestarting)
+            return;
+
+        else if (IsFinished)
+            return;
+
         float newGaugeHeight;
         if (bikeSpeed < BikeMaxSpeed)
         {
@@ -565,20 +560,10 @@ public class Game : MonoBehaviour
         
         SpeedGaugeAdjuster.localPosition = new Vector3(0, newGaugeHeight, 0);
 
-        if (IsRestarting)
-            return;
-
-        if (IsFinished)
-            return;
-
         // Bike chug sound mechanism.
         if (!isJumping && bikeSpeed > 2f)
         {
-            if (!audioSource.isPlaying)
-            {
-                audioSource.PlayOneShot(BikeCycleClip);
-                audioSource.pitch = BikeCyclePitchScale * bikeSpeed;
-            }
+            GameBike.Pedaled(bikeSpeed);
         }
 
         //SpeedGaugeImage.color = new Color(0, 0, 0, 0.7f);
@@ -643,7 +628,7 @@ public class Game : MonoBehaviour
         {
             if (!isJumping)
             {
-                PlayOneShot(BikeJumpClip);
+                GameBike.Jumped1();
                 isJumping = true;
                 JumpCount++;
                 bikeJumpSpeed = BikeJumpStartSpeed;
@@ -657,15 +642,14 @@ public class Game : MonoBehaviour
             //Debug.Log("jumpElapsed: " + jumpElapsed);
             if (JumpCount == 1 && jumpElapsed > BikeJump2Wait && Input.GetMouseButtonDown(0) && jumpElapsed < BikeJump2Timeout)
             {
-                PlayOneShot(BikeJump2Clip, 2.0f);
+                GameBike.Jumped2();
                 bikeJumpSpeed += BikeJump2SpeedBoost;
                 JumpCount++;
                 jumpElapsed = 0;
-                //Debug.Log("START FLIPPING!");
             }
             else if(JumpCount == 2 && jumpElapsed > BikeJump3Wait && Input.GetMouseButtonDown(0) && jumpElapsed < BikeJump3Timeout)
             {
-                PlayOneShot(BikeJump3Clip);
+                GameBike.Jumped3();
                 bikeJumpSpeed += BikeJump3SpeedBoost;
                 JumpCount++;
                 jumpElapsed = 0;
@@ -673,8 +657,6 @@ public class Game : MonoBehaviour
 
                 // Special FX since this is the 3RD jump after all...
                 GameBike.StartWind();
-
-                //Debug.Log("START FLIPPING!");
             }
             else if (sailElapsed > BikeJump2Timeout && sailElapsed < BikeJumpSailTimeout &&
 #if UNITY_TOUCH_SUPPORTED
@@ -685,7 +667,6 @@ public class Game : MonoBehaviour
             {
                 if (!isSailing)
                 {
-                    //PlayOnOff(BikeSailClip, 0.1f);
                     //GameBike.StartWind();
                 }
 
@@ -695,7 +676,6 @@ public class Game : MonoBehaviour
             {
                 if (isSailing)
                 {
-                    StopOnOff();
                     GameBike.StopWind();
                 }
 
@@ -812,12 +792,18 @@ public class Game : MonoBehaviour
         bikeSpeed = 0f;
         jumpElapsed = 0f;
         sailElapsed = 0f;
+        GameBike.ResetMovingCars();
 
         GameGui.StopTime();
     }
 
     public void BikeCrashed()
     {
+        IsCrashed = true;
+        StarsThisLevel[0] = 0;
+        StarsThisLevel[1] = 0;
+        StarsThisLevel[2] = 0;
+        swerveApplied = false;
         BikeStopped();
         GameGui.LoseStarFlags();
     }
@@ -825,6 +811,7 @@ public class Game : MonoBehaviour
     public void Swerve()
     {
         swerveApplied = true;
+        Debug.LogError("Swerve Applied... bikeSpeed is: " + bikeSpeed);
         bikeSpeed = BikeMaxSpeed2;
     }
 
@@ -841,12 +828,11 @@ public class Game : MonoBehaviour
 
         // Skip a frame to prevent lockup?
         yield return null;
-
         Debug.Log("DoRestart, aftger yield null.");
-
-
         IsRestarting = true;
-        yield return Game.WaitRestartFinish;
+        yield return null;
+
+        yield return Game.Inst.WaitRestartFinish;
 
         Debug.Log("DoRestart, aftger yield WaitRestartFinish.");
 
@@ -856,14 +842,17 @@ public class Game : MonoBehaviour
         yield return null;
         
         IsRestarting = false;
-
-
+        
         yield return null;
         
         if (nextLevel)
         {
             StartTheNextLevel();
         }
+
+        yield return null;
+
+        IsCrashed = false;
 
         Debug.Log("DoRestart, aftger everything.");
 
@@ -931,6 +920,8 @@ public class Game : MonoBehaviour
 
             GameGui.ShowStar(kind, starCount[kind]);
         }
+
+        StarsThisLevel[kind]++;
     }
 
     public void CollectFlag(int kind) // 0-2

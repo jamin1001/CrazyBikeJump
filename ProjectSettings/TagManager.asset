@@ -16,6 +16,11 @@ TagManager:
   - PassengerCar
   - PoliceCar
   - TruckCar
+  - Flag1
+  - Flag2
+  - Flag3
+  - Atm
+  - Wall
   layers:
   - Default
   - TransparentFX

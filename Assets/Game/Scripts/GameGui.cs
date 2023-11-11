@@ -6,7 +6,7 @@ using Unity.VisualScripting;
 
 public class GameGui : MonoBehaviour
 {
-    public GameObject SubStar;
+    public AudioSource CoinAudio;
 
     static float DelayBetweenCharacters = 0.02f;
     static WaitForSeconds WaitCharacter = new WaitForSeconds(DelayBetweenCharacters);
@@ -68,8 +68,6 @@ public class GameGui : MonoBehaviour
         { 0.0f, 0.0f },
         { 0.5f, 0.0f },
     };
-
-
 
     // indexToStarFlag:
     // stars (b s g)   flags (y r b)
@@ -290,10 +288,11 @@ public class GameGui : MonoBehaviour
 
                                 if (coinSpinSpeed > 600)
                                     coinSpinSpeed = 600;
-                            
+
                                 //Game.Inst.PlayOneShot(Game.Inst.CoinTransferClip, 0.2f, 0.1f);
                                 //Game.Inst.PlayOneShot(Game.Inst.CoinTransferClip, 0.4f, 0.2f);
-                                Game.Inst.PlayOneShot(Game.Inst.CoinTransferClip);//, 0.6f, 0.3f);
+                                //Game.Inst.PlayOneShot(Game.Inst.CoinTransferClip);//, 0.6f, 0.3f);
+                                CoinAudio.Play();
                             }
 
                             Debug.Log("Transaction remaining is now: " + atmTransactionsRemaining);
@@ -479,14 +478,17 @@ public class GameGui : MonoBehaviour
     
 
 
-    public void StartAnimatedText(string newText)
+    public void StartAnimatedText(string newText, Color textColor)
     {
         _textToAnimate = newText;
-        StartCoroutine(AnimateText());
+        StartCoroutine(AnimateText(textColor));
     }
 
-    IEnumerator AnimateText()
+    IEnumerator AnimateText(Color textColor)
     {
+        TextMeshProText.color = textColor;
+        TextMeshProText.text = "";
+
         for (int i = 0; i < _textToAnimate.Length; i++)
         {
             TextMeshProText.text += _textToAnimate[i];
