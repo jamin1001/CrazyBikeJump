@@ -377,8 +377,11 @@ public class GameGui : MonoBehaviour
 
     public void LoseStarFlags()
     {
-        LosingTransaction = true;
-        TransactAtm();
+        if (Game.Inst.StarFlagCountTotal() > 0)
+        {
+            LosingTransaction = true;
+            TransactAtm();
+        }
     }
 
 

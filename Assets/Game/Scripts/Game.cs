@@ -65,33 +65,6 @@ public class Game : MonoBehaviour
 
     public float BikeWheelSpeedVisualFactor = 0.2f;
 
-    /*
-    // Sounds
-    public AudioClip BikeCycleClip;
-    public AudioClip BikeCrashClip;
-    public AudioClip BikeCrashWallClip;
-    public AudioClip BikeJumpClip;
-    public AudioClip BikeJump2Clip;
-    public AudioClip BikeJump3Clip;
-    public AudioClip BikeSailClip;
-    public AudioClip BikeCollectStarClip;
-    public AudioClip BikeCollectFlagClip;
-    public AudioClip BikeSwerveClip;
-    public AudioClip FinishLineClip;
-    public AudioClip FinishedBadClip;
-    public AudioClip FinishedGoodClip;
-    public AudioClip FinishedWonderfulClip;
-    public AudioClip ConfettiBangClip;
-    public AudioClip CowHitClip;
-    public AudioClip CowSwerveClip;
-    public AudioClip HorseHitClip;
-    public AudioClip HorseSwerveClip;
-    public AudioClip SheepHitClip;
-    public AudioClip SheepSwerveClip;
-    public AudioClip CoinTransferClip;
-    public List<AudioClip> ConfettiPopClips;
-    */
-
     public float CamFollowDistX = 0f;
     public float CamFollowDistY = 2f;
     public float CamFollowDistZ = 2f;
@@ -220,20 +193,8 @@ public class Game : MonoBehaviour
 
         //// REF REQUIRED COMPONENTS
 
-        /*
-        audioSource = GetComponent<AudioSource>(); // continuous chug chug
-        audioSourceOneShot = gameObject.AddComponent<AudioSource>(); // jump, collect, etc
-        audioSourceOnOff = gameObject.AddComponent<AudioSource>(); // sailing, bumping, etc
-        audioSourceAnimal = gameObject.AddComponent<AudioSource>(); // animal moo, etc
-        */
-
         gridPicker = GetComponent<GridPicker>();
         GameGui = GetComponent<GameGui>();
-
-        /*
-        audioSourceOneShot.playOnAwake = false;
-        audioSourceOnOff.playOnAwake = false;
-        */
 
         //// CAMERA
 
@@ -914,8 +875,10 @@ public class Game : MonoBehaviour
     /// <param name="kind"></param>
     public void CollectStar(int kind) // 0-2
     {
+        Debug.LogError("CS");
         if (!GameGui.LosingTransaction)
         {
+            Debug.LogError("--LT");
             starCount[kind]++;
 
             GameGui.ShowStar(kind, starCount[kind]);

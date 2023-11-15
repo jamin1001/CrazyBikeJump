@@ -24,12 +24,16 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _Texture2D:
+        m_Texture: {fileID: 2800000, guid: b635505644b4c884ab361b4ebf9c8971, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _QueueControl: 0
     m_Colors:
-    - _FlagColor: {r: 1, g: 0.9822857, b: 0.2971698, a: 0}
+    - _FlagColor: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &3397902062061731688
 MonoBehaviour:
