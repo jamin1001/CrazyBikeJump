@@ -31,7 +31,7 @@ public class Bike : MonoBehaviour
 
     private List<GameObject> movingCars = new();
     private List<float> movingCarsSpeed = new();
-
+    private List<Vector3> originalCarPositions = new();
 
     public void Jumped1()
     {
@@ -59,8 +59,12 @@ public class Bike : MonoBehaviour
 
     public void ResetMovingCars()
     {
+        for(int c = 0; c < originalCarPositions.Count; c++)
+            movingCars[c].transform.position = originalCarPositions[c];
+
         movingCars.Clear();
         movingCarsSpeed.Clear();
+        originalCarPositions.Clear();
     }
 
     public void StartWind()
@@ -198,6 +202,7 @@ public class Bike : MonoBehaviour
 
                 movingCars.Add(carOb);
                 movingCarsSpeed.Add(CarStartSpeed);
+                originalCarPositions.Add(carOb.transform.position);
 
                 carOb.GetComponent<AudioSource>().Play();
             }
@@ -228,14 +233,17 @@ public class Bike : MonoBehaviour
                 // BOXES ARE SWERVE AROUND
                 if (obName.Contains("swerve"))
                 {
-                    SwerveAudio.Play();
-                    SwerveParticlesPrefab.Play();
-                    Game.Inst.Swerve();
+                    if (transform.position.z > otherOb.transform.position.z) // Ignores the reset case where the bike ends up at the start and so is BEHIND the swerved object.
+                    {
+                        SwerveAudio.Play();
+                        SwerveParticlesPrefab.Play();
+                        Game.Inst.Swerve();
 
-                    string parentName = otherOb.transform.parent.gameObject.name;
+                        string parentName = otherOb.transform.parent.gameObject.name;
 
-                    if (parentName.Contains("cow") || parentName.Contains("horse") || parentName.Contains("sheep"))
-                        otherOb.GetComponent<AudioSource>().Play();
+                        if (parentName.Contains("cow") || parentName.Contains("horse") || parentName.Contains("sheep"))
+                            otherOb.GetComponent<AudioSource>().Play();
+                    }
                 }
                 
                 // AND EXCEPT FOR PRIZE BOXES

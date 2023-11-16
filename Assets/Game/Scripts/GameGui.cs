@@ -35,8 +35,7 @@ public class GameGui : MonoBehaviour
     private float elapsedRaceSeconds;
     private bool isRaceTimeStopped = false;
     private int extraStar = -1;
-    private int atmTransactionsRemaining = 0;
-
+    
     const int ATM_TRANSACT_POOL = 4;
 
     public float AtmNextStarFlagTimeout = 0.5f;
@@ -73,6 +72,8 @@ public class GameGui : MonoBehaviour
     // stars (b s g)   flags (y r b)
     // 0 1 2           3 4 5   
     // 0 2 4           1 3 5
+
+    public int AtmTransactionsRemaining { get; set; }
 
     public bool LosingTransaction { get; set; }
     public bool LosingTransactionFalling { get; set; }
@@ -123,7 +124,7 @@ public class GameGui : MonoBehaviour
             elapsedRaceSeconds = nextElapsedSeconds;
         }
 
-        if(atmTransactionsRemaining > 0)
+        if(AtmTransactionsRemaining > 0)
         {
             //Debug.LogError("star child 0 world pos is: " + atmTransferImages[0, 0].transform.GetChild(0).position);
 
@@ -268,7 +269,7 @@ public class GameGui : MonoBehaviour
                             atmTransferStates[i, 0] = (atmTransferStates[i, 0] + 1) % 6;
 
                             // This one transacted.
-                            atmTransactionsRemaining--;
+                            AtmTransactionsRemaining--;
 
                             int starFlag = -1;
                             for (int k = 0; k < 6; k++)
@@ -280,7 +281,7 @@ public class GameGui : MonoBehaviour
                                 }
                             }
                             Debug.Assert(starFlag != -1);
-                            Debug.Log($"End transfer transfer starFlag={starFlag} ({atmTransferStates[starFlag, 0]},{atmTransferStates[starFlag, 1]})");
+                            //Debug.Log($"End transfer transfer starFlag={starFlag} ({atmTransferStates[starFlag, 0]},{atmTransferStates[starFlag, 1]})");
 
                             if (!LosingTransaction)
                             {
@@ -295,7 +296,7 @@ public class GameGui : MonoBehaviour
                                 CoinAudio.Play();
                             }
 
-                            Debug.Log("Transaction remaining is now: " + atmTransactionsRemaining);
+                            //Debug.Log("Transaction remaining is now: " + AtmTransactionsRemaining);
                         }
                     }
                 }
@@ -305,7 +306,7 @@ public class GameGui : MonoBehaviour
             {
 
             }
-            /*else*/ if (atmTransactionsRemaining == 0)
+            /*else*/ if (AtmTransactionsRemaining == 0)
             {
                 // Reset.
                 starFlagElapsed = 0;
@@ -335,7 +336,7 @@ public class GameGui : MonoBehaviour
         if (coinSpinSpeed < 0)
             coinSpinSpeed = 0;
 
-        if (atmTransactionsRemaining == 0 && coinSpinIndex != 0)
+        if (AtmTransactionsRemaining == 0 && coinSpinIndex != 0)
         {
             // Give a little last oomph to get it to the starting frame again.
             coinSpinSpeed = 15f;
@@ -359,12 +360,12 @@ public class GameGui : MonoBehaviour
 
     public void TransactAtm()
     {
-        if (atmTransactionsRemaining > 0) // Already transacting (or losing it all!)
+        if (AtmTransactionsRemaining > 0) // Already transacting (or losing it all!)
             return;
 
-        atmTransactionsRemaining = Game.Inst.StarFlagCountTotal();
+        AtmTransactionsRemaining = Game.Inst.StarFlagCountTotal();
 
-        if (atmTransactionsRemaining > 0)
+        if (AtmTransactionsRemaining > 0)
         {
             starFlagElapsed = AtmNextStarFlagTimeout; // To force start the first one.
         }

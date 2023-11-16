@@ -372,19 +372,19 @@ public class Game : MonoBehaviour
         // O = world origin middle of square
         // + = our grid origin middle of square (top left of grid)
         //
-        // Also note we are placing our 3D grid from the bottom up rather than top down of what is represented
-        // in the Unity Editor, since that matches the extending of the grid forward into the +Z camera distance:
+        // Also note we are placing our 3D grid from top to bottom in the Unity Editor, since that matches
+        // the extending of the grid forward into the +Z camera distance:
         //
         // Unity Editor (scrolls down)
         // ...
-        // Level X:
-        // G1
-        // G2
-        // G3
-        // G4
+        // Level X (grids G extends "up"):
         // G5
+        // G4
+        // G3
+        // G2
+        // G1
         //
-        // Our grid in world presented in reverse:
+        // Our grids in world also extends "up":
         // G5 ^ +Z
         // G4 |
         // G3 | 
@@ -392,9 +392,15 @@ public class Game : MonoBehaviour
         // G1 (world origin)
 
         int grids = gridCounts[currentLevel];
-        Vector3 gridOrigin = new Vector3(-5f, -0.24f, 5f);
+        //Vector3 gridOrigin = new Vector3(-5f, -0.24f, 5f);
+        //float gridExtent = 15;
+
+        float squeezeX = 0.8f;
+        Vector3 gridOrigin = new Vector3(-5f + squeezeX, -0.24f, 5f);
         float gridExtent = 15;
-        float tileExtent = gridExtent / Rows; // or Cols
+
+        float tileExtentX = gridExtent / Rows - squeezeX; // or Cols
+        float tileExtentZ = gridExtent / Rows; // or Cols
 
         for (int g = 0; g < grids; g++) // g = 0 is on bottom, g = 1 is going in positive Z direction
             for (int r = 0; r < Rows; r++)
@@ -414,9 +420,9 @@ public class Game : MonoBehaviour
                         GameObject ob = obstaclePools[obstacle][nextObIndex];
                         ob.SetActive(true);
                         ob.transform.position = gridOrigin + new Vector3(
-                            c * tileExtent, // skip over current columns
+                            c * tileExtentX, // skip over current columns
                             0,                                                                                                                          
-                            g * gridExtent - r * tileExtent); // skip over previous grids and current rows
+                            g * gridExtent - r * tileExtentZ); // skip over previous grids and current rows
 
                         // Will be enabling the next in line in the next go-around (if we get there).
                         obstacleCountNextLevel[obstacle]++;
@@ -463,8 +469,6 @@ public class Game : MonoBehaviour
 
     void Update()
     {
-        //Game.Inst = this;
-
         // Cache some values.
         float dt = Time.deltaTime;
         //Vector3 mousePos = Input.mousePosition;
@@ -502,7 +506,7 @@ public class Game : MonoBehaviour
         if (IsCrashed)
             return;
 
-        if (IsRestarting)
+        else if (IsRestarting)
             return;
 
         else if (IsFinished)
@@ -753,8 +757,7 @@ public class Game : MonoBehaviour
         bikeSpeed = 0f;
         jumpElapsed = 0f;
         sailElapsed = 0f;
-        GameBike.ResetMovingCars();
-
+        
         GameGui.StopTime();
     }
 
@@ -772,51 +775,28 @@ public class Game : MonoBehaviour
     public void Swerve()
     {
         swerveApplied = true;
-        Debug.LogError("Swerve Applied... bikeSpeed is: " + bikeSpeed);
+        //Debug.LogError("Swerve Applied... bikeSpeed is: " + bikeSpeed);
         bikeSpeed = BikeMaxSpeed2;
     }
 
     public void Restart(bool nextLevel)
     {
-        Debug.Log("Restart, before DoRestart.");
         StartCoroutine(DoRestart(nextLevel));
-        Debug.Log("Restart, after DoRestart.");
     }
 
     IEnumerator DoRestart(bool nextLevel)
-    {
-        Debug.Log("DoRestart, before yield null.");
-
-        // Skip a frame to prevent lockup?
-        yield return null;
-        Debug.Log("DoRestart, aftger yield null.");
+    { 
         IsRestarting = true;
-        yield return null;
-
         yield return Game.Inst.WaitRestartFinish;
-
-        Debug.Log("DoRestart, aftger yield WaitRestartFinish.");
-
         GameBike.transform.position = Vector3.zero;
         ResetBikeRotation();
-
-        yield return null;
-        
-        IsRestarting = false;
-        
-        yield return null;
-        
+        GameBike.ResetMovingCars();
         if (nextLevel)
         {
             StartTheNextLevel();
         }
-
-        yield return null;
-
+        IsRestarting = false;
         IsCrashed = false;
-
-        Debug.Log("DoRestart, aftger everything.");
-
     }
 
     //// GUI HANDLING
@@ -875,14 +855,15 @@ public class Game : MonoBehaviour
     /// <param name="kind"></param>
     public void CollectStar(int kind) // 0-2
     {
-        Debug.LogError("CS");
         if (!GameGui.LosingTransaction)
         {
-            Debug.LogError("--LT");
             starCount[kind]++;
 
             GameGui.ShowStar(kind, starCount[kind]);
         }
+        // Add on this one on top too.
+        if (GameGui.AtmTransactionsRemaining > 0)
+            GameGui.AtmTransactionsRemaining++;
 
         StarsThisLevel[kind]++;
     }
@@ -895,6 +876,9 @@ public class Game : MonoBehaviour
 
             GameGui.ShowFlag(kind, flagCount[kind]);
         }
+        // Add on this one on top too.
+        if (GameGui.AtmTransactionsRemaining > 0)
+            GameGui.AtmTransactionsRemaining++;
     }
 
     public int TransactStar(int kind) // 0-2

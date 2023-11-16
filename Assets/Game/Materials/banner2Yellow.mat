@@ -34,6 +34,7 @@ Material:
     - _QueueControl: 0
     m_Colors:
     - _FlagColor: {r: 1, g: 1, b: 1, a: 0}
+    - _UV_Tiling: {r: 1, g: 1, b: 0, a: 0}
   m_BuildTextureStacks: []
 --- !u!114 &3397902062061731688
 MonoBehaviour:
