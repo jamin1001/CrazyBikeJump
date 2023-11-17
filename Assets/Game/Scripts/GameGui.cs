@@ -7,12 +7,15 @@ using Unity.VisualScripting;
 public class GameGui : MonoBehaviour
 {
     public AudioSource CoinAudio;
+    public AudioSource LoseStarsAudio;
 
     static float DelayBetweenCharacters = 0.02f;
     static WaitForSeconds WaitCharacter = new WaitForSeconds(DelayBetweenCharacters);
     static WaitForSeconds WaitDisappear = new WaitForSeconds(2f);
 
     public Transform GuiPoolFolder;
+
+    public TMP_Text JumpText;
 
     public TMP_Text TextMeshProText;
     string _textToAnimate;
@@ -31,6 +34,8 @@ public class GameGui : MonoBehaviour
 
     public RawImage SpinningCoin;
     public TMP_Text SpinningCoinCount;
+
+
 
     private float elapsedRaceSeconds;
     private bool isRaceTimeStopped = false;
@@ -104,6 +109,8 @@ public class GameGui : MonoBehaviour
         }
 
         SpinningCoinCount.text = Game.Inst.CoinCount().ToString();
+
+        JumpText.text = "";
     }
 
     private void Update()
@@ -243,22 +250,24 @@ public class GameGui : MonoBehaviour
 
                             if (LosingTransaction)
                             {
-
+                                
+                                    
+                                
                             }
                             else
                             {
                                 if (i == 0)
-                                    Game.Inst.AddCoins(1);
+                                    AddSpinCoins(1);
                                 if (i == 1)
-                                    Game.Inst.AddCoins(2);
+                                    AddSpinCoins(2);
                                 if (i == 2)
-                                    Game.Inst.AddCoins(3);
+                                    AddSpinCoins(3);
                                 if (i == 3)
-                                    Game.Inst.AddCoins(1);
+                                    AddSpinCoins(1);
                                 if (i == 4)
-                                    Game.Inst.AddCoins(2);
+                                    AddSpinCoins(2);
                                 if (i == 5)
-                                    Game.Inst.AddCoins(3);
+                                    AddSpinCoins(3);
                             }
 
                             // Update the coins just added.
@@ -302,10 +311,20 @@ public class GameGui : MonoBehaviour
                 }
             }
 
-            //if(losingTransaction)
+            if (LosingTransaction)
             {
+                
+                if (!LoseStarsAudio.isPlaying)
+                {
+                    LoseStarsAudio.pitch -= 0.3f;
+                    if (LoseStarsAudio.pitch < 0)
+                        LoseStarsAudio.pitch = 0.3f;
 
+                    LoseStarsAudio.Play();
+                }
             }
+
+            
             /*else*/ if (AtmTransactionsRemaining == 0)
             {
                 // Reset.
@@ -344,6 +363,25 @@ public class GameGui : MonoBehaviour
         
     }
 
+    public void AddSpinCoins(int coinCount)
+    {
+        StartCoroutine(SpinCoins(coinCount));
+    }
+
+    IEnumerator SpinCoins(int coinsLeft)
+    {
+        while (coinsLeft > 0)
+        {
+            Game.Inst.AddCoins(1);
+            SpinningCoinCount.text = Game.Inst.CoinCount().ToString();
+            coinSpinSpeed = 1000;
+            CoinAudio.Play();
+            coinsLeft--;
+
+            yield return new WaitForSeconds(0.2f);
+        }
+    }
+
     public void ResetAtm()
     {
         for (int i = 0; i < 6; i++)
@@ -380,7 +418,10 @@ public class GameGui : MonoBehaviour
     {
         if (Game.Inst.StarFlagCountTotal() > 0)
         {
+            Debug.LogError("LOSE STARS!");
             LosingTransaction = true;
+            LoseStarsAudio.pitch = 2.5f;
+            LoseStarsAudio.Play();
             TransactAtm();
         }
     }

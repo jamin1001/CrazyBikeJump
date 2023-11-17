@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 public class Bike : MonoBehaviour
 {
@@ -13,7 +14,8 @@ public class Bike : MonoBehaviour
     public AudioSource Jump3Audio;
     public AudioSource WindAudio;
  
-    public float BikeCyclePitchScale = 2.0f;
+    public float BikeCyclePitchScale = 0.2f;
+    public float BikeCyclePitchMinSpeed = 0.4f;
 
     public ParticleSystem CrashParticlesPrefab; // world
     public ParticleSystem CrashWallParticlesPrefab; // world
@@ -24,6 +26,7 @@ public class Bike : MonoBehaviour
     public ParticleSystem CollectFlagYellowParticlesPrefab; // world
     public ParticleSystem CollectFlagRedParticlesPrefab; // world
     public ParticleSystem CollectFlagBlueParticlesPrefab; // world
+    public ParticleSystem CollectFlagCoinParticlesPrefab; // world
     public ParticleSystem WindParticlesPrefab;  // local to bike
 
     public float CarAccel = 20f;
@@ -52,8 +55,11 @@ public class Bike : MonoBehaviour
     {
         if (!PedalAudio.isPlaying)
         {
-            PedalAudio.pitch = BikeCyclePitchScale * bikeSpeed;
-            PedalAudio.Play();
+            if (bikeSpeed > BikeCyclePitchMinSpeed)
+            {
+                PedalAudio.pitch = BikeCyclePitchScale * bikeSpeed;
+                PedalAudio.Play();
+            }
         }
     }
 
@@ -194,6 +200,17 @@ public class Bike : MonoBehaviour
 
                     Game.Inst.CollectFlag(2);
                 }
+                else if (obName.Contains("Coin"))
+                {
+                    CollectFlagCoinParticlesPrefab.transform.localPosition = flagFxPosition;
+                    CollectFlagCoinParticlesPrefab.Play();
+                    CollectFlagCoinParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+
+                    otherOb.transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+                    otherOb.GetComponent<BoxCollider>().enabled = false;
+
+                    Game.Inst.StartAtm();
+                }
             }
             // OTHER OBJECTS
             else if(obName.Contains("carDanger"))
@@ -245,12 +262,58 @@ public class Bike : MonoBehaviour
                             otherOb.GetComponent<AudioSource>().Play();
                     }
                 }
-                
+
                 // AND EXCEPT FOR PRIZE BOXES
-                else if(!obName.Contains("Atm") && !obName.Contains("Flag") && !obName.Contains("carDanger"))
+                else if (!obName.Contains("Atm") && !obName.Contains("Flag") && !obName.Contains("carDanger"))
                 {
                     Vector3 starFxPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
 
+                    // In this approach, the type of object jumped gets the corresponding reward.
+                    // Hack for now, later use tag lookup.
+                    if (
+                        obName.Contains("sheep") ||
+                        obName.Contains("cone") ||
+                        obName.Contains("passenger"))
+                    {
+                        CollectBronzeParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectBronzeParticlesPrefab.Play();
+                        CollectBronzeParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                        Game.Inst.CollectStar(0);
+
+                        ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
+                        CollectBronzeParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+
+                    }
+                    else if (
+                        obName.Contains("horse") ||
+                        obName.Contains("tires") || obName.Contains("barrel") ||
+                        obName.Contains("police") || obName.Contains("hippie"))
+                    {
+                        CollectSilverParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectSilverParticlesPrefab.Play();
+                        CollectSilverParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                        Game.Inst.CollectStar(1);
+
+                        ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
+                        CollectSilverParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+                    }
+                    else if(
+                        obName.Contains("cow") ||
+                        obName.Contains("concrete") ||
+                        obName.Contains("formula") || obName.Contains("truck"))
+                    {
+                        CollectGoldParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectGoldParticlesPrefab.Play();
+                        CollectGoldParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                        Game.Inst.CollectStar(2);
+
+                        ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
+                        CollectGoldParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+
+                    }
+
+                    // This approach plays the fixed star count embedded in the particle object. Higher stars for more jumps.
+                    /*
                     if (Game.Inst.JumpCount == 1)
                     {
                         CollectBronzeParticlesPrefab.transform.localPosition = starFxPosition;
@@ -272,7 +335,7 @@ public class Bike : MonoBehaviour
                         CollectGoldParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
                         Game.Inst.CollectStar(2);
                     }
-
+                    */
                     
                 }
 

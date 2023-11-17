@@ -134,16 +134,23 @@ public class Game : MonoBehaviour
     public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
     public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(2.0f);
     public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(1.4f);
-    public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(2.0f);
+    public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(1.0f);
+    public WaitForSecondsRealtime JumpTextBonus = new WaitForSecondsRealtime(0.4f);
+    public WaitForSecondsRealtime JumpTextDisappear = new WaitForSecondsRealtime(1.0f);
 
 
     static public List<WaitForSecondsRealtime> WaitTimes1 = new List<WaitForSecondsRealtime>
     {
-        new WaitForSecondsRealtime(0.2f),
-        new WaitForSecondsRealtime(0.4f),
         new WaitForSecondsRealtime(0.6f),
         new WaitForSecondsRealtime(0.8f),
         new WaitForSecondsRealtime(1.0f),
+    };
+
+    static public List<WaitForSecondsRealtime> WaitTimes1Half = new List<WaitForSecondsRealtime>
+    {
+        new WaitForSecondsRealtime(0.6f / 2),
+        new WaitForSecondsRealtime(0.8f / 2),
+        new WaitForSecondsRealtime(1.0f / 2),
     };
 
     static public List<WaitForSecondsRealtime> WaitTimes2 = new List<WaitForSecondsRealtime>
@@ -326,6 +333,14 @@ public class Game : MonoBehaviour
     {
         currentLevel++;
 
+        if (currentLevel >= levelCount)
+        {
+            // Beat the game! Celebrate and start over!
+            GameGui.StartAnimatedText("DEMO OVER\nThanks for playing!", Color.magenta);
+
+            return;
+        }
+
         // Reset awards.
         StarsThisLevel[0] = 0;
         StarsThisLevel[1] = 0;
@@ -340,7 +355,17 @@ public class Game : MonoBehaviour
         for (int i = 0; i < obstacleCount; i++)
         {
             foreach (GameObject ob in obstaclePools[i])
+            {
+                // Restore flag properties if they were turned off previously.
+                if (ob.name.Contains("Flag"))
+                {
+                    ob.transform.GetChild(0).GetChild(2).gameObject.SetActive(true);
+                    ob.GetComponent<BoxCollider>().enabled = true;
+                }
+
                 ob.SetActive(false);
+
+            }
 
             obstacleCountNextLevel[i] = 0;
         }
@@ -354,6 +379,13 @@ public class Game : MonoBehaviour
         for (int i = 0; i < seaCount; i++)
             foreach (GameObject seaOb in seaPools[i])
                 seaOb.SetActive(false);
+
+
+
+    
+
+
+
 
         // Polyperfect terrain tiles are 15 x 15 units square X and Z. Each platform should be raised 0.15 in Y.
         // The first tile is centered at the world origin.
@@ -450,10 +482,7 @@ public class Game : MonoBehaviour
 
         FinishBlock.transform.position = new Vector3(0, -0.24f, grids * 15f);
 
-        if (currentLevel == levelCount)
-        {
-            // Beat the game! Celebrate and start over!
-        }
+       
     }
 
     void Start()
