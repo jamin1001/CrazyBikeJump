@@ -1,3 +1,4 @@
+using MoreMountains.Tools;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -234,6 +235,16 @@ public class Bike : MonoBehaviour
 
     }
 
+    void DoTheSquish()
+    {
+
+    }
+
+    void DoTheSpinout()
+    {
+       
+    }
+
     void OnCollisionExit(Collision collision)
     {
         if (Game.Inst.IsCrashed)
@@ -250,8 +261,23 @@ public class Bike : MonoBehaviour
                 // BOXES ARE SWERVE AROUND
                 if (obName.Contains("swerve"))
                 {
+
                     if (transform.position.z > otherOb.transform.position.z) // Ignores the reset case where the bike ends up at the start and so is BEHIND the swerved object.
                     {
+                        string parentName = otherOb.transform.parent.gameObject.name;
+
+                        if (parentName.Contains("cone"))
+                        {
+                            otherOb.transform.parent.GetChild(2).GetComponent<MMPathMovement>().enabled = true;
+
+                            // Turn off all collisions too.
+                            otherOb.transform.parent.GetChild(2).GetChild(0).GetChild(0).GetComponent<BoxCollider>().enabled = false; // model
+                            otherOb.transform.parent.GetChild(2).GetChild(0).GetChild(0).GetComponent<CapsuleCollider>().enabled = false; // model
+                            otherOb.transform.parent.GetChild(0).GetComponent<BoxCollider>().enabled = false; // left swerve
+                            otherOb.transform.parent.GetChild(1).GetComponent<BoxCollider>().enabled = false; // right swerve
+                        }
+
+                        /*
                         SwerveAudio.Play();
                         SwerveParticlesPrefab.Play();
                         Game.Inst.Swerve();
@@ -260,7 +286,9 @@ public class Bike : MonoBehaviour
 
                         if (parentName.Contains("cow") || parentName.Contains("horse") || parentName.Contains("sheep"))
                             otherOb.GetComponent<AudioSource>().Play();
+                        */
                     }
+                    
                 }
 
                 // AND EXCEPT FOR PRIZE BOXES
@@ -283,8 +311,35 @@ public class Bike : MonoBehaviour
                         ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
                         CollectBronzeParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
 
+                        if(obName.Contains("cone")) {
+                            //otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
+                            //otherOb.transform.GetChild(2).GetComponent<MMPathMovement>().enabled = true;
+                            //otherOb.transform.parent.parent.GetComponent<MMPathMovement>().enabled = true;
+
+                            // Spin it outta here.
+
+                            // Move up and out (and left/right random).
+
+                            MMPathMovement mpath = otherOb.transform.GetComponent<MMPathMovement>();//.enabled = true;
+                            mpath.enabled = true;
+                            mpath.PathElements[1].PathElementPosition.x = Random.Range(-5f, 5f);
+
+                            // Twirl around.
+                            otherOb.transform.GetComponent<MMAutoRotate>().enabled = true;
+
+                            // This locks rotation so make sure we clear it.
+                            otherOb.transform.parent.GetComponent<MMSquashAndStretch>().enabled = false;
+
+                            // Turn off all collisions too.
+                            otherOb.transform.GetComponent<BoxCollider>().enabled = false; // model
+                            otherOb.transform.GetComponent<CapsuleCollider>().enabled = false; // model
+                            otherOb.transform.parent.parent.parent.GetChild(0).GetComponent<BoxCollider>().enabled = false; // left swerve
+                            otherOb.transform.parent.parent.parent.GetChild(1).GetComponent<BoxCollider>().enabled = false; // right swerve
+                        }
+
+
                     }
-                    else if (
+                        else if (
                         obName.Contains("horse") ||
                         obName.Contains("tires") || obName.Contains("barrel") ||
                         obName.Contains("police") || obName.Contains("hippie"))
@@ -296,6 +351,9 @@ public class Bike : MonoBehaviour
 
                         ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
                         CollectSilverParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+
+                        otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
+
                     }
                     else if(
                         obName.Contains("cow") ||
@@ -310,6 +368,7 @@ public class Bike : MonoBehaviour
                         ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
                         CollectGoldParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
 
+                        otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
                     }
 
                     // This approach plays the fixed star count embedded in the particle object. Higher stars for more jumps.

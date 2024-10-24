@@ -418,7 +418,7 @@ public class GameGui : MonoBehaviour
     {
         if (Game.Inst.StarFlagCountTotal() > 0)
         {
-            Debug.LogError("LOSE STARS!");
+            Debug.Log("LOSE STARS!");
             LosingTransaction = true;
             LoseStarsAudio.pitch = 2.5f;
             LoseStarsAudio.Play();

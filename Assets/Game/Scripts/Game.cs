@@ -120,6 +120,7 @@ public class Game : MonoBehaviour
     List<List<GameObject>> obstaclePools = new();
     List<List<GameObject>> landPools = new();
     List<List<GameObject>> seaPools = new();
+    public List<Material> DissolveMaterials = new();
 
     Transform obstacleFolder;
     Transform landFolder;
@@ -205,10 +206,23 @@ public class Game : MonoBehaviour
 
         //// CAMERA
 
-        gameCam = Camera.main;
-        
+        gameCam = null;// Camera.main;
+
 
         //// LEVEL LOADING
+
+        // Load Resources
+
+
+        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant01"));
+        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant02"));
+        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant03"));
+        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant04"));
+        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant05"));
+
+
+
+
 
 
         // Go through all the levels and determine how many instances you need of each type.
@@ -319,7 +333,7 @@ public class Game : MonoBehaviour
                 newLand.SetActive(false); // reactivate later per level spec
 
                 // Custom stuff for land piece placement.
-                newLand.transform.position = new Vector3(0, -0.24f, 15f * j);
+                newLand.transform.position = new Vector3(0, -0.24f, 2 * 15f * j); // Update 2: x2 in z dir
             }
         }
 
@@ -423,11 +437,14 @@ public class Game : MonoBehaviour
         // G2 |
         // G1 (world origin)
 
+        // Update 1: Y position of tile is changed to -0.24; accomdation made for squeezeX (obstacles moved closer to center where track is, than just block 3x3 grid) (Fall 2023?)
+        // Update 2: Z of tile is stretched to 2x, so that obstacles spread more in Z direction, they were too tight for jumping (May 2024)
+
         int grids = gridCounts[currentLevel];
         //Vector3 gridOrigin = new Vector3(-5f, -0.24f, 5f);
         //float gridExtent = 15;
 
-        float squeezeX = 0.8f;
+        float squeezeX = 3.5f; // 0.8f; // Update 2: even closer
         Vector3 gridOrigin = new Vector3(-5f + squeezeX, -0.24f, 5f);
         float gridExtent = 15;
 
@@ -454,7 +471,7 @@ public class Game : MonoBehaviour
                         ob.transform.position = gridOrigin + new Vector3(
                             c * tileExtentX, // skip over current columns
                             0,                                                                                                                          
-                            g * gridExtent - r * tileExtentZ); // skip over previous grids and current rows
+                            g * 2 * gridExtent - r * 2 * tileExtentZ); // skip over previous grids and current rows; x2 to double scale along z now (Update 2)
 
                         // Will be enabling the next in line in the next go-around (if we get there).
                         obstacleCountNextLevel[obstacle]++;
@@ -480,7 +497,7 @@ public class Game : MonoBehaviour
         }
         */
 
-        FinishBlock.transform.position = new Vector3(0, -0.24f, grids * 15f);
+        FinishBlock.transform.position = new Vector3(0, -0.24f, 2 * grids * 15f); // Update 2: x2 in z direction
 
        
     }
@@ -490,7 +507,9 @@ public class Game : MonoBehaviour
         originalBikeEulerY = GameBike.transform.localEulerAngles.y;
         originalHandleBarEulerY = HandleBars.transform.localEulerAngles.y;
 
-        originalCamEulerX = gameCam.transform.localEulerAngles.x;
+        if (gameCam) {
+            originalCamEulerX = gameCam.transform.localEulerAngles.x;
+        }
 
         ResetGui();
         StartTheNextLevel();
@@ -504,33 +523,37 @@ public class Game : MonoBehaviour
         float pixelsAwayFromMiddle = 0;
         float fromMiddle = 0;
         Vector3 oldPos = GameBike.transform.position;
- 
-        // Move camera always.
-        Vector3 camPos = gameCam.transform.position;
-        //float magDiff = (Bike.transform.position - (gameCam.transform.position + new Vector3(CamFollowDistX, CamFollowDistY, CamFollowDistZ))).sqrMagnitude;
-        float magDiff = (GameBike.transform.position - gameCam.transform.position + new Vector3(CamFollowDistX, CamFollowDistY, CamFollowDistZ)).sqrMagnitude;
-        
-        /*
-        float magDiff2 = magDiff * magDiff;
-        //if (magDiff > 2.0f)
-        Debug.LogWarning("cam magDiff2: " + magDiff2);
-        IsCameraAdjusting = magDiff2 > CamStillAdjustingRange;
-        */
 
-        if (magDiff > 0.2f)
+        if (gameCam)
         {
-            gameCam.transform.position += new Vector3(
-                dt * CamFollowSpeedX * (GameBike.transform.position.x + CamFollowDistX - gameCam.transform.position.x),
-                dt * CamFollowSpeedY * (GameBike.transform.position.y + CamFollowDistY - gameCam.transform.position.y),
-                dt * CamFollowSpeedZ * (GameBike.transform.position.z + CamFollowDistZ - gameCam.transform.position.z));
+            // Move camera always.
+            Vector3 camPos = gameCam.transform.position;
+            //float magDiff = (Bike.transform.position - (gameCam.transform.position + new Vector3(CamFollowDistX, CamFollowDistY, CamFollowDistZ))).sqrMagnitude;
+            float magDiff = (GameBike.transform.position - gameCam.transform.position + new Vector3(CamFollowDistX, CamFollowDistY, CamFollowDistZ)).sqrMagnitude;
 
-            if (JumpCount == 2 || JumpCount == 3)
+            /*
+            float magDiff2 = magDiff * magDiff;
+            //if (magDiff > 2.0f)
+            Debug.LogWarning("cam magDiff2: " + magDiff2);
+            IsCameraAdjusting = magDiff2 > CamStillAdjustingRange;
+            */
+
+            if (magDiff > 0.2f)
             {
-                Vector3 currentCamEulers = gameCam.transform.localEulerAngles;
-                currentCamEulers.x = originalCamEulerX + CamTiltScaleJump * Mathf.Sqrt(GameBike.transform.position.y);
-                gameCam.transform.localEulerAngles = currentCamEulers;
+                gameCam.transform.position += new Vector3(
+                    dt * CamFollowSpeedX * (GameBike.transform.position.x + CamFollowDistX - gameCam.transform.position.x),
+                    dt * CamFollowSpeedY * (GameBike.transform.position.y + CamFollowDistY - gameCam.transform.position.y),
+                    dt * CamFollowSpeedZ * (GameBike.transform.position.z + CamFollowDistZ - gameCam.transform.position.z));
+
+                if (JumpCount == 2 || JumpCount == 3)
+                {
+                    Vector3 currentCamEulers = gameCam.transform.localEulerAngles;
+                    currentCamEulers.x = originalCamEulerX + CamTiltScaleJump * Mathf.Sqrt(GameBike.transform.position.y);
+                    gameCam.transform.localEulerAngles = currentCamEulers;
+                }
             }
         }
+
 
         if (IsCrashed)
             return;
