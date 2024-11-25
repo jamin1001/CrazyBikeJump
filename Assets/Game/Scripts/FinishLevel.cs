@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 public class FinishLevel : MonoBehaviour
 {
+    public AssetReference myTestRef;
+
     public float FireworksHeightY;
     public float FireworksVariationX;
     public float FireworksVariationY;
@@ -16,7 +19,7 @@ public class FinishLevel : MonoBehaviour
     // Start is called before the first frame update
     void OnCollisionEnter(Collision collision)
     {
-        Game.Inst.IsFinished = true;
+        Game.Inst.IsBikeFinished = true;
         Game.Inst.BikeStopped();
         FinishLineAudio.Play();
         StartCoroutine(PopPopPop(collision.gameObject)); 
@@ -133,7 +136,7 @@ public class FinishLevel : MonoBehaviour
         else
             FinishGoodAudio.Play();
 
-        Game.Inst.IsFinished = false;
+        Game.Inst.IsBikeFinished = false;
         Game.Inst.Restart(true);
 
         confettiParent.GetChild(0).gameObject.SetActive(false);

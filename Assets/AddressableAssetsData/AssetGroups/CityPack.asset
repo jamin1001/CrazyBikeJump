@@ -1,0 +1,341 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: CityPack
+  m_EditorClassIdentifier: 
+  m_GroupName: CityPack
+  m_GUID: 5e5e371b437e9ea48a0755858499bf88
+  m_SerializeEntries:
+  - m_GUID: 0218613366500f84692aa5e2e0b8fb2a
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityL-H4.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 023cc34f3658d9d45aa3e0af6d8d418f
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityM.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 08a21aaa7f08bac4b981b6152dd0bdfd
+    m_Address: Assets/Game/Levels/City/Animal/2dog.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0c169a41cb0bd484da44a88f803a54fd
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityL.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e5aa5a6a12196d42807f89f62fb554e
+    m_Address: Assets/Game/Levels/City/Animal/3stegosaurus.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 102dd9fed27579a4d9b1c463b9c54b87
+    m_Address: Assets/Game/Levels/City/Vehicle/2vehicle-car-police.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 10dfa956f20e64040bc93ff2a2809aca
+    m_Address: Assets/Game/Levels/City/Vehicle/Car Alarm Loop_1_short.wav
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1c2f711117e743344aa7f62964de11b5
+    m_Address: Assets/Game/Levels/City/Barrier/1barrier-traffic-cone.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2456e732adda52c448a0cbafa675247a
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityM-H1.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2db2071928a86dd4ba3295502b319c77
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityM-H2.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 30087789683ad3c47a592e71526d21fa
+    m_Address: Assets/Game/Levels/City/Vehicle/1vehicle-car-passenger.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 313d024c21fba5641b369eaffec5cec9
+    m_Address: Assets/Game/Levels/City/Terrain/02A.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 37e2827b00326574a9a0e7eb67fe2d7c
+    m_Address: Assets/Game/Levels/City/Animal/3stegosaurus.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 382123cf79d042941be1a86610966f40
+    m_Address: Assets/Game/Levels/City/Scenery/3scenery-highrise.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3bf7c14bc5a35104d8dfb2cda5e61b0f
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityL-H3.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 502d44d41d223354187a36fecba0d4f4
+    m_Address: Assets/Game/Levels/City/Barrier/2barrier-barrel.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 519a4117831e4dd45a67fedea506aa25
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityM-H4.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5afd244e269654e4588b8d4488476929
+    m_Address: Assets/Game/Levels/City/Animal/1rat.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 656e0a80237f93743b51ae362ad1e470
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityL-H2.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 774cbfeaa21591b4bb5291fc6a3226f6
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityR-H2.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 776ae302e46eda54e823c2972c1ec1d0
+    m_Address: Assets/Game/Levels/City/Jump/2jump-hexring.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7ecf61f3611009a4599ca77a0a1fe0da
+    m_Address: Assets/Game/Levels/City/Barrier/3barrier-concrete.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 808b3f0eb4e5f164cb6f3922dde731f7
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityM-H3.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 82eaf33cb01919e4984a361ec55f10b2
+    m_Address: Assets/Game/Levels/City/Vehicle/3vehicle-car-truck-cement.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 838cca168237d3443901c19d28c86de9
+    m_Address: Assets/Game/Levels/City/Jump/1jump-hexring.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8e80587b2b2c51d4198b1d2937da352a
+    m_Address: Assets/Game/Levels/City/Jump/3jump-hexring.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a3a86e8d1721c0b46a77863cca0ee8da
+    m_Address: Assets/Game/Levels/City/Scenery/2scenery-talltree.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a45b810e289c175438be8e46d473dde8
+    m_Address: Assets/Game/Levels/City/Vehicle/3vehicle-car-truck-cement.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8a352e14f37b194e9cc2bed67bc147e
+    m_Address: Assets/Game/Levels/City/Terrain/01A.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: abbf1878ccd458b4bacbfcb4f2c14537
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityR.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad96be8a7a02fe142a5eaaf0cf308894
+    m_Address: Assets/Game/Levels/City/Barrier/1barrier-traffic-cone.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b34a1c0e1f347d64a9b93a01b539a337
+    m_Address: Assets/Game/Levels/City/Vehicle/1car-passenger.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b812661fda36f1947be18eeeeb30e7c4
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityR-H3.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bb7d282a849ba8148a5b4ea4a7c12035
+    m_Address: Assets/Game/Levels/City/Scenery/3scenery-highrise.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bc502a10a1c647b4bb8a1fed8ff34d82
+    m_Address: Assets/Game/Levels/City/Scenery/2scenery-talltree.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c6ca22ef11c0a4340b69780e48deb106
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityR-H1.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd53a120225a3a04f8244f259df959ba
+    m_Address: Assets/Game/Levels/City/Terrain/03A.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cdc6f41ab79f65b4598b9c0b12051fc6
+    m_Address: Assets/Game/Levels/City/Animal/1rat.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d178f56817dc86342809e2ac06d3f95d
+    m_Address: Assets/Game/Levels/City/Terrain/02B.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d1f8ba2ad4976ff4fad8801e4ce9c2ab
+    m_Address: Assets/Game/Levels/City/Animal/2dog.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d6151a1000f752547ae0a092681ef156
+    m_Address: Assets/Game/Levels/City/Terrain/03B.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd7975356d1ded848a573356007d3854
+    m_Address: Assets/Game/Levels/City/Terrain/05B.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: de7b2440de977f948993a2cf5b650026
+    m_Address: Assets/Game/Levels/City/Barrier/3barrier-concrete.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df6704b1ded73b14baa0302afc018309
+    m_Address: Assets/Game/Levels/City/Terrain/01B.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e528aa0fe5dec184698e736a09fa5018
+    m_Address: Assets/Game/Levels/City/Terrain/04B.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e799b03104f75214a90969c9a76c7e4f
+    m_Address: Assets/Game/Levels/City/Scenery/1scenery-burger.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e97ad8c320adb3843b277ccd2ea3bd94
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityL-H1.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: edb06bf08913000419f9e27165096fba
+    m_Address: Assets/Game/Levels/City/Terrain/05A.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f2debf2f80398984391a08cbf8a9d649
+    m_Address: Assets/Game/Levels/City/Terrain/TerrainCityR-H4.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f416ed0ee58d104448b0eba40f3cec3c
+    m_Address: Assets/Game/Levels/City/Vehicle/2vehicle-car-police.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f738f22c4e696814ab6f19f109a3c6d9
+    m_Address: Assets/Game/Levels/City/Scenery/1scenery-burger.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f96bcbc4f3f89544b88e18aee88b75d2
+    m_Address: Assets/Game/Levels/City/Barrier/2barrier-barrel.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f9daf6b334b34ab4b8fb95abda41502f
+    m_Address: Assets/Game/Levels/City/Terrain/04A.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 505bef9f591b33444b0783b1f88a8038, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: fb956d8fa6c58ad44908108c0c64654a, type: 2}
+    - {fileID: 11400000, guid: a08ab1a19a26f2441be5b08b1db7da2d, type: 2}

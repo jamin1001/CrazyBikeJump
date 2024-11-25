@@ -13,6 +13,9 @@ public class Bike : MonoBehaviour
     public AudioSource Jump1Audio;
     public AudioSource Jump2Audio;
     public AudioSource Jump3Audio;
+    public AudioSource JumpFallAudio;
+    public AudioSource ScreechAudio;
+    public AudioSource LandThudAudio;
     public AudioSource WindAudio;
  
     public float BikeCyclePitchScale = 0.2f;
@@ -51,6 +54,23 @@ public class Bike : MonoBehaviour
     {
         Jump3Audio.Play();
     }
+
+    public void JumpedFall()
+    {
+        JumpFallAudio.Play();
+    }
+
+    public void Screech()
+    {
+        if(!ScreechAudio.isPlaying)
+            ScreechAudio.Play();
+    }
+
+    public void LandThud()
+    {
+        LandThudAudio.Play();
+    }
+
 
     public void Pedaled(float bikeSpeed)
     {
@@ -106,7 +126,7 @@ public class Bike : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         // If already crashed, don't be adding other things.
-        if (Game.Inst.IsCrashed)
+        if (Game.Inst.IsBikeCrashed)
             return;
 
         GameObject otherOb = collision.collider.gameObject;
@@ -247,14 +267,14 @@ public class Bike : MonoBehaviour
 
     void OnCollisionExit(Collision collision)
     {
-        if (Game.Inst.IsCrashed)
+        if (Game.Inst.IsBikeCrashed)
             return;
 
         if (collision.collider is BoxCollider)
         {
             GameObject otherOb = collision.collider.gameObject;
 
-            if (!Game.Inst.IsRestarting)
+            if (!Game.Inst.IsBikeRestarting)
             {
                 string obName = otherOb.name;
 
@@ -352,7 +372,7 @@ public class Bike : MonoBehaviour
                         ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
                         CollectSilverParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
 
-                        otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
+                        //otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
 
                     }
                     else if(
@@ -368,7 +388,7 @@ public class Bike : MonoBehaviour
                         ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
                         CollectGoldParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
 
-                        otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
+                        // otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
                     }
 
                     // This approach plays the fixed star count embedded in the particle object. Higher stars for more jumps.

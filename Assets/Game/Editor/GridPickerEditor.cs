@@ -8,11 +8,20 @@ using System;
 using PlasticPipe.PlasticProtocol.Messages;
 using log4net.Core;
 using UnityEngine.Rendering;
+using System.Linq;
+using static Cinemachine.DocumentationSortingAttribute;
 
 [CustomEditor(typeof(GridPicker))]
 public class GridPickerEditor : Editor
 {
-    //static public string[] Emojis = { "x", "🐂", "🐴", "🐑", "🛢️", "🚧", "⭕", "⚫", "🏎️", "🚌", "🚗", "🚓", "🚚" };
+    //static public string[] Emojis = { "x",
+    // "🐀", "🐕", "🦕",         // Animal
+    // "⚠", "🛢️", "🚧",         // Barrier
+    // "1️", "2, "3"               // Jump
+    // "🍔", "🌳", "🏢",         // Scenery
+    // "🚗", "🚓", "🚚"          // Vehicle
+    // "❤1", "❤2", "❤3",        // Holes
+    // };
     static public int Rows = GridPicker.NumRows; // Number of rows in each grid
     static public int Cols = GridPicker.NumCols; // Number of columns in each grid
     static private float popupWidth = 30;
@@ -22,6 +31,7 @@ public class GridPickerEditor : Editor
 
     // Initialize the list of lists for selected indices
     private List<List<List<int>>> choicesGrid = new();// List<List<List<int>>>();
+    private List<List<List<int>>> terrainPartsGrid = new(); // Contains [0-14] for water [0-4], tar [5-9], hole indices [10-14]
     private List<string> levelNames = new();
     private List<int> levelLands = new();
     private List<int> levelSeas = new();
@@ -53,19 +63,21 @@ public class GridPickerEditor : Editor
         SerializedProperty levelSilversProperty = serializedObject.FindProperty("LevelSilverSeconds");
         SerializedProperty levelGoldsProperty = serializedObject.FindProperty("LevelGoldSeconds");
         SerializedProperty gridChoicesProperty = serializedObject.FindProperty("GridChoices");
-        
+        SerializedProperty gridTerrainPartsProperty = serializedObject.FindProperty("GridTerrainParts");
 
         // The choices are empty, so Inspector must have disappeared, so need to sync from the serial data which is not empty.
         if (choicesGrid.Count == 0 && levelStatsProperty.arraySize > 0)
         {
-            int choiceIndex = 0;
+            int cellTotalIndex = 0;
 
+            // This is the current number of levels as loaded. They can be further increased in the UI.
             int levels = levelStatsProperty.arraySize;
 
             for (int l = 0; l < levels; l++)
             {
                 // Add Level.
                 choicesGrid.Add(new List<List<int>>());
+                terrainPartsGrid.Add(new List<List<int>>());
 
                 // Add Level Name.
                 levelNames.Add(levelNamesProperty.GetArrayElementAtIndex(l).stringValue);
@@ -78,6 +90,7 @@ public class GridPickerEditor : Editor
                 int gridsThisLevel = levelStatsProperty.GetArrayElementAtIndex(l).intValue;
                 for (int g = 0; g < gridsThisLevel; g++)
                 {
+                    /*
                     // Add grid.
                     List<int> gridValues = new List<int>(Rows * Cols);
                     for (int i = 0; i < Rows * Cols; i++)
@@ -85,6 +98,10 @@ public class GridPickerEditor : Editor
                         gridValues.Add(0); // Initialize with default values (0 in this case)
                     }
                     choicesGrid[l].Add(gridValues);
+                    terrainPartsGrid[l].Add(gridValues);
+                    */
+                    choicesGrid[l].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
+                    terrainPartsGrid[l].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
 
                     // Populate grid.
                     for (int row = 0; row < Rows; row++)
@@ -94,16 +111,25 @@ public class GridPickerEditor : Editor
                             int gridIndexXY = row * Cols + col;
                             try
                             {
-                                int choiceXY = gridChoicesProperty.GetArrayElementAtIndex(choiceIndex).intValue;
+                                int choiceXY = gridChoicesProperty.GetArrayElementAtIndex(cellTotalIndex).intValue;
                                 choicesGrid[l][g][gridIndexXY] = choiceXY;
                             }
                             catch(Exception ex)
                             {
-                                Debug.LogError($"Index out of range: choiceIndex={choiceIndex} l={l} g={g} gridIndexXY={gridIndexXY} ex={ex.Message}");
+                                Debug.LogError($"GridChoice index out of range: choiceIndex={cellTotalIndex} l={l} g={g} gridIndexXY={gridIndexXY} ex={ex.Message}");
+                            }
+                            try
+                            {
+                                int terrainPartXY = gridTerrainPartsProperty.GetArrayElementAtIndex(cellTotalIndex).intValue;
+                                terrainPartsGrid[l][g][gridIndexXY] = terrainPartXY;
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.LogError($"TerrainPart index out of range: choiceIndex={cellTotalIndex} l={l} g={g} gridIndexXY={gridIndexXY} ex={ex.Message}");
                             }
 
                             // Keeps incrementing since we progress linearly through the integer list of all grid entry values.
-                            choiceIndex++;
+                            cellTotalIndex++;
                         }
                     }
                 }
@@ -123,6 +149,9 @@ public class GridPickerEditor : Editor
                 // Custom Level Name.
                 levelNames[level] = EditorGUILayout.TextField(levelNames[level]);
 
+#if false
+// Land and Sea deprecated for now.
+
                 // Land choice.
                 Rect popupRectLand = EditorGUILayout.GetControlRect(GUILayout.Width(popupLandWidth));
                 int landChoice = levelLands[level];
@@ -132,7 +161,7 @@ public class GridPickerEditor : Editor
                 Rect popupRectSea = EditorGUILayout.GetControlRect(GUILayout.Width(popupSeaWidth));
                 int seaChoice = levelSeas[level];
                 levelSeas[level] = EditorGUI.Popup(popupRectSea, seaChoice, GridPicker.LevelSea);
-
+#endif
                 // Custom Finish Seconds (3 types).
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Seconds to get gold:");
@@ -213,14 +242,17 @@ public class GridPickerEditor : Editor
                 if (GUILayout.Button("Add Grid"))
                 {
                     //selectedOptionIndices[level].Add(new List<int>(numRows * numCols));
-
+                    /*
                     List<int> gridValues = new List<int>(Rows * Cols);
                     for (int i = 0; i < Rows * Cols; i++)
                     {
                         gridValues.Add(0); // Initialize with default values (0 in this case)
                     }
                     choicesGrid[level].Add(gridValues);
-
+                    terrainPartsGrid[level].Add(gridValues);
+                    */
+                    choicesGrid[level].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
+                    terrainPartsGrid[level].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
                 }
 
                 EditorGUILayout.EndVertical();
@@ -236,6 +268,7 @@ public class GridPickerEditor : Editor
             levelOpenProperty.GetArrayElementAtIndex(choicesGrid.Count).boolValue = true;
 
             choicesGrid.Add(new List<List<int>>());
+            terrainPartsGrid.Add(new List<List<int>>());
             levelNames.Add("The Level Name");
             levelLands.Add(0);
             levelSeas.Add(0);
@@ -248,12 +281,16 @@ public class GridPickerEditor : Editor
         // Sync the serialized version now that it has been updated above.
         levelStatsProperty.ClearArray(); // No entries means no levels.
         gridChoicesProperty.ClearArray();
+        gridTerrainPartsProperty.ClearArray();
         levelNamesProperty.ClearArray();
         levelLandsProperty.ClearArray();
         levelSeasProperty.ClearArray();
         levelBronzesProperty.ClearArray();
         levelSilversProperty.ClearArray();
         levelGoldsProperty.ClearArray();
+
+        // Need to build up the terrain each time.
+        //terrainPartsGrid.Clear();
 
         int arraySize = 0;// selectedOptionIndicesProperty.arraySize;
         for (int level = 0; level < choicesGrid.Count; level++)
@@ -286,17 +323,89 @@ public class GridPickerEditor : Editor
             levelGoldsProperty.InsertArrayElementAtIndex(level); // This level index.
             levelGoldsProperty.GetArrayElementAtIndex(level).intValue = levelGolds[level];
 
+            // Update the terrain tiles based on what obstacles were placed.
+            //terrainPartsGrid.Add(new List<List<int>>());
 
-            for (int grid = 0; grid < choicesGrid[level].Count; grid++)
+            int grids = choicesGrid[level].Count;
+            for (int grid = 0; grid < grids; grid++)
             {
+                /*
+                // Add grid.
+                List<int> gridValues = new List<int>(Rows * Cols);
+                for (int i = 0; i < Rows * Cols; i++)
+                {
+                    gridValues.Add(0); // Initialize with default values (0 in this case)
+                }
+                terrainPartsGrid[level].Add(gridValues);
+                */
+
                 for (int row = 0; row < Rows; row++)
                 {
                     for (int col = 0; col < Cols; col++)
                     {
-                        int valueToInsert = choicesGrid[level][grid][row * Cols + col];
+                        // Grab the value from the data structure and put into the property.
+                        int cell = row * Cols + col;
+
+                        int obIndex = choicesGrid[level][grid][cell];
                         gridChoicesProperty.InsertArrayElementAtIndex(arraySize);
-                        gridChoicesProperty.GetArrayElementAtIndex(arraySize).intValue = valueToInsert; 
+                        gridChoicesProperty.GetArrayElementAtIndex(arraySize).intValue = obIndex;
+
+                        int terrainPartIndex = terrainPartsGrid[level][grid][cell];
+                        gridTerrainPartsProperty.InsertArrayElementAtIndex(arraySize);
+                        gridTerrainPartsProperty.GetArrayElementAtIndex(arraySize).intValue = terrainPartIndex;
+
                         arraySize++;
+
+
+                        // Terrain part details.
+
+                        // Some useful obIndex values.
+                        int WATER = 16;
+                        int TAR = 17;
+                        int PIT = 18;
+
+                        // 0 1 2
+                        // 3 4 5
+                        // 6 7 8
+
+                        int terrainPart = 0; // default is no hole
+
+                        //Func<int, int> getCellAbove = c => c - 3; // !isUpperRow
+                        //Func<int, int> getCellBelow = c => c + 3; // !isLowerRow
+
+                        Func<int, int> getObTypeAbove = c => c <= 2 ? choicesGrid[level][grid - 1][c + 6] : choicesGrid[level][grid][c - 3]; // !isUpperRow
+                        Func<int, int> getObTypeBelow = c => c >= 6 ? choicesGrid[level][grid + 1][c - 6] : choicesGrid[level][grid][c + 3]; // !isLowerRow
+
+                        Func<int, bool> isUpperRow  = c => grid == 0 && c <= 2; // Upper row in whole level.
+                        Func<int, bool> isLowerRow = c => grid == grids - 1 && c >= 6; // Lower row in whole level.
+                        //Func<int, bool> isCenterRow = c => !isUpperRow(c) && !isLowerRow(c);
+
+                        Func<int, bool> isSameTypeAbove = c => !isUpperRow(c) && getObTypeAbove(c) == obIndex;
+                        Func<int, bool> isSameTypeBelow = c => !isLowerRow(c) && getObTypeBelow(c) == obIndex;
+
+                        // These are all holes. Need to configure part based on neighbors.
+                        if (obIndex == WATER || obIndex == TAR || obIndex == PIT)
+                        {
+                           terrainPart = 1; // hole
+
+                           if (isSameTypeAbove(cell) && isSameTypeBelow(cell))
+                           {
+                                terrainPart = 3; // center part
+                           }
+                           else if(isSameTypeAbove(cell))
+                           {
+                                terrainPart = 4; // lower part
+                           }
+                           else if(isSameTypeBelow(cell))
+                           {
+                                terrainPart = 2; // upper part
+                           }
+                        }
+                       
+                        terrainPart += (cell % 3) * 5; // Slot cell into left(0), mid(5), or right(10)
+
+                        // Store it.
+                        terrainPartsGrid[level][grid][cell] = terrainPart;
                     }
                 }
             }

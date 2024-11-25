@@ -1,7 +1,10 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 #if UNITY_EDITOR
 using UnityEngine.UI;
 using static UnityEngine.InputManagerEntry;
@@ -11,6 +14,16 @@ using static UnityEngine.InputManagerEntry;
 [RequireComponent(typeof(GameGui))]
 public class Game : MonoBehaviour
 {
+    // For instancing the obstacles. Size is preset in editor already, in case fixed prefabs are assigned.
+    public List<GameObject> ObstaclePrefabs = new List<GameObject>(new GameObject[23]);
+#if false
+    public List<GameObject> LandPrefabs; // Must match Land enum in GridPicker.
+    public List<GameObject> SeaPrefabs; // Must match Sea enum in GridPicker.
+#endif
+    // For instancing the terrain parts. Size is preset in editor already, in case fixed prefabs are assigned.
+    public List<GameObject> TerrainPartPrefabs;
+
+
     // Object Refs
     public Bike GameBike;
     public GameObject FrontWheel;
@@ -73,25 +86,23 @@ public class Game : MonoBehaviour
     public float CamFollowSpeedZ = 6.0f;
     public float CamTiltScaleJump = 30f;
     public float CamStillAdjustingRange = 5.0f;
-    public List<GameObject> ObstaclePrefabs; // For instancing the obstacles.
-    public List<GameObject> LandPrefabs; // Must match Land enum in GridPicker.
-    public List<GameObject> SeaPrefabs; // Must match Sea enum in GridPicker.
 
     // Bike Controls
     float originalBikeEulerY;
     float originalHandleBarEulerY;
-    float originalCamEulerX;
     float bikeSpeed = 0f;
     float bikeJumpSpeed = 0;
     bool isJumping = false;
     bool isSailing = false;
+    bool isOkToScreechAgain = true;
     int currentLevel = -1;
-    
 
+    public bool IsLevelLoaded { get; set; }
+    public bool IsLevelPopulated { get; set; }
     public int JumpCount { get; set; }
-    public bool IsRestarting { get; set; }
-    public bool IsFinished { get; set; }
-    public bool IsCrashed { get; set; }
+    public bool IsBikeRestarting { get; set; }
+    public bool IsBikeFinished { get; set; }
+    public bool IsBikeCrashed { get; set; }
     public bool IsCameraAdjusting { get; set; }
 
     public int[] StarsThisLevel { get; set; } = new int[3];
@@ -101,7 +112,6 @@ public class Game : MonoBehaviour
     float savedBikeTilt = 0f;
     bool swerveApplied = false;
 
-    Camera gameCam;
     GridPicker gridPicker;
     public GameGui GameGui { get; set; }
 
@@ -111,20 +121,28 @@ public class Game : MonoBehaviour
     int obstacleCount;
     int landCount;
     int seaCount;
+    int terrainPartCount;
+
     Dictionary<int, int> obstacleMaxAnyLevel = new();
     Dictionary<int, int> landMaxAnyLevel = new();
     Dictionary<int, int> seaMaxAnyLevel = new();
+    Dictionary<int, int> terrainPartMaxAnyLevel = new();
     Dictionary<string, int> emojiToObstacle = new();
 
     List<List<List<int>>> choicesGrid = new();
+    List<List<List<int>>> terrainPartsGrid = new();
     List<List<GameObject>> obstaclePools = new();
     List<List<GameObject>> landPools = new();
     List<List<GameObject>> seaPools = new();
-    public List<Material> DissolveMaterials = new();
+    List<List<GameObject>> terrainPartsPools = new();
 
+    GameObject bikeInst = null;
+
+    Transform levelFolder;
     Transform obstacleFolder;
     Transform landFolder;
     Transform seaFolder;
+    Transform terrainPartsFolder;
 
     // Game State
     int[] starCount = new int[3];
@@ -180,9 +198,9 @@ public class Game : MonoBehaviour
 
     public int GetExtraStarSeconds(int starKind)
     {
-        if(starKind == 0)
+        if (starKind == 0)
             return gridPicker.LevelBronzeSeconds[currentLevel];
-        else if(starKind == 1)
+        else if (starKind == 1)
             return gridPicker.LevelSilverSeconds[currentLevel];
         else if (starKind == 2)
             return gridPicker.LevelGoldSeconds[currentLevel];
@@ -192,93 +210,162 @@ public class Game : MonoBehaviour
 
     void Awake()
     {
+        // There is a single game instance, that runs everything, including the menu.
+        // Levels are loaded dynamically depending on the situation.
         Inst = this;
+        GameGui = GetComponent<GameGui>();
 
+        // Get fixed references that do not change ever, such as between world loads. 
+        bikeInst = GameObject.Find("Bike").transform.gameObject;
+        levelFolder = GameObject.Find("LoadedLevel").transform;
+        obstacleFolder = GameObject.Find("Obstacles").transform;
+        landFolder = GameObject.Find("Lands").transform; ;
+        seaFolder = GameObject.Find("Seas").transform; ;
+        terrainPartsFolder = GameObject.Find("TerrainParts").transform;
+        bikeInst.SetActive(false);
+        gridPicker = levelFolder.GetChild(0).GetComponent<GridPicker>();
+
+        Addressables.LoadAssetsAsync<Object>("CityPackAsset", OnAssetLoaded).Completed += OnLoadComplete;
+
+    }
+
+    void Start()
+    {
+        originalBikeEulerY = GameBike.transform.localEulerAngles.y;
+        originalHandleBarEulerY = HandleBars.transform.localEulerAngles.y;
+
+        ResetGui();
+        //StartTheNextLevel();
+    }
+
+    private List<Object> loadedAssets = new List<Object>();
+
+    private void OnAssetLoaded(Object obj)
+    {
+        // This gets called for each addressable asset loaded and assigns it to the correct
+        // category so that we can instance from these prefab references, which are special
+        // for each world. For example, race cars and red road tracks for the race world.
+
+        loadedAssets.Add(obj);
+
+        // Get the content before the first underscore.
+        string objNamePrefix = obj.name.Split('_')[0];
+
+        if (GridPicker.ObjNameToEmojiIndex.ContainsKey(objNamePrefix))
+        {
+            int emojiIndex = GridPicker.ObjNameToEmojiIndex[objNamePrefix];
+            ObstaclePrefabs[emojiIndex] = obj.GameObject();
+        }
+        else if (GridPicker.ObjNameToTerrainPartIndex.ContainsKey(objNamePrefix))
+        {
+            int terrainPartIndex = GridPicker.ObjNameToTerrainPartIndex[objNamePrefix];
+            TerrainPartPrefabs[terrainPartIndex] = obj.GameObject();
+        }
+
+    }
+
+    // Callback when all assets are finished loading
+    private void OnLoadComplete(AsyncOperationHandle<IList<Object>> handle)
+    {
+        if (handle.Status == AsyncOperationStatus.Succeeded)
+        {
+            Debug.Log($"Loaded {loadedAssets.Count} assets.");
+
+            // Use the loaded assets in the scene
+            foreach (var asset in loadedAssets)
+            {
+                if (asset is GameObject)
+                {
+                    //Instantiate(asset as GameObject);
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("Failed to load assets.");
+        }
+
+        // Setup based on loaded stuff.
+
+
+
+        //// REF REQUIRED COMPONENTS
+
+        
+
+        IsLevelLoaded = true;
+
+        //bikeInst.SetActive(true);
+    }
+
+
+    void PopulateLevel()
+    {
         // TODO: Scale GUI appopriate to device.
 
         //SpeedGaugeMain.position = 10f * SpeedGaugeMain.position;
         //SpeedGaugeMain.localScale = 10f * SpeedGaugeMain.localScale;
 
-        //// REF REQUIRED COMPONENTS
 
-        gridPicker = GetComponent<GridPicker>();
-        GameGui = GetComponent<GameGui>();
-
-        //// CAMERA
-
-        gameCam = null;// Camera.main;
-
-
-        //// LEVEL LOADING
-
-        // Load Resources
-
-
-        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant01"));
-        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant02"));
-        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant03"));
-        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant04"));
-        DissolveMaterials.Add(Resources.Load<Material>("Materials/Dissolves/DissolveMaterialVariant05"));
-
-
-
-
-
+        //// LEVEL LOADING SETUP
 
         // Go through all the levels and determine how many instances you need of each type.
-        GridPickerUtil.SerialToGrid(choicesGrid, gridPicker.LevelStats, gridPicker.GridChoices); // populates choicesGrid
+        GridPickerUtil.SerialToGrid(choicesGrid, terrainPartsGrid, gridPicker.LevelStats,
+            gridPicker.GridChoices, gridPicker.GridTerrainParts); // populates choicesGrid, terrainParts
         levelCount = gridPicker.LevelStats.Count;
         gridCounts = gridPicker.LevelStats;
-        obstacleCount = GridPicker.Emojis.Length - 1; // minus the zero space
+        obstacleCount = GridPicker.Emojis.Length; // Element 0 blank is counted as obstacle but not used.
         Debug.Assert(obstacleCount == ObstaclePrefabs.Count); // Should be as many prefabs linked as defined obstacles
 
         landCount = GridPicker.LevelLand.Length;
         seaCount = GridPicker.LevelSea.Length;
+        terrainPartCount = GridPicker.ObjNameToTerrainPartIndex.Count; 
 
         for (int i = 0; i < obstacleCount; i++) obstaclePools.Add(new());
         for (int i = 0; i < landCount; i++) landPools.Add(new());
         for (int i = 0; i < seaCount; i++) seaPools.Add(new());
+        for (int i = 0; i < terrainPartCount; i++) terrainPartsPools.Add(new());
         for (int i = 0; i < GridPicker.Emojis.Length; i++) emojiToObstacle[GridPicker.Emojis[i]] = i;
         for (int i = 0; i < obstacleCount; i++) obstacleMaxAnyLevel[i] = 0;
         for (int i = 0; i < landCount; i++) landMaxAnyLevel[i] = 0;
         for (int i = 0; i < seaCount; i++) seaMaxAnyLevel[i] = 0;
-
-        obstacleFolder = GameObject.Find("Obstacles").transform;
-        landFolder = GameObject.Find("Lands").transform; ;
-        seaFolder = GameObject.Find("Seas").transform; ;
+        for (int i = 0; i < terrainPartCount; i++) terrainPartMaxAnyLevel[i] = 0;
 
         Dictionary<int, int> obstacleMaxThisLevel = new(); // obstacle type -> max
         Dictionary<int, int> landMaxThisLevel = new(); // land type -> max
         Dictionary<int, int> seaMaxThisLevel = new(); // sea type -> max
+        Dictionary<int, int> terrainPartMaxThisLevel = new(); // terrain part -> max
+
+
+        //// INSTANCE MAX CALCULATION
+
+        // Here we calculuation max for each thing so that we can instantiate in pools what we need.
         for (int l = 0; l < levelCount; l++)
         {
             // OBSTACLE
 
-            // Clear it, since we recount each level.
+            // Clear it, since we recount obstacles each level.
             for (int i = 0; i < obstacleCount; i++)
                 obstacleMaxThisLevel[i] = 0;
 
+            // Increment obstacles per type across the board so we track the maxes.
             for (int g = 0; g < gridCounts[l]; g++)
             {
                 for (int c = 0; c < Rows * Cols; c++)
                 {
                     int choice = choicesGrid[l][g][c];
-                    if (choice > 0)
-                    {
-                        obstacleMaxThisLevel[choice - 1]++;
-                    }
+                    obstacleMaxThisLevel[choice]++; // consider off by one here
                 }
-
             }
 
             // Update the maxes with what was just found. We only need to know the max per level in order
-            // to allocate a big enough pool of objects per obstacle type for the duration of the whole game.
+            // to allocate a big enough pool of objects per obstacle type for the duration of the whole world.
             for (int i = 0; i < obstacleCount; i++)
                 if (obstacleMaxThisLevel[i] > obstacleMaxAnyLevel[i])
                     obstacleMaxAnyLevel[i] = obstacleMaxThisLevel[i];
 
-
-            // LAND, similar
+#if false
+            // LAND
 
             for (int i = 0; i < landCount; i++)
                 landMaxThisLevel[i] = 0;
@@ -293,9 +380,7 @@ public class Game : MonoBehaviour
                 if (landMaxThisLevel[i] > landMaxAnyLevel[i])
                     landMaxAnyLevel[i] = landMaxThisLevel[i];
 
-
-
-            // SEA, similar
+            // SEA
 
             for (int i = 0; i < seaCount; i++)
                 seaMaxThisLevel[i] = 0;
@@ -310,11 +395,40 @@ public class Game : MonoBehaviour
                 if (seaMaxThisLevel[i] > seaMaxAnyLevel[i])
                     seaMaxAnyLevel[i] = seaMaxThisLevel[i];
 
+#endif
+
+            // TERRAIN
+
+            // Clear it, since we recount terrain parts each level.
+            for (int i = 0; i < terrainPartCount; i++)
+                terrainPartMaxThisLevel[i] = 0;
+
+            // Increment terrain parts per type across the board so we track the maxes.
+            for (int g = 0; g < gridCounts[l]; g++)
+            {
+                for (int c = 0; c < Rows * Cols; c++)
+                {
+                    int terrainPart = terrainPartsGrid[l][g][c];
+                    terrainPartMaxThisLevel[terrainPart]++;
+                }
+            }
+
+            // Update the maxes with what was just found. We only need to know the max per level in order
+            // to allocate a big enough pool of objects per obstacle type for the duration of the whole world.
+            for (int i = 0; i < terrainPartCount; i++)
+                if (terrainPartMaxThisLevel[i] > terrainPartMaxAnyLevel[i])
+                    terrainPartMaxAnyLevel[i] = terrainPartMaxThisLevel[i];
         }
 
-        // Instance the required obstacles and intially disable them.
-        for (int i = 0; i < obstacleCount; i++)
+
+        //// POOL INSTANCING
+
+        // Instance the required obstacles (except null first element so i starts at 1)
+        // and intially disable them.
+        for (int i = 1; i < obstacleCount; i++)
         {
+            // Make a pool of obstacles for the particular type, the max
+            // of any given level dictating how many to reserve the pool for.
             for (int j = 0; j < obstacleMaxAnyLevel[i]; j++)
             {
                 GameObject newObstacle = Instantiate(ObstaclePrefabs[i], obstacleFolder);
@@ -323,6 +437,7 @@ public class Game : MonoBehaviour
             }
         }
 
+#if false
         // Instance the required lands and intially disable them.
         for (int i = 0; i < landCount; i++)
         {
@@ -338,8 +453,22 @@ public class Game : MonoBehaviour
         }
 
         // Instance the required seas and intially disable them. (TODO) 
+#endif
 
-        //StartTheNextLevel();
+        // Instance the required terrain parts and intially disable them.
+        for (int i = 0; i < terrainPartCount; i++)
+        {
+            // Make a pool of terrain parts for the particular type, the max
+            // of any given level dictating how many to reserve the pool for.
+            for (int j = 0; j < terrainPartMaxAnyLevel[i]; j++)
+            {
+                GameObject newTerrainPart = Instantiate(TerrainPartPrefabs[i], terrainPartsFolder);
+                terrainPartsPools[i].Add(newTerrainPart);
+                newTerrainPart.SetActive(false); // reactivate later per level spec
+            }
+        }
+
+        StartTheNextLevel();
 
     }
 
@@ -365,6 +494,9 @@ public class Game : MonoBehaviour
         GameGui.StartAnimatedText(gridPicker.LevelNames[currentLevel], Color.white);
 
         // Disable all obstacles to prepare for the next level. Also prep the obstacle counter.
+        // This is just a way to enable the objects of the level (the "next" one per type) in
+        // order since the queried objects over a given set of grids will not be in any
+        // specified order, yet we have to enable whatever type we come upon. 
         Dictionary<int, int> obstacleCountNextLevel = new();
         for (int i = 0; i < obstacleCount; i++)
         {
@@ -394,13 +526,14 @@ public class Game : MonoBehaviour
             foreach (GameObject seaOb in seaPools[i])
                 seaOb.SetActive(false);
 
-
-
-    
-
-
-
-
+        // Disable all the terrain parts. See obstacle parts above for more details.
+        Dictionary<int, int> terrainPartsCountNextLevel = new();
+        for (int i = 0; i < terrainPartCount; i++)
+        {
+            foreach (GameObject terrainPart in terrainPartsPools[i])
+                terrainPart.SetActive(false);
+            terrainPartsCountNextLevel[i] = 0;
+        }
         // Polyperfect terrain tiles are 15 x 15 units square X and Z. Each platform should be raised 0.15 in Y.
         // The first tile is centered at the world origin.
         // To layout, start from the middle of the top left square in the tile's grid which will be our origin point.
@@ -444,6 +577,8 @@ public class Game : MonoBehaviour
         //Vector3 gridOrigin = new Vector3(-5f, -0.24f, 5f);
         //float gridExtent = 15;
 
+        Vector3 gridTerrainOrigin = new Vector3(-5f, -0.24f, 5f);
+
         float squeezeX = 3.5f; // 0.8f; // Update 2: even closer
         Vector3 gridOrigin = new Vector3(-5f + squeezeX, -0.24f, 5f);
         float gridExtent = 15;
@@ -458,26 +593,55 @@ public class Game : MonoBehaviour
                     // This is always within the given grid block we are referencing.
                     int gridIndex = Cols * r + c;
 
-                    // The trailing -1 is required to go from the list with a space at position 0 (not an obstacle) to the list without.
                     // The (grids - 1) - g is reversing the sense of g as the increasing grid index and is pulling from the bottom up of the Editor scroll area.
-                    int obstacle = choicesGrid[currentLevel][(grids - 1) - g][gridIndex] - 1;
+                    int obstacle = choicesGrid[currentLevel][(grids - 1) - g][gridIndex];
 
-                    // -1 means found the blank, which means do nothing (> -1 is any real obstacle)
-                    if (obstacle > -1)
+                    if (obstacle > 0) // Instance everything but the null obstacle.
                     {
                         int nextObIndex = obstacleCountNextLevel[obstacle];
                         GameObject ob = obstaclePools[obstacle][nextObIndex];
                         ob.SetActive(true);
-                        ob.transform.position = gridOrigin + new Vector3(
-                            c * tileExtentX, // skip over current columns
-                            0,                                                                                                                          
-                            g * 2 * gridExtent - r * 2 * tileExtentZ); // skip over previous grids and current rows; x2 to double scale along z now (Update 2)
 
+                        if (obstacle == 16 || obstacle == 17 || obstacle == 18)
+                        {
+                            // Same as terrain.
+                            ob.transform.position = gridTerrainOrigin + new Vector3(
+                            c * 5,
+                            0,
+                            g * 15 - r * 5);
+                        }
+                        else
+                        {
+                            ob.transform.position = gridOrigin + new Vector3(
+                                c * tileExtentX, // skip over current columns
+                                0,
+                                g * 2 * gridExtent - r * 2 * tileExtentZ); // skip over previous grids and current rows; x2 to double scale along z now (Update 2)
+                        }
                         // Will be enabling the next in line in the next go-around (if we get there).
                         obstacleCountNextLevel[obstacle]++;
                     }
+
+                    int terrainPart = terrainPartsGrid[currentLevel][(grids - 1) - g][gridIndex]; // not there is no -1
+
+                    // Instance all the terrain parts.
+                    {
+                        int nextTpIndex = terrainPartsCountNextLevel[terrainPart];
+                        GameObject tp = terrainPartsPools[terrainPart][nextTpIndex];
+                        tp.SetActive(true);
+                        tp.transform.position = gridTerrainOrigin + new Vector3(
+                            c * 5, // skip over current columns
+                            0,
+                            g * 15 - r * 5); // skip over previous grids and current rows; x2 to double scale along z now (Update 2)
+
+                        // Will be enabling the next in line in the next go-around (if we get there).
+                        terrainPartsCountNextLevel[terrainPart]++;
+                    }
                 }
 
+#if false
+// Land and Sea deprecated for now. The intent was to have a variety of land or sea blocks extended
+// out on the level, but the terrain addition made the land layout more complicated. So this concept
+// could still work for water types, but not really important right now so commenting out.
 
         // Enable the land objects.
         for (int g = 0; g < grids; g++)
@@ -488,35 +652,32 @@ public class Game : MonoBehaviour
         }
 
         // Enable the sea objects. (TODO: per grid or whole level?)
-        /*
         for (int g = 0; g < grids; g++)
         {
             int seaType = gridPicker.LevelSeas[currentLevel];
             GameObject seaOb = seaPools[seaType][g];
             seaOb.SetActive(true);
         }
-        */
+#endif
 
         FinishBlock.transform.position = new Vector3(0, -0.24f, 2 * grids * 15f); // Update 2: x2 in z direction
-
-       
-    }
-
-    void Start()
-    {
-        originalBikeEulerY = GameBike.transform.localEulerAngles.y;
-        originalHandleBarEulerY = HandleBars.transform.localEulerAngles.y;
-
-        if (gameCam) {
-            originalCamEulerX = gameCam.transform.localEulerAngles.x;
-        }
-
-        ResetGui();
-        StartTheNextLevel();
     }
 
     void Update()
     {
+        if (!IsLevelLoaded)
+            return;
+
+        if (!IsLevelPopulated)
+        {
+            PopulateLevel();
+            IsLevelPopulated = true;
+            return;
+        }
+
+        if (!bikeInst.active)
+            bikeInst.SetActive(true);
+
         // Cache some values.
         float dt = Time.deltaTime;
         //Vector3 mousePos = Input.mousePosition;
@@ -524,44 +685,13 @@ public class Game : MonoBehaviour
         float fromMiddle = 0;
         Vector3 oldPos = GameBike.transform.position;
 
-        if (gameCam)
-        {
-            // Move camera always.
-            Vector3 camPos = gameCam.transform.position;
-            //float magDiff = (Bike.transform.position - (gameCam.transform.position + new Vector3(CamFollowDistX, CamFollowDistY, CamFollowDistZ))).sqrMagnitude;
-            float magDiff = (GameBike.transform.position - gameCam.transform.position + new Vector3(CamFollowDistX, CamFollowDistY, CamFollowDistZ)).sqrMagnitude;
-
-            /*
-            float magDiff2 = magDiff * magDiff;
-            //if (magDiff > 2.0f)
-            Debug.LogWarning("cam magDiff2: " + magDiff2);
-            IsCameraAdjusting = magDiff2 > CamStillAdjustingRange;
-            */
-
-            if (magDiff > 0.2f)
-            {
-                gameCam.transform.position += new Vector3(
-                    dt * CamFollowSpeedX * (GameBike.transform.position.x + CamFollowDistX - gameCam.transform.position.x),
-                    dt * CamFollowSpeedY * (GameBike.transform.position.y + CamFollowDistY - gameCam.transform.position.y),
-                    dt * CamFollowSpeedZ * (GameBike.transform.position.z + CamFollowDistZ - gameCam.transform.position.z));
-
-                if (JumpCount == 2 || JumpCount == 3)
-                {
-                    Vector3 currentCamEulers = gameCam.transform.localEulerAngles;
-                    currentCamEulers.x = originalCamEulerX + CamTiltScaleJump * Mathf.Sqrt(GameBike.transform.position.y);
-                    gameCam.transform.localEulerAngles = currentCamEulers;
-                }
-            }
-        }
-
-
-        if (IsCrashed)
+        if (IsBikeCrashed)
             return;
 
-        else if (IsRestarting)
+        else if (IsBikeRestarting)
             return;
 
-        else if (IsFinished)
+        else if (IsBikeFinished)
             return;
 
         float newGaugeHeight;
@@ -595,7 +725,17 @@ public class Game : MonoBehaviour
             // Accel & Steering (pressed while not in air).
             if (!isJumping)// && mousePos.x > screenMiddleBorderLeft && mousePos.x < screenMiddleBorderRight)
             {
-                
+                if(bikeSpeed > 0 && isOkToScreechAgain)
+                {
+                    GameBike.Screech();
+                    isOkToScreechAgain = false;
+                }
+                if(bikeSpeed < 3.5f)
+                {
+                    isOkToScreechAgain = true;
+                }
+
+
 #if UNITY_TOUCH_SUPPORTED
                 Touch firstTouch = Input.GetTouch(0);
                 Vector2 contactPos = firstTouch.position;
@@ -684,6 +824,8 @@ public class Game : MonoBehaviour
             {
                 if (!isSailing)
                 {
+                    //GameBike.JumpedFall();
+
                     //GameBike.StartWind();
                 }
 
@@ -773,6 +915,7 @@ public class Game : MonoBehaviour
                     bikeSpeed = 0f;
 
                 GameBike.StopWind();
+                GameBike.LandThud();
             }
 
             // Apply jump tilt (if any).
@@ -815,7 +958,7 @@ public class Game : MonoBehaviour
 
     public void BikeCrashed()
     {
-        IsCrashed = true;
+        IsBikeCrashed = true;
         StarsThisLevel[0] = 0;
         StarsThisLevel[1] = 0;
         StarsThisLevel[2] = 0;
@@ -838,7 +981,7 @@ public class Game : MonoBehaviour
 
     IEnumerator DoRestart(bool nextLevel)
     { 
-        IsRestarting = true;
+        IsBikeRestarting = true;
         yield return Game.Inst.WaitRestartFinish;
         GameBike.transform.position = Vector3.zero;
         ResetBikeRotation();
@@ -847,8 +990,8 @@ public class Game : MonoBehaviour
         {
             StartTheNextLevel();
         }
-        IsRestarting = false;
-        IsCrashed = false;
+        IsBikeRestarting = false;
+        IsBikeCrashed = false;
     }
 
     //// GUI HANDLING
