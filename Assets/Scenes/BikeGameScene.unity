@@ -3103,22 +3103,42 @@ PrefabInstance:
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridChoices.Array.data[25]'
-      value: 16
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
+        type: 3}
+      propertyPath: 'GridChoices.Array.data[27]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridChoices.Array.data[28]'
-      value: 16
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
+        type: 3}
+      propertyPath: 'GridChoices.Array.data[29]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridChoices.Array.data[31]'
-      value: 16
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
+        type: 3}
+      propertyPath: 'GridChoices.Array.data[33]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridChoices.Array.data[34]'
-      value: 16
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
+        type: 3}
+      propertyPath: 'GridChoices.Array.data[35]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
@@ -3228,7 +3248,7 @@ PrefabInstance:
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridTerrainParts.Array.data[25]'
-      value: 7
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
@@ -3238,7 +3258,7 @@ PrefabInstance:
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridTerrainParts.Array.data[28]'
-      value: 8
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
@@ -3248,7 +3268,7 @@ PrefabInstance:
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridTerrainParts.Array.data[31]'
-      value: 8
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
@@ -3258,7 +3278,7 @@ PrefabInstance:
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridTerrainParts.Array.data[34]'
-      value: 9
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}

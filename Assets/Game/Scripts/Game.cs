@@ -577,7 +577,7 @@ public class Game : MonoBehaviour
         //Vector3 gridOrigin = new Vector3(-5f, -0.24f, 5f);
         //float gridExtent = 15;
 
-        Vector3 gridTerrainOrigin = new Vector3(-5f, -0.24f, 5f);
+        Vector3 gridTerrainOrigin = new Vector3(-5f, 0, 5f);
 
         float squeezeX = 3.5f; // 0.8f; // Update 2: even closer
         Vector3 gridOrigin = new Vector3(-5f + squeezeX, -0.24f, 5f);
@@ -602,7 +602,7 @@ public class Game : MonoBehaviour
                         GameObject ob = obstaclePools[obstacle][nextObIndex];
                         ob.SetActive(true);
 
-                        if (obstacle == 16 || obstacle == 17 || obstacle == 18)
+                        if (true)//obstacle == 16 || obstacle == 17 || obstacle == 18)
                         {
                             // Same as terrain.
                             ob.transform.position = gridTerrainOrigin + new Vector3(
