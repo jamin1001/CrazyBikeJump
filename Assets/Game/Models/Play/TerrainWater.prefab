@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6591817467333177063}
   - component: {fileID: 2063346991091239819}
   - component: {fileID: 653627367023250867}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: water
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2477211841346351705}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TerrainWater
   m_TagString: Untagged
   m_Icon: {fileID: 0}

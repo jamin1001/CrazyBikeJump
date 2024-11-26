@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6702536574147994013}
   - component: {fileID: 1125490070306612023}
   - component: {fileID: 157156897400829900}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: tile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,7 +118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5601150285995171572}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: terrain-R-H4_city
   m_TagString: Untagged
   m_Icon: {fileID: 0}

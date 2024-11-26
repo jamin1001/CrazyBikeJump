@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1152494568559843657}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: TerrainPit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 4404146635549682559}
   - component: {fileID: 4468967681529424789}
   - component: {fileID: 789776241686117180}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: block
   m_TagString: Untagged
   m_Icon: {fileID: 0}

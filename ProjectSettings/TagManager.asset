@@ -4,7 +4,6 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Cow
   - Horse
   - Sheep
   - Barrel
@@ -21,6 +20,7 @@ TagManager:
   - Flag3
   - Atm
   - Wall
+  - Terrain
   layers:
   - Default
   - TransparentFX
@@ -28,7 +28,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Terrain
   - 
   - 
   - 

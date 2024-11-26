@@ -55,8 +55,8 @@ public class UseMenu : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+ 
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
             {
               
                 if(hit.collider.gameObject == leftArrow)

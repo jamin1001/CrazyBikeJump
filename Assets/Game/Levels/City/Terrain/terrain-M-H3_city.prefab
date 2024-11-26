@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 6722682478866265525}
   - component: {fileID: 2507899333273275744}
   - component: {fileID: 9176433863356924665}
-  m_Layer: 0
+  - component: {fileID: 1218352029447627287}
+  m_Layer: 6
   m_Name: tile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,6 +87,28 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &1218352029447627287
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2789079629669323436}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -4765187370794481141, guid: e528aa0fe5dec184698e736a09fa5018, type: 3}
 --- !u!1 &7179731227349702145
 GameObject:
   m_ObjectHideFlags: 0
@@ -95,7 +118,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7879631909948804634}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: terrain-M-H3_city
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -16,6 +16,10 @@ public class Bike : MonoBehaviour
     public AudioSource JumpFallAudio;
     public AudioSource ScreechAudio;
     public AudioSource LandThudAudio;
+    public AudioSource WheelThud0Audio;
+    public AudioSource WheelThud1Audio;
+    public AudioSource WheelThud2Audio;
+    public AudioSource WheelThud3Audio;
     public AudioSource WindAudio;
  
     public float BikeCyclePitchScale = 0.2f;
@@ -70,7 +74,25 @@ public class Bike : MonoBehaviour
     {
         LandThudAudio.Play();
     }
-
+    public void WheelThud(int wheelLevel)
+    {
+        switch(wheelLevel)
+        {
+            case 0:
+                WheelThud0Audio.Play();
+                break;
+            case 1:
+                WheelThud1Audio.Play();
+                break;
+            case 2:
+                WheelThud2Audio.Play();
+                break;
+            case 3:
+                WheelThud3Audio.Play();
+                break;
+        }
+   
+    }
 
     public void Pedaled(float bikeSpeed)
     {

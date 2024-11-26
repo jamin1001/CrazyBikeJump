@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4016520228879680144}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: terrain-L-H0_city
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 17416040742621854}
   - component: {fileID: 796788498573691449}
   - component: {fileID: 1456722231103942236}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: tile
   m_TagString: Untagged
   m_Icon: {fileID: 0}

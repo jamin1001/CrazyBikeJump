@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -26,10 +27,13 @@ public class Game : MonoBehaviour
 
     // Object Refs
     public Bike GameBike;
+    public GameObject GameBikeBase;
     public GameObject FrontWheel;
     public GameObject BackWheel;
     public GameObject HandleBars;
     public GameObject FinishBlock;
+    public GameObject FrontWheelProj;
+    public GameObject BackWheelProj;
 
     // Gui Params
     public RectTransform SpeedGaugeAdjuster;
@@ -114,6 +118,7 @@ public class Game : MonoBehaviour
 
     GridPicker gridPicker;
     public GameGui GameGui { get; set; }
+    public object Quaterion { get; private set; }
 
     // Game Layout
     int levelCount;
@@ -148,6 +153,9 @@ public class Game : MonoBehaviour
     int[] starCount = new int[3];
     int[] flagCount = new int[3];
     int coinCount = 0;
+
+    // Bike State
+    int wheelLevel = 0; // 0 = same, 1 = front down, 2 = back down too, 3 = front up 
 
     // Timings
     public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
@@ -216,7 +224,7 @@ public class Game : MonoBehaviour
         GameGui = GetComponent<GameGui>();
 
         // Get fixed references that do not change ever, such as between world loads. 
-        bikeInst = GameObject.Find("Bike").transform.gameObject;
+        bikeInst = GameObject.Find("BikeBase").transform.gameObject;
         levelFolder = GameObject.Find("LoadedLevel").transform;
         obstacleFolder = GameObject.Find("Obstacles").transform;
         landFolder = GameObject.Find("Lands").transform; ;
@@ -683,7 +691,7 @@ public class Game : MonoBehaviour
         //Vector3 mousePos = Input.mousePosition;
         float pixelsAwayFromMiddle = 0;
         float fromMiddle = 0;
-        Vector3 oldPos = GameBike.transform.position;
+        Vector3 oldPos = GameBike.transform.localPosition;
 
         if (IsBikeCrashed)
             return;
@@ -773,7 +781,7 @@ public class Game : MonoBehaviour
                     if (bikeSpeed > BikeMaxSpeed)
                         bikeSpeed = BikeMaxSpeed;
                 }
-                
+
             }
         }
 
@@ -810,7 +818,7 @@ public class Game : MonoBehaviour
                 bikeJumpSpeed += BikeJump3SpeedBoost;
                 JumpCount++;
                 jumpElapsed = 0;
-                savedBikeTilt = BikeJumpTilt * GameBike.transform.position.y;
+                savedBikeTilt = BikeJumpTilt * GameBike.transform.localPosition.y;
 
                 // Special FX since this is the 3RD jump after all...
                 GameBike.StartWind();
@@ -847,14 +855,60 @@ public class Game : MonoBehaviour
             bikeSpeed -= BikeDecel * dt;
             if (bikeSpeed < 0)
                 bikeSpeed = 0;
+
+            // Tilt bike if wheels are on different levels.
+            int layerMask = LayerMask.GetMask("Terrain");
+            Ray frontRay = new Ray(FrontWheel.transform.position, Vector3.down);
+            if (Physics.Raycast(frontRay, out RaycastHit frontHit, Mathf.Infinity, layerMask))
+            {
+                FrontWheelProj.transform.position = frontHit.point;
+            }
+            Ray backRay = new Ray(BackWheel.transform.position, Vector3.down);
+            if (Physics.Raycast(backRay, out RaycastHit backHit, Mathf.Infinity, layerMask))
+            {
+                BackWheelProj.transform.position = backHit.point;
+            }
+
+            Vector3 eulers = GameBike.transform.localRotation.eulerAngles;
+            eulers.x = -(90f - (180f / Mathf.PI) * (Mathf.Atan2(frontHit.point.z - backHit.point.z, frontHit.point.y - backHit.point.y)));
+            GameBike.transform.localRotation = Quaternion.Euler(eulers);
+
+            GameBikeBase.transform.localPosition = new Vector3(0,
+                0.25f + (BackWheelProj.transform.position.y + FrontWheelProj.transform.position.y) / 2f, 0);
+
+            int oldWheelLevel = wheelLevel;
+
+            if (BackWheelProj.transform.position.y - FrontWheelProj.transform.position.y > 0.01f)
+                wheelLevel = 1;
+            else if (FrontWheelProj.transform.position.y - BackWheelProj.transform.position.y > 0.01f)
+                wheelLevel = 2;
+            else
+                wheelLevel = 0;
+
+            if(wheelLevel != oldWheelLevel)
+            {
+                // first tire down
+                if(wheelLevel == 1)
+                    GameBike.WheelThud(0);
+                // back tire down too
+                else if(wheelLevel == 0 && oldWheelLevel == 1)
+                    GameBike.WheelThud(1);
+                // first tire up
+                else if(wheelLevel == 2)
+                    GameBike.WheelThud(2);
+                // back tire up too
+                else if(wheelLevel == 0 && oldWheelLevel == 2)
+                    GameBike.WheelThud(3);
+
+            } 
         }
 
         // Jumping Vertical Accel/Decel.
         if (isJumping)
         {
-            GameBike.transform.position += new Vector3(0, dt * bikeJumpSpeed, 0);
+            GameBike.transform.localPosition += new Vector3(0, dt * bikeJumpSpeed, 0);
 
-            if (GameBike.transform.position.y > oldPos.y) // rising
+            if (GameBike.transform.localPosition.y > oldPos.y) // rising
             {
                 if(JumpCount == 1)
                     bikeJumpSpeed += dt * -BikeJumpDecelRise;
@@ -888,7 +942,7 @@ public class Game : MonoBehaviour
 
             // Tilting back.
             float bikeTilt = 0;
-            if (GameBike.transform.position.y > BikeJumpTiltThreshold || JumpCount == 3)
+            if (GameBike.transform.localPosition.y > BikeJumpTiltThreshold || JumpCount == 3)
             {
                 if (JumpCount == 3)
                 {
@@ -896,13 +950,13 @@ public class Game : MonoBehaviour
                     savedBikeTilt += BikeJumpUntiltSpeed * dt; // Will continue to keep tilting forward.
                 }
                 else
-                    bikeTilt = BikeJumpTilt * GameBike.transform.position.y;
+                    bikeTilt = BikeJumpTilt * GameBike.transform.localPosition.y;
             }
 
             // Hitting the ground.            
-            if (GameBike.transform.position.y < 0)
+            if (GameBike.transform.localPosition.y < 0)
             {
-                GameBike.transform.position = new Vector3(GameBike.transform.position.x, 0, GameBike.transform.position.z);
+                GameBike.transform.localPosition = new Vector3(GameBike.transform.localPosition.x, 0, GameBike.transform.localPosition.z);
                 bikeJumpSpeed = 0f;
                 isJumping = false;
                 JumpCount = 0;
@@ -927,7 +981,7 @@ public class Game : MonoBehaviour
         // Moving.
         if (bikeSpeed > 0)
         {
-            GameBike.transform.position += new Vector3(dt * BikeTurnTranslation * fromMiddle, 0, dt * bikeSpeed + transform.position.z);
+            GameBike.transform.localPosition += new Vector3(dt * BikeTurnTranslation * fromMiddle, 0, dt * bikeSpeed + transform.position.z);
 
             FrontWheel.transform.localRotation *= Quaternion.Euler(dt * BikeWheelSpeedVisualFactor * bikeSpeed, 0, 0);
             BackWheel.transform.localRotation *= Quaternion.Euler(dt * BikeWheelSpeedVisualFactor * bikeSpeed, 0, 0);
@@ -983,7 +1037,7 @@ public class Game : MonoBehaviour
     { 
         IsBikeRestarting = true;
         yield return Game.Inst.WaitRestartFinish;
-        GameBike.transform.position = Vector3.zero;
+        GameBike.transform.localPosition = Vector3.zero;
         ResetBikeRotation();
         GameBike.ResetMovingCars();
         if (nextLevel)
