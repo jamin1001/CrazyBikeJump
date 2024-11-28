@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.ParticleSystem;
 
@@ -145,6 +146,9 @@ public class Bike : MonoBehaviour
        
     }
 
+
+    //////////////// COLLISION ENTER
+ 
     void OnCollisionEnter(Collision collision)
     {
         // If already crashed, don't be adding other things.
@@ -152,7 +156,9 @@ public class Bike : MonoBehaviour
             return;
 
         GameObject otherOb = collision.collider.gameObject;
+        GameObject parentOfOtherOb = otherOb.gameObject.transform.parent.gameObject;
         string obName = otherOb.name;
+        string parentName = parentOfOtherOb.name;
 
         // CAPSULE
         if (collision.collider is CapsuleCollider)
@@ -170,8 +176,8 @@ public class Bike : MonoBehaviour
                 xOffset = -1f;
 
             // Object sounds from being hit!
-            if (obName.Contains("cow") || obName.Contains("horse") || obName.Contains("sheep"))
-                otherOb.GetComponent<AudioSource>().Play();
+            if(parentOfOtherOb.name.Contains("animal"))
+                parentOfOtherOb.GetComponent<AudioSource>().PlayDelayed(0.3f);
                 
             CrashParticlesPrefab.transform.position = collision.transform.position + new Vector3(xOffset, 1f, -0.5f);
             CrashParticlesPrefab.Play();
@@ -180,6 +186,7 @@ public class Bike : MonoBehaviour
             Game.Inst.BikeCrashed();
             StartCoroutine(StopEverything());
         }
+
         // BOX
         else if(collision.collider is BoxCollider)
         {
@@ -268,6 +275,65 @@ public class Bike : MonoBehaviour
             }
             
         }    
+    
+        // MESH COLLIDER
+        else if(collision.collider is MeshCollider)
+        {
+            // Hitting the hexring means we have errored on this one, so turn red.
+            if (otherOb.name.Contains("hexring"))
+            {
+                // If the hexpanel is still turned off and we hit the border, then it is a fail.
+                if (parentOfOtherOb.transform.GetChild(1).gameObject.active)
+                {
+                    otherOb.GetComponent<AudioSource>().PlayDelayed(0.2f);
+
+                    // Turn off hex panel and turn on error hex panel.
+                    parentOfOtherOb.transform.GetChild(1).gameObject.SetActive(false);
+                    parentOfOtherOb.transform.GetChild(2).gameObject.SetActive(true);
+                }
+
+            }
+            else if (otherOb.name.Contains("hexpanel"))
+            {
+                // If the error hexpanel is still turned off and we hit the panel, then it is a success.
+                if (!parentOfOtherOb.transform.GetChild(2).gameObject.active) {
+
+                    parentOfOtherOb.GetComponent<AudioSource>().PlayDelayed(0.2f);
+
+                    // Turn off the hex panel, it has been "collected".
+                    otherOb.SetActive(false);
+
+                    // Hacky: Copied from below.
+                    Vector3 starFxPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
+                    ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
+
+                    if (parentName.Contains("1"))
+                    {
+                        CollectBronzeParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectBronzeParticlesPrefab.Play();
+                        CollectBronzeParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                        CollectBronzeParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+                        Game.Inst.CollectStar(0);
+                    }
+                    else if (parentName.Contains("2"))
+                    {
+                        CollectSilverParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectSilverParticlesPrefab.Play();
+                        CollectSilverParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                        CollectSilverParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+                        Game.Inst.CollectStar(1);
+                    }
+                    else if (parentName.Contains("3"))
+                    {
+                        CollectGoldParticlesPrefab.transform.localPosition = starFxPosition;
+                        CollectGoldParticlesPrefab.Play();
+                        CollectGoldParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                        CollectGoldParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+                        Game.Inst.CollectStar(2);
+                    }
+                }
+            }
+        }
     }
 
     IEnumerator StopEverything()
@@ -277,15 +343,7 @@ public class Bike : MonoBehaviour
 
     }
 
-    void DoTheSquish()
-    {
-
-    }
-
-    void DoTheSpinout()
-    {
-       
-    }
+    //////////////// COLLISION EXIT
 
     void OnCollisionExit(Collision collision)
     {
@@ -294,149 +352,124 @@ public class Bike : MonoBehaviour
 
         if (collision.collider is BoxCollider)
         {
-            GameObject otherOb = collision.collider.gameObject;
+            // Object that has the box component you are colliding into.
+            GameObject boxOb = collision.collider.gameObject;
 
             if (!Game.Inst.IsBikeRestarting)
             {
-                string obName = otherOb.name;
+                string boxObName = boxOb.name;
 
-                // BOXES ARE SWERVE AROUND
-                if (obName.Contains("swerve"))
+                // SWERVE BOXES
+                if (boxObName.Contains("swerve"))
                 {
-
-                    if (transform.position.z > otherOb.transform.position.z) // Ignores the reset case where the bike ends up at the start and so is BEHIND the swerved object.
+                    if (transform.position.z > boxOb.transform.position.z) // Ignores the reset case where the bike ends up at the start and so is BEHIND the swerved object.
                     {
-                        string parentName = otherOb.transform.parent.gameObject.name;
+                        string parentName = boxOb.transform.parent.gameObject.name;
 
-                        if (parentName.Contains("cone"))
+                        // Barriers get squishy when passed.
+                        if (parentName.Contains("barrier"))
                         {
-                            otherOb.transform.parent.GetChild(2).GetComponent<MMPathMovement>().enabled = true;
+                            // Turn on crazy move.
+                            boxOb.transform.parent.GetChild(0).GetComponent<MMPathMovement>().enabled = true;
 
                             // Turn off all collisions too.
-                            otherOb.transform.parent.GetChild(2).GetChild(0).GetChild(0).GetComponent<BoxCollider>().enabled = false; // model
-                            otherOb.transform.parent.GetChild(2).GetChild(0).GetChild(0).GetComponent<CapsuleCollider>().enabled = false; // model
-                            otherOb.transform.parent.GetChild(0).GetComponent<BoxCollider>().enabled = false; // left swerve
-                            otherOb.transform.parent.GetChild(1).GetComponent<BoxCollider>().enabled = false; // right swerve
+                            boxOb.transform.parent.GetChild(0).GetChild(0).GetChild(0).GetComponent<BoxCollider>().enabled = false; // model
+                            boxOb.transform.parent.GetChild(0).GetChild(0).GetChild(0).GetComponent<CapsuleCollider>().enabled = false; // model
+                            boxOb.transform.parent.GetChild(1).GetComponent<BoxCollider>().enabled = false; // left swerve
+                            boxOb.transform.parent.GetChild(2).GetComponent<BoxCollider>().enabled = false; // right swerve
                         }
 
-                        /*
+                        // When in swerve mode, these continue it.
                         SwerveAudio.Play();
                         SwerveParticlesPrefab.Play();
                         Game.Inst.Swerve();
 
-                        string parentName = otherOb.transform.parent.gameObject.name;
-
-                        if (parentName.Contains("cow") || parentName.Contains("horse") || parentName.Contains("sheep"))
-                            otherOb.GetComponent<AudioSource>().Play();
-                        */
+                        if (parentName.Contains("animal"))
+                        {
+                            // Play swerve sound.
+                            boxOb.GetComponent<AudioSource>().PlayDelayed(0.3f);
+                        }
                     }
                     
                 }
 
-                // AND EXCEPT FOR PRIZE BOXES
-                else if (!obName.Contains("Atm") && !obName.Contains("Flag") && !obName.Contains("carDanger"))
+                // NORMAL BOXES (NOT PRIZE OR DANGER BOXES)
+                else if (!boxObName.Contains("Flag") && !boxObName.Contains("carDanger"))
                 {
                     Vector3 starFxPosition = transform.localPosition + new Vector3(0, 0.5f, 0); // add a little height
 
                     // In this approach, the type of object jumped gets the corresponding reward.
-                    // Hack for now, later use tag lookup.
-                    if (
-                        obName.Contains("sheep") ||
-                        obName.Contains("cone") ||
-                        obName.Contains("passenger"))
+                    if (boxObName.Contains("action"))
                     {
-                        CollectBronzeParticlesPrefab.transform.localPosition = starFxPosition;
-                        CollectBronzeParticlesPrefab.Play();
-                        CollectBronzeParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
-                        Game.Inst.CollectStar(0);
+                        // DO ACTION
 
-                        ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
-                        CollectBronzeParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
-
-                        if(obName.Contains("cone")) {
-                            //otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
-                            //otherOb.transform.GetChild(2).GetComponent<MMPathMovement>().enabled = true;
-                            //otherOb.transform.parent.parent.GetComponent<MMPathMovement>().enabled = true;
-
+                        // Spin away barriers.
+                        if(boxObName.Contains("barrier"))
+                        {
                             // Spin it outta here.
 
                             // Move up and out (and left/right random).
-
-                            MMPathMovement mpath = otherOb.transform.GetComponent<MMPathMovement>();//.enabled = true;
+                            MMPathMovement mpath = boxOb.transform.GetComponent<MMPathMovement>();
                             mpath.enabled = true;
                             mpath.PathElements[1].PathElementPosition.x = Random.Range(-5f, 5f);
 
                             // Twirl around.
-                            otherOb.transform.GetComponent<MMAutoRotate>().enabled = true;
+                            boxOb.transform.GetComponent<MMAutoRotate>().enabled = true;
 
                             // This locks rotation so make sure we clear it.
-                            otherOb.transform.parent.GetComponent<MMSquashAndStretch>().enabled = false;
+                            boxOb.transform.parent.GetComponent<MMSquashAndStretch>().enabled = false;
 
                             // Turn off all collisions too.
-                            otherOb.transform.GetComponent<BoxCollider>().enabled = false; // model
-                            otherOb.transform.GetComponent<CapsuleCollider>().enabled = false; // model
-                            otherOb.transform.parent.parent.parent.GetChild(0).GetComponent<BoxCollider>().enabled = false; // left swerve
-                            otherOb.transform.parent.parent.parent.GetChild(1).GetComponent<BoxCollider>().enabled = false; // right swerve
+                            boxOb.transform.GetComponent<BoxCollider>().enabled = false; // model
+                            boxOb.transform.GetComponent<CapsuleCollider>().enabled = false; // model
+                            boxOb.transform.parent.parent.parent.GetChild(0).GetComponent<BoxCollider>().enabled = false; // left swerve
+                            boxOb.transform.parent.parent.parent.GetChild(1).GetComponent<BoxCollider>().enabled = false; // right swerve
+                        }
+                        // Jump small animals.
+                        else if(boxObName.Contains("1animal"))
+                        {
+                            // This enables wiggling which needs to be turned off if the level is reset.
+                            MMPathMovement mpath = boxOb.transform.GetComponent<MMPathMovement>();
+                            mpath.enabled = true;
+                            mpath.PathElements[0].PathElementPosition.y = 0.2f;
+                            mpath.PathElements[1].PathElementPosition.y = -0.1f;
                         }
 
+                        if(boxObName.Contains("animal")) {
+                            // Play the squeak sound or whatever.
+                            boxOb.GetComponent<AudioSource>().Play();
+                        }
 
-                    }
-                        else if (
-                        obName.Contains("horse") ||
-                        obName.Contains("tires") || obName.Contains("barrel") ||
-                        obName.Contains("police") || obName.Contains("hippie"))
-                    {
-                        CollectSilverParticlesPrefab.transform.localPosition = starFxPosition;
-                        CollectSilverParticlesPrefab.Play();
-                        CollectSilverParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
-                        Game.Inst.CollectStar(1);
+                        // AWARD STAR
 
                         ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
-                        CollectSilverParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
-
-                        //otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
+                       
+                        if (boxObName.Contains("1"))
+                        {
+                            CollectBronzeParticlesPrefab.transform.localPosition = starFxPosition;
+                            CollectBronzeParticlesPrefab.Play();
+                            CollectBronzeParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                            CollectBronzeParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+                            Game.Inst.CollectStar(0);
+                        }
+                        else if(boxObName.Contains("2"))
+                        {
+                            CollectSilverParticlesPrefab.transform.localPosition = starFxPosition;
+                            CollectSilverParticlesPrefab.Play();
+                            CollectSilverParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                            CollectSilverParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+                            Game.Inst.CollectStar(1);
+                        }
+                        else if (boxObName.Contains("3"))
+                        {
+                            CollectGoldParticlesPrefab.transform.localPosition = starFxPosition;
+                            CollectGoldParticlesPrefab.Play();
+                            CollectGoldParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
+                            CollectGoldParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
+                            Game.Inst.CollectStar(2);
+                        }
 
                     }
-                    else if(
-                        obName.Contains("cow") ||
-                        obName.Contains("concrete") ||
-                        obName.Contains("formula") || obName.Contains("truck"))
-                    {
-                        CollectGoldParticlesPrefab.transform.localPosition = starFxPosition;
-                        CollectGoldParticlesPrefab.Play();
-                        CollectGoldParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
-                        Game.Inst.CollectStar(2);
-
-                        ParticleSystem.Burst burst = new ParticleSystem.Burst(0, 1, 1, 1, 0.01f);
-                        CollectGoldParticlesPrefab.emission.SetBursts(new ParticleSystem.Burst[] { burst });
-
-                        // otherOb.GetComponent<Renderer>().material = Game.Inst.DissolveMaterials[0];
-                    }
-
-                    // This approach plays the fixed star count embedded in the particle object. Higher stars for more jumps.
-                    /*
-                    if (Game.Inst.JumpCount == 1)
-                    {
-                        CollectBronzeParticlesPrefab.transform.localPosition = starFxPosition;
-                        CollectBronzeParticlesPrefab.Play();
-                        CollectBronzeParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
-                        Game.Inst.CollectStar(0);
-                    }
-                    else if(Game.Inst.JumpCount == 2)
-                    {
-                        CollectSilverParticlesPrefab.transform.localPosition = starFxPosition;
-                        CollectSilverParticlesPrefab.Play();
-                        CollectSilverParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
-                        Game.Inst.CollectStar(1);
-                    }
-                    else if(Game.Inst.JumpCount == 3)
-                    {
-                        CollectGoldParticlesPrefab.transform.localPosition = starFxPosition;
-                        CollectGoldParticlesPrefab.Play();
-                        CollectGoldParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
-                        Game.Inst.CollectStar(2);
-                    }
-                    */
                     
                 }
 

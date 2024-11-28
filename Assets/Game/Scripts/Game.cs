@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using MoreMountains.Tools;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Burst.CompilerServices;
@@ -8,6 +9,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 #if UNITY_EDITOR
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 using static UnityEngine.InputManagerEntry;
 #endif
 
@@ -350,7 +352,7 @@ public class Game : MonoBehaviour
         // Here we calculuation max for each thing so that we can instantiate in pools what we need.
         for (int l = 0; l < levelCount; l++)
         {
-            // OBSTACLE
+            // OBSTACLE MAXES
 
             // Clear it, since we recount obstacles each level.
             for (int i = 0; i < obstacleCount; i++)
@@ -405,7 +407,7 @@ public class Game : MonoBehaviour
 
 #endif
 
-            // TERRAIN
+            // TERRAIN MAXES
 
             // Clear it, since we recount terrain parts each level.
             for (int i = 0; i < terrainPartCount; i++)
@@ -429,7 +431,7 @@ public class Game : MonoBehaviour
         }
 
 
-        //// POOL INSTANCING
+        // OBSTACLE POOL INSTANCING
 
         // Instance the required obstacles (except null first element so i starts at 1)
         // and intially disable them.
@@ -463,6 +465,8 @@ public class Game : MonoBehaviour
         // Instance the required seas and intially disable them. (TODO) 
 #endif
 
+        // TERRAIN POOL INSTANCING
+        
         // Instance the required terrain parts and intially disable them.
         for (int i = 0; i < terrainPartCount; i++)
         {
@@ -601,33 +605,7 @@ public class Game : MonoBehaviour
                     // This is always within the given grid block we are referencing.
                     int gridIndex = Cols * r + c;
 
-                    // The (grids - 1) - g is reversing the sense of g as the increasing grid index and is pulling from the bottom up of the Editor scroll area.
-                    int obstacle = choicesGrid[currentLevel][(grids - 1) - g][gridIndex];
-
-                    if (obstacle > 0) // Instance everything but the null obstacle.
-                    {
-                        int nextObIndex = obstacleCountNextLevel[obstacle];
-                        GameObject ob = obstaclePools[obstacle][nextObIndex];
-                        ob.SetActive(true);
-
-                        if (true)//obstacle == 16 || obstacle == 17 || obstacle == 18)
-                        {
-                            // Same as terrain.
-                            ob.transform.position = gridTerrainOrigin + new Vector3(
-                            c * 5,
-                            0,
-                            g * 15 - r * 5);
-                        }
-                        else
-                        {
-                            ob.transform.position = gridOrigin + new Vector3(
-                                c * tileExtentX, // skip over current columns
-                                0,
-                                g * 2 * gridExtent - r * 2 * tileExtentZ); // skip over previous grids and current rows; x2 to double scale along z now (Update 2)
-                        }
-                        // Will be enabling the next in line in the next go-around (if we get there).
-                        obstacleCountNextLevel[obstacle]++;
-                    }
+                    //// TERRAIN INSTANCING
 
                     int terrainPart = terrainPartsGrid[currentLevel][(grids - 1) - g][gridIndex]; // not there is no -1
 
@@ -644,6 +622,48 @@ public class Game : MonoBehaviour
                         // Will be enabling the next in line in the next go-around (if we get there).
                         terrainPartsCountNextLevel[terrainPart]++;
                     }
+
+                    //// OBSTACLE INSTANCING
+
+                    // The (grids - 1) - g is reversing the sense of g as the increasing grid index and is pulling from the bottom up of the Editor scroll area.
+                    int obstacle = choicesGrid[currentLevel][(grids - 1) - g][gridIndex];
+
+                    if (obstacle > 0) // Instance everything but the null obstacle.
+                    {
+                        int nextObIndex = obstacleCountNextLevel[obstacle];
+                        GameObject ob = obstaclePools[obstacle][nextObIndex];
+                        ob.SetActive(true);
+
+                        if (true)//obstacle == 16 || obstacle == 17 || obstacle == 18)
+                        {
+                            // Same as terrain.
+                            ob.transform.position = gridTerrainOrigin + new Vector3(
+                            c * 5,
+                            0,
+                            g * 15 - r * 5);
+
+                            /* This is too premature, seems we must wait a frame.
+                            // Place down on terrain.f
+                            int layerMask = LayerMask.GetMask("Terrain");
+                            Ray downRay = new Ray(ob.transform.position + new Vector3(-2, 5, 0), Vector3.down);
+                            if (Physics.Raycast(downRay, out RaycastHit downHit, Mathf.Infinity, layerMask))
+                            {
+                                ob.transform.position = downHit.point;
+                            }
+                            */
+                        }
+                        else
+                        {
+                            ob.transform.position = gridOrigin + new Vector3(
+                                c * tileExtentX, // skip over current columns
+                                0,
+                                g * 2 * gridExtent - r * 2 * tileExtentZ); // skip over previous grids and current rows; x2 to double scale along z now (Update 2)
+                        }
+                        // Will be enabling the next in line in the next go-around (if we get there).
+                        obstacleCountNextLevel[obstacle]++;
+                    }
+
+                    
                 }
 
 #if false
@@ -671,6 +691,17 @@ public class Game : MonoBehaviour
         FinishBlock.transform.position = new Vector3(0, -0.24f, 2 * grids * 15f); // Update 2: x2 in z direction
     }
 
+    public KeyCode pauseKey = KeyCode.P; // The key to toggle pause
+    private bool isPaused = false;
+
+    void TogglePause()
+    {
+        isPaused = !isPaused;
+        Time.timeScale = isPaused ? 0f : 1f;
+        Debug.Log("Game " + (isPaused ? "Paused" : "Resumed"));
+    }
+
+
     void Update()
     {
         if (!IsLevelLoaded)
@@ -684,7 +715,33 @@ public class Game : MonoBehaviour
         }
 
         if (!bikeInst.active)
+        {
             bikeInst.SetActive(true);
+
+            for (int c = 0; c < obstacleFolder.childCount; c++)
+            {
+                Transform tr = obstacleFolder.GetChild(c);
+                if (tr.gameObject.name.Contains("Terrain"))
+                    continue; // Skip water, etc.
+
+
+                // Place down on terrain.
+                int layerMask = LayerMask.GetMask("Terrain");
+                Ray downRay = new Ray(tr.position + new Vector3(0, 5, 0), Vector3.down);
+                if (Physics.Raycast(downRay, out RaycastHit downHit, Mathf.Infinity, layerMask))
+                {
+                    tr.localPosition = downHit.point;
+                }
+            }
+            
+
+        }
+
+        if (Input.GetKeyDown(pauseKey))
+        {
+            TogglePause();
+        }
+
 
         // Cache some values.
         float dt = Time.deltaTime;
@@ -1040,6 +1097,32 @@ public class Game : MonoBehaviour
         GameBike.transform.localPosition = Vector3.zero;
         ResetBikeRotation();
         GameBike.ResetMovingCars();
+
+        // Reset bouncing animals.
+        for (int c = 0; c < obstacleFolder.childCount; c++)
+        {
+            Transform tr = obstacleFolder.GetChild(c);
+
+            if (tr.gameObject.activeSelf && tr.gameObject.name.Contains("1animal"))
+            {
+                // Stop hopping.
+                Transform trc = tr.GetChild(0);
+                MMPathMovement mpath = trc.transform.GetComponent<MMPathMovement>();
+                mpath.enabled = false;
+                trc.localPosition = new Vector3(trc.localPosition.x, 0, trc.localPosition.z); 
+
+                // Place down on terrain again.
+                int layerMask = LayerMask.GetMask("Terrain");
+                Ray downRay = new Ray(tr.position + new Vector3(0, 5, 0), Vector3.down);
+                if (Physics.Raycast(downRay, out RaycastHit downHit, Mathf.Infinity, layerMask))
+                {
+                    tr.localPosition = downHit.point;
+                }
+
+            }
+        }
+
+
         if (nextLevel)
         {
             StartTheNextLevel();

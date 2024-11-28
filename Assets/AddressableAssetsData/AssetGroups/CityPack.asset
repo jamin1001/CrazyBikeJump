@@ -237,12 +237,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - CityPackAsset
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cdc6f41ab79f65b4598b9c0b12051fc6
-    m_Address: Assets/Game/Levels/City/Animal/1rat.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d178f56817dc86342809e2ac06d3f95d
     m_Address: Assets/Game/Levels/City/Terrain/02B.fbx
     m_ReadOnly: 0
@@ -311,6 +305,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f416ed0ee58d104448b0eba40f3cec3c
     m_Address: Assets/Game/Levels/City/Vehicle/2vehicle-car-police.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f72cd969390feba4fa318ec80fb32708
+    m_Address: Assets/Game/Levels/City/Animal/1animal_rat.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - CityPackAsset

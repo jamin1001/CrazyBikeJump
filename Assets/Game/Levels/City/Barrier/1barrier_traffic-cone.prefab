@@ -29,9 +29,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8714747343572688090}
   - {fileID: 5114468797666559401}
   - {fileID: 6520547305216604111}
-  - {fileID: 8714747343572688090}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1582842663123069163
@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 8714747343572688090}
   - component: {fileID: 7922056616964456445}
   m_Layer: 0
-  m_Name: Moving
+  m_Name: move
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -126,7 +126,7 @@ GameObject:
   - component: {fileID: 1419599013856052824}
   - component: {fileID: 2844579318826838312}
   m_Layer: 0
-  m_Name: Squashing
+  m_Name: squash
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -336,7 +336,7 @@ GameObject:
   - component: {fileID: 5005543273685984328}
   - component: {fileID: 3177051716183295510}
   m_Layer: 0
-  m_Name: traffic-cone
+  m_Name: 1barrier_action
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -382,6 +382,9 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
