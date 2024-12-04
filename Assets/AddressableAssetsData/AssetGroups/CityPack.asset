@@ -105,12 +105,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - CityPackAsset
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 502d44d41d223354187a36fecba0d4f4
-    m_Address: Assets/Game/Levels/City/Barrier/2barrier-barrel.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 519a4117831e4dd45a67fedea506aa25
     m_Address: Assets/Game/Levels/City/Terrain/TerrainCityM-H4.prefab
     m_ReadOnly: 0
@@ -191,12 +185,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: abbf1878ccd458b4bacbfcb4f2c14537
     m_Address: Assets/Game/Levels/City/Terrain/TerrainCityR.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ad96be8a7a02fe142a5eaaf0cf308894
-    m_Address: Assets/Game/Levels/City/Barrier/1barrier-traffic-cone.fbx
     m_ReadOnly: 0
     m_SerializedLabels:
     - CityPackAsset

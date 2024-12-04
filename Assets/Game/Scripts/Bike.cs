@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.ParticleSystem;
@@ -164,19 +165,19 @@ public class Bike : MonoBehaviour
         if (collision.collider is CapsuleCollider)
         {
             // HIT!!!!!!!!!
-            
+
             // Looks better for a flagpole if the crash explosion is sitting directly in line with the pole.
             float xOffset = 0;
+            /* TODO address this without using tags.
             if (collision.gameObject.tag.Contains("Flag"))
                 if (transform.position.x < collision.transform.position.x)
                     xOffset = -1f;
                 else
                     xOffset = 1f;
-            if (collision.gameObject.tag.Contains("Atm"))
-                xOffset = -1f;
+            */
 
             // Object sounds from being hit!
-            if(parentOfOtherOb.name.Contains("animal"))
+            if (parentOfOtherOb.name.Contains("animal"))
                 parentOfOtherOb.GetComponent<AudioSource>().PlayDelayed(0.3f);
                 
             CrashParticlesPrefab.transform.position = collision.transform.position + new Vector3(xOffset, 1f, -0.5f);
@@ -204,12 +205,6 @@ public class Bike : MonoBehaviour
                 CrashWallParticlesPrefab.gameObject.GetComponent<AudioSource>().Play();
                 Game.Inst.BikeCrashed();
                 StartCoroutine(StopEverything());
-            }
-            // ATM PANEL
-            else if(obName.Contains("Atm"))
-            {
-                Debug.LogWarning("Starting ATM...");
-                Game.Inst.StartAtm();
             }
             // FLAG COLLECT
             else if (obName.Contains("Flag"))
@@ -276,7 +271,8 @@ public class Bike : MonoBehaviour
             
         }    
     
-        // MESH COLLIDER
+        // MESH COLLIDER - Since BikeCenter (hitter) is subobject of rigidbody in question, the collision
+        // shape will make it into this method against the collider (hittee).
         else if(collision.collider is MeshCollider)
         {
             // Hitting the hexring means we have errored on this one, so turn red.
@@ -404,14 +400,23 @@ public class Bike : MonoBehaviour
                         // DO ACTION
 
                         // Spin away barriers.
-                        if(boxObName.Contains("barrier"))
+                        if (boxObName.Contains("barrier"))
                         {
                             // Spin it outta here.
 
                             // Move up and out (and left/right random).
                             MMPathMovement mpath = boxOb.transform.GetComponent<MMPathMovement>();
                             mpath.enabled = true;
-                            mpath.PathElements[1].PathElementPosition.x = Random.Range(-5f, 5f);
+
+                            if (boxObName.Contains("1")) {
+                                mpath.PathElements[1].PathElementPosition.x = Random.Range(-1f, 1f);
+                            } else if(boxObName.Contains("2")) {
+                                mpath.PathElements[1].PathElementPosition.x = Random.Range(-2f, 2f);
+                            }
+                            else //if (boxObName.Contains("3"))
+                            {
+                                mpath.PathElements[1].PathElementPosition.x = Random.Range(-4f, 4f);
+                            }
 
                             // Twirl around.
                             boxOb.transform.GetComponent<MMAutoRotate>().enabled = true;
@@ -422,8 +427,8 @@ public class Bike : MonoBehaviour
                             // Turn off all collisions too.
                             boxOb.transform.GetComponent<BoxCollider>().enabled = false; // model
                             boxOb.transform.GetComponent<CapsuleCollider>().enabled = false; // model
-                            boxOb.transform.parent.parent.parent.GetChild(0).GetComponent<BoxCollider>().enabled = false; // left swerve
-                            boxOb.transform.parent.parent.parent.GetChild(1).GetComponent<BoxCollider>().enabled = false; // right swerve
+                            boxOb.transform.parent.parent.parent.GetChild(1).GetComponent<BoxCollider>().enabled = false; // left swerve
+                            boxOb.transform.parent.parent.parent.GetChild(2).GetComponent<BoxCollider>().enabled = false; // right swerve
                         }
                         // Jump small animals.
                         else if(boxObName.Contains("1animal"))

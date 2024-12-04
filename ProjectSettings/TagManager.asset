@@ -3,24 +3,7 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags:
-  - Horse
-  - Sheep
-  - Barrel
-  - Barrier
-  - Tires
-  - Cone
-  - FormulaCar
-  - HippieCar
-  - PassengerCar
-  - PoliceCar
-  - TruckCar
-  - Flag1
-  - Flag2
-  - Flag3
-  - Atm
-  - Wall
-  - Terrain
+  tags: []
   layers:
   - Default
   - TransparentFX
@@ -29,9 +12,9 @@ TagManager:
   - Water
   - UI
   - Terrain
-  - 
-  - 
-  - 
+  - Bike
+  - BikeCenter
+  - BikeCenterReceive
   - 
   - 
   - 

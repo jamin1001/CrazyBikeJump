@@ -392,7 +392,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 3, y: 6, z: 3}
-  m_Center: {x: 0, y: 4.39, z: 0}
+  m_Center: {x: 0, y: 6.83, z: 0}
 --- !u!136 &5061033082288121943
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -412,10 +412,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.51
-  m_Height: 1.02
-  m_Direction: 1
-  m_Center: {x: 0, y: 0.3762975, z: 0}
+  m_Radius: 0.48
+  m_Height: 4.59
+  m_Direction: 2
+  m_Center: {x: 0, y: 2, z: 0}
 --- !u!82 &4234086838796266077
 AudioSource:
   m_ObjectHideFlags: 0
