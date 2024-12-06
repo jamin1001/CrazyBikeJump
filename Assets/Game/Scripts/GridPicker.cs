@@ -19,7 +19,7 @@ public class GridPicker : MonoBehaviour
      "🍔1", "🌳2", "🏢3",        // Scenery
      "🚗1", "🚓2", "🚚3",        // Vehicle
 
-     "❤1", "❤2", "❤3",          // Holes
+     "❤1", "❤2", "❤3",          // Holes - water, tar, pit
      "🚩1", "🚩2", "🚩3",        // Flags
      "🚩💰",                     // Special
      }; // grid choice indexes this
@@ -136,16 +136,6 @@ public class GridPickerUtil
                 int gridsThisLevel = levelStats[l];
                 for (int g = 0; g < gridsThisLevel; g++)
                 {
-                    /*
-                    // Add grid.
-                    List<int> gridValues = new List<int>(Rows * Cols);
-                    for (int i = 0; i < Rows * Cols; i++)
-                    {
-                        gridValues.Add(0); // Initialize with default values (0 in this case)
-                    }
-                    choicesGrid[l].Add(gridValues);
-                    terrainPartsGrid[l].Add(gridValues);
-                    */
                     choicesGrid[l].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
                     terrainPartsGrid[l].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
 

@@ -643,7 +643,7 @@ public class Game : MonoBehaviour
                             g * 15 - r * 5);
 
                             /* This is too premature, seems we must wait a frame.
-                            // Place down on terrain.f
+                    
                             int layerMask = LayerMask.GetMask("Terrain");
                             Ray downRay = new Ray(ob.transform.position + new Vector3(-2, 5, 0), Vector3.down);
                             if (Physics.Raycast(downRay, out RaycastHit downHit, Mathf.Infinity, layerMask))
@@ -688,7 +688,8 @@ public class Game : MonoBehaviour
         }
 #endif
 
-        FinishBlock.transform.position = new Vector3(0, -0.24f, 2 * grids * 15f); // Update 2: x2 in z direction
+        //  Leave one grid past finish for nothing.
+        FinishBlock.transform.position = new Vector3(0, -0.24f, (grids - 1) * 15f); // Update 2: x2 in z direction
     }
 
     public KeyCode pauseKey = KeyCode.P; // The key to toggle pause
@@ -733,15 +734,14 @@ public class Game : MonoBehaviour
                     tr.localPosition = downHit.point;
                 }
             }
-            
-
         }
 
+        /*
         if (Input.GetKeyDown(pauseKey))
         {
             TogglePause();
         }
-
+        */
 
         // Cache some values.
         float dt = Time.deltaTime;
@@ -930,6 +930,7 @@ public class Game : MonoBehaviour
             eulers.x = -(90f - (180f / Mathf.PI) * (Mathf.Atan2(frontHit.point.z - backHit.point.z, frontHit.point.y - backHit.point.y)));
             GameBike.transform.localRotation = Quaternion.Euler(eulers);
 
+            // TODO: Fix hard code 0.25
             GameBikeBase.transform.localPosition = new Vector3(0,
                 0.25f + (BackWheelProj.transform.position.y + FrontWheelProj.transform.position.y) / 2f, 0);
 
@@ -1121,7 +1122,6 @@ public class Game : MonoBehaviour
 
             }
         }
-
 
         if (nextLevel)
         {

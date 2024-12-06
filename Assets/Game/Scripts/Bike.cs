@@ -366,7 +366,8 @@ public class Bike : MonoBehaviour
                         if (parentName.Contains("barrier"))
                         {
                             // Turn on crazy move.
-                            boxOb.transform.parent.GetChild(0).GetComponent<MMPathMovement>().enabled = true;
+                            //boxOb.transform.parent.GetChild(0).GetComponent<MMPathMovement>().enabled = true;
+                            boxOb.transform.parent.GetChild(0).GetChild(0).GetComponent<MMSquashAndStretch>().enabled = true;
 
                             // Turn off all collisions too.
                             boxOb.transform.parent.GetChild(0).GetChild(0).GetChild(0).GetComponent<BoxCollider>().enabled = false; // model

@@ -5,8 +5,6 @@ using UnityEngine.AddressableAssets;
 
 public class FinishLevel : MonoBehaviour
 {
-    public AssetReference myTestRef;
-
     public float FireworksHeightY;
     public float FireworksVariationX;
     public float FireworksVariationY;
@@ -27,7 +25,7 @@ public class FinishLevel : MonoBehaviour
 
     IEnumerator PopPopPop(GameObject obThatEnteredFinishLine)
     {
-        Transform confettiParent = transform.GetChild(3); // Careful: this is a specific child within the Finish scene node.
+        Transform confettiParent = transform.GetChild(2); // Careful: this is a specific child within the FinishLevel scene node.
 
         List<WaitForSecondsRealtime> waitTimes = Game.WaitTimes1;
         int waitCount = waitTimes.Count;

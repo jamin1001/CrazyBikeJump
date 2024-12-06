@@ -1,15 +1,15 @@
 ﻿
-using static Game;
+//using static Game;
 using UnityEditor;
 using UnityEngine;
-using Unity.VisualScripting;
+//using Unity.VisualScripting;
 using System.Collections.Generic;
 using System;
-using PlasticPipe.PlasticProtocol.Messages;
-using log4net.Core;
-using UnityEngine.Rendering;
+//using PlasticPipe.PlasticProtocol.Messages;
+//using log4net.Core;
+//using UnityEngine.Rendering;
 using System.Linq;
-using static Cinemachine.DocumentationSortingAttribute;
+//using static Cinemachine.DocumentationSortingAttribute;
 
 [CustomEditor(typeof(GridPicker))]
 public class GridPickerEditor : Editor
@@ -30,7 +30,7 @@ public class GridPickerEditor : Editor
     static private float buttonWidth = 180;
 
     // Initialize the list of lists for selected indices
-    private List<List<List<int>>> choicesGrid = new();// List<List<List<int>>>();
+    private List<List<List<int>>> choicesGrid = new();
     private List<List<List<int>>> terrainPartsGrid = new(); // Contains [0-14] for water [0-4], tar [5-9], hole indices [10-14]
     private List<string> levelNames = new();
     private List<int> levelLands = new();
@@ -90,16 +90,6 @@ public class GridPickerEditor : Editor
                 int gridsThisLevel = levelStatsProperty.GetArrayElementAtIndex(l).intValue;
                 for (int g = 0; g < gridsThisLevel; g++)
                 {
-                    /*
-                    // Add grid.
-                    List<int> gridValues = new List<int>(Rows * Cols);
-                    for (int i = 0; i < Rows * Cols; i++)
-                    {
-                        gridValues.Add(0); // Initialize with default values (0 in this case)
-                    }
-                    choicesGrid[l].Add(gridValues);
-                    terrainPartsGrid[l].Add(gridValues);
-                    */
                     choicesGrid[l].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
                     terrainPartsGrid[l].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
 
@@ -145,10 +135,8 @@ public class GridPickerEditor : Editor
             {
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-               
                 // Custom Level Name.
                 levelNames[level] = EditorGUILayout.TextField(levelNames[level]);
-
 #if false
 // Land and Sea deprecated for now.
 
@@ -198,13 +186,12 @@ public class GridPickerEditor : Editor
                     levelGolds[level]   = Math.Max(1, bronzeEstimate - 1);
                 }
 
-
                 // Loop through each grid in the current level
                 for (int grid = 0; grid < choicesGrid[level].Count; grid++)
                 {
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
 
-                    EditorGUILayout.LabelField("Grid " + (grid + 1));
+                    EditorGUILayout.LabelField("Grid " + (choicesGrid[level].Count - grid));
 
                     // Loop through each row
                     for (int row = 0; row < Rows; row++)
@@ -230,9 +217,7 @@ public class GridPickerEditor : Editor
                             GUILayout.Label("", style, GUILayout.Height(30), GUILayout.Width(30));
 
                             EditorGUILayout.EndVertical();
-
                         }
-
                         EditorGUILayout.EndHorizontal();
                     }
                     EditorGUILayout.EndVertical();
@@ -241,16 +226,6 @@ public class GridPickerEditor : Editor
                 // Add a button to dynamically add a new grid within the current level
                 if (GUILayout.Button("Add Grid"))
                 {
-                    //selectedOptionIndices[level].Add(new List<int>(numRows * numCols));
-                    /*
-                    List<int> gridValues = new List<int>(Rows * Cols);
-                    for (int i = 0; i < Rows * Cols; i++)
-                    {
-                        gridValues.Add(0); // Initialize with default values (0 in this case)
-                    }
-                    choicesGrid[level].Add(gridValues);
-                    terrainPartsGrid[level].Add(gridValues);
-                    */
                     choicesGrid[level].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
                     terrainPartsGrid[level].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
                 }
@@ -275,8 +250,11 @@ public class GridPickerEditor : Editor
             levelBronzes.Add(6); // Sensible defaults.
             levelSilvers.Add(5);
             levelGolds.Add(4);
-        }
 
+            // Make a minimum of one grid.
+            choicesGrid[0].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
+            terrainPartsGrid[0].Add(Enumerable.Repeat(0, Rows * Cols).ToList());
+        }
 
         // Sync the serialized version now that it has been updated above.
         levelStatsProperty.ClearArray(); // No entries means no levels.
@@ -288,9 +266,6 @@ public class GridPickerEditor : Editor
         levelBronzesProperty.ClearArray();
         levelSilversProperty.ClearArray();
         levelGoldsProperty.ClearArray();
-
-        // Need to build up the terrain each time.
-        //terrainPartsGrid.Clear();
 
         int arraySize = 0;// selectedOptionIndicesProperty.arraySize;
         for (int level = 0; level < choicesGrid.Count; level++)
@@ -323,27 +298,15 @@ public class GridPickerEditor : Editor
             levelGoldsProperty.InsertArrayElementAtIndex(level); // This level index.
             levelGoldsProperty.GetArrayElementAtIndex(level).intValue = levelGolds[level];
 
-            // Update the terrain tiles based on what obstacles were placed.
-            //terrainPartsGrid.Add(new List<List<int>>());
-
             int grids = choicesGrid[level].Count;
             for (int grid = 0; grid < grids; grid++)
             {
-                /*
-                // Add grid.
-                List<int> gridValues = new List<int>(Rows * Cols);
-                for (int i = 0; i < Rows * Cols; i++)
-                {
-                    gridValues.Add(0); // Initialize with default values (0 in this case)
-                }
-                terrainPartsGrid[level].Add(gridValues);
-                */
-
                 for (int row = 0; row < Rows; row++)
                 {
                     for (int col = 0; col < Cols; col++)
                     {
-                        // Grab the value from the data structure and put into the property.
+                        //// Grab the value from the data structure and put into the property.
+                        
                         int cell = row * Cols + col;
 
                         int obIndex = choicesGrid[level][grid][cell];
@@ -357,7 +320,7 @@ public class GridPickerEditor : Editor
                         arraySize++;
 
 
-                        // Terrain part details.
+                        //// Terrain part details.
 
                         // Some useful obIndex values.
                         int WATER = 16;
@@ -369,9 +332,6 @@ public class GridPickerEditor : Editor
                         // 6 7 8
 
                         int terrainPart = 0; // default is no hole
-
-                        //Func<int, int> getCellAbove = c => c - 3; // !isUpperRow
-                        //Func<int, int> getCellBelow = c => c + 3; // !isLowerRow
 
                         Func<int, int> getObTypeAbove = c => c <= 2 ? choicesGrid[level][grid - 1][c + 6] : choicesGrid[level][grid][c - 3]; // !isUpperRow
                         Func<int, int> getObTypeBelow = c => c >= 6 ? choicesGrid[level][grid + 1][c - 6] : choicesGrid[level][grid][c + 3]; // !isLowerRow
@@ -411,7 +371,7 @@ public class GridPickerEditor : Editor
             }
         }
 
-        // Apply any changes to serialized properties
+        // Apply any changes to serialized properties.
         serializedObject.ApplyModifiedProperties();
     }
 }
