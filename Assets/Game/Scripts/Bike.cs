@@ -279,7 +279,7 @@ public class Bike : MonoBehaviour
             if (otherOb.name.Contains("hexring"))
             {
                 // If the hexpanel is still turned off and we hit the border, then it is a fail.
-                if (parentOfOtherOb.transform.GetChild(1).gameObject.active)
+                if (parentOfOtherOb.transform.GetChild(1).gameObject.activeSelf)
                 {
                     otherOb.GetComponent<AudioSource>().PlayDelayed(0.2f);
 
@@ -292,7 +292,7 @@ public class Bike : MonoBehaviour
             else if (otherOb.name.Contains("hexpanel"))
             {
                 // If the error hexpanel is still turned off and we hit the panel, then it is a success.
-                if (!parentOfOtherOb.transform.GetChild(2).gameObject.active) {
+                if (!parentOfOtherOb.transform.GetChild(2).gameObject.activeSelf) {
 
                     parentOfOtherOb.GetComponent<AudioSource>().PlayDelayed(0.2f);
 

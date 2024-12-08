@@ -634,31 +634,31 @@ public class Game : MonoBehaviour
                         GameObject ob = obstaclePools[obstacle][nextObIndex];
                         ob.SetActive(true);
 
-                        if (true)//obstacle == 16 || obstacle == 17 || obstacle == 18)
-                        {
-                            // Same as terrain.
-                            ob.transform.position = gridTerrainOrigin + new Vector3(
-                            c * 5,
-                            0,
-                            g * 15 - r * 5);
 
-                            /* This is too premature, seems we must wait a frame.
-                    
-                            int layerMask = LayerMask.GetMask("Terrain");
-                            Ray downRay = new Ray(ob.transform.position + new Vector3(-2, 5, 0), Vector3.down);
-                            if (Physics.Raycast(downRay, out RaycastHit downHit, Mathf.Infinity, layerMask))
-                            {
-                                ob.transform.position = downHit.point;
-                            }
-                            */
-                        }
-                        else
+                        // Same as terrain.
+                        ob.transform.position = gridTerrainOrigin + new Vector3(
+                        c * 5,
+                        0,
+                        g * 15 - r * 5);
+
+                        /* This is too premature, seems we must wait a frame.
+                        int layerMask = LayerMask.GetMask("Terrain");
+                        Ray downRay = new Ray(ob.transform.position + new Vector3(-2, 5, 0), Vector3.down);
+                        if (Physics.Raycast(downRay, out RaycastHit downHit, Mathf.Infinity, layerMask))
                         {
-                            ob.transform.position = gridOrigin + new Vector3(
-                                c * tileExtentX, // skip over current columns
-                                0,
-                                g * 2 * gridExtent - r * 2 * tileExtentZ); // skip over previous grids and current rows; x2 to double scale along z now (Update 2)
+                            ob.transform.position = downHit.point;
                         }
+                        */
+
+                        /*
+                        ob.transform.position = gridOrigin + new Vector3(
+                            c * tileExtentX, // skip over current columns
+                            0,
+                            g * 2 * gridExtent - r * 2 * tileExtentZ); // skip over previous grids and current rows; x2 to double scale along z now (Update 2)
+                        */
+
+
+
                         // Will be enabling the next in line in the next go-around (if we get there).
                         obstacleCountNextLevel[obstacle]++;
                     }
@@ -715,7 +715,7 @@ public class Game : MonoBehaviour
             return;
         }
 
-        if (!bikeInst.active)
+        if (!bikeInst.activeSelf)
         {
             bikeInst.SetActive(true);
 

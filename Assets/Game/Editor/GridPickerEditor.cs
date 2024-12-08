@@ -25,8 +25,10 @@ public class GridPickerEditor : Editor
     static public int Rows = GridPicker.NumRows; // Number of rows in each grid
     static public int Cols = GridPicker.NumCols; // Number of columns in each grid
     static private float popupWidth = 30;
+#if false
     static private float popupLandWidth = 100;
     static private float popupSeaWidth  = 100;
+#endif
     static private float buttonWidth = 180;
 
     // Initialize the list of lists for selected indices
