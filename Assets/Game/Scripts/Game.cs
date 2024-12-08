@@ -145,7 +145,7 @@ public class Game : MonoBehaviour
 
     GameObject bikeInst = null;
 
-    Transform levelFolder;
+    Transform worldFolder;
     Transform obstacleFolder;
     Transform landFolder;
     Transform seaFolder;
@@ -227,13 +227,14 @@ public class Game : MonoBehaviour
 
         // Get fixed references that do not change ever, such as between world loads. 
         bikeInst = GameObject.Find("BikeBase").transform.gameObject;
-        levelFolder = GameObject.Find("LoadedLevel").transform;
+
+        worldFolder = GameObject.Find("LoadedWorld").transform;
         obstacleFolder = GameObject.Find("Obstacles").transform;
         landFolder = GameObject.Find("Lands").transform; ;
         seaFolder = GameObject.Find("Seas").transform; ;
         terrainPartsFolder = GameObject.Find("TerrainParts").transform;
         bikeInst.SetActive(false);
-        gridPicker = levelFolder.GetChild(0).GetComponent<GridPicker>();
+        gridPicker = worldFolder.GetChild(0).GetComponent<GridPicker>();
 
         Addressables.LoadAssetsAsync<Object>("CityPackAsset", OnAssetLoaded).Completed += OnLoadComplete;
 
@@ -688,8 +689,9 @@ public class Game : MonoBehaviour
         }
 #endif
 
-        //  Leave one grid past finish for nothing.
-        FinishBlock.transform.position = new Vector3(0, -0.24f, (grids - 1) * 15f); // Update 2: x2 in z direction
+        // Leave one grid past finish for nothing.
+        // TODO: May need to adjust this Y based on terrain Y. 
+        FinishBlock.transform.position = new Vector3(0, 0, (grids - 1) * 15f); // Update 2: x2 in z direction
     }
 
     public KeyCode pauseKey = KeyCode.P; // The key to toggle pause

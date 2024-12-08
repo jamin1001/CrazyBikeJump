@@ -4,21 +4,21 @@ using UnityEngine.UIElements;
 
 public class UseMenu : MonoBehaviour
 {
-    public float LevelSpinSpeed;
+    public float WorldSpinSpeed;
     public Transform Target;
     public Camera MenuCamera;
-    public Transform Levels;
+    public Transform WorldOptions;
     public GameObject LeftArrow;
     public GameObject RightArrow;
-    public TextMeshProUGUI LevelTitle; 
+    public TextMeshProUGUI WorldTitle;
 
     public float ArrowXRate;
     public float ArrowYRate;
     public float ArrowXMaxScale;
     public float ArrowYMaxScale;
 
-    int levelIndex = 0;
-
+    int worldIndex = 0;
+    
     void Start()
     {
         
@@ -26,23 +26,23 @@ public class UseMenu : MonoBehaviour
 
     void Update()
     {
-        int c = Levels.childCount;
+        int c = WorldOptions.childCount;
 
         // Hide arrow on first or last level.
         LeftArrow.SetActive(true);
         RightArrow.SetActive(true);
-        if (levelIndex == 0)
+        if (worldIndex == 0)
             LeftArrow.SetActive(false);
-        else if (levelIndex == c - 1)
+        else if (worldIndex == c - 1)
             RightArrow.SetActive(false);
 
         // Rotate current level.
         for (int i = 0; i < c; i++)
         {
-            if(i == levelIndex)
-                Levels.GetChild(i).Rotate(0, LevelSpinSpeed * Time.deltaTime, 0, Space.Self);
+            if(i == worldIndex)
+                WorldOptions.GetChild(i).Rotate(0, WorldSpinSpeed * Time.deltaTime, 0, Space.Self);
             else
-                Levels.GetChild(i).rotation = Quaternion.identity;
+                WorldOptions.GetChild(i).rotation = Quaternion.identity;
         }
 
         // Pulsate arrows.
@@ -61,17 +61,16 @@ public class UseMenu : MonoBehaviour
               
                 if(hit.collider.gameObject == LeftArrow)
                 {
-                    levelIndex = (levelIndex + c - 1) % c;
-                    Target.position = Levels.GetChild(levelIndex).position;
+                    worldIndex = (worldIndex + c - 1) % c;
+                    Target.position = WorldOptions.GetChild(worldIndex).position;
                 }
                 else if(hit.collider.gameObject == RightArrow)
                 {
-                    levelIndex = (levelIndex + c + 1) % c;
-                    Target.position = Levels.GetChild(levelIndex).position;
+                    worldIndex = (worldIndex + c + 1) % c;
+                    Target.position = WorldOptions.GetChild(worldIndex).position;
                 }
 
-                LevelTitle.text = Levels.GetChild(levelIndex).name;
-
+                WorldTitle.text = WorldOptions.GetChild(worldIndex).name;
             }
         }
     }

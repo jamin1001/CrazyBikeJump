@@ -18,10 +18,9 @@ public class GridPicker : MonoBehaviour
      "🔘1", "🔘2", "🔘3",        // Jump
      "🍔1", "🌳2", "🏢3",        // Scenery
      "🚗1", "🚓2", "🚚3",        // Vehicle
-
-     "❤1", "❤2", "❤3",          // Holes - water, tar, pit
+     "🕳1", "🕳2", "🕳3",        // Holes - water, tar, pit
      "🚩1", "🚩2", "🚩3",        // Flags
-     "🚩💰",                     // Special
+     "🚩💰",                      // Special
      }; // grid choice indexes this
 
     static public Dictionary<string, int> ObjNameToEmojiIndex = new() {
