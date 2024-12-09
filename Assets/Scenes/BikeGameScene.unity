@@ -2960,12 +2960,12 @@ PrefabInstance:
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'LevelOpen.Array.data[0]'
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'LevelOpen.Array.data[1]'
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
@@ -5141,6 +5141,7 @@ MonoBehaviour:
   CollectFlagBlueParticlesPrefab: {fileID: 2018565948}
   CollectFlagCoinParticlesPrefab: {fileID: 2042941637}
   WindParticlesPrefab: {fileID: 2099602759}
+  FinishShine: {fileID: 2127308039}
   CarAccel: 20
   CarStartSpeed: 5
 --- !u!54 &978018977
@@ -14364,7 +14365,7 @@ GameObject:
   - component: {fileID: 2127308041}
   - component: {fileID: 2127308042}
   m_Layer: 0
-  m_Name: Shine
+  m_Name: BikeShine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

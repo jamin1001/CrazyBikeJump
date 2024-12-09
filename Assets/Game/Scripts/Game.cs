@@ -103,8 +103,8 @@ public class Game : MonoBehaviour
     bool isOkToScreechAgain = true;
     int currentLevel = -1;
 
-    public bool IsLevelLoaded { get; set; }
-    public bool IsLevelPopulated { get; set; }
+    public bool IsWorldLoaded { get; set; }
+    public bool IsWorldPopulated { get; set; }
     public int JumpCount { get; set; }
     public bool IsBikeRestarting { get; set; }
     public bool IsBikeFinished { get; set; }
@@ -304,13 +304,13 @@ public class Game : MonoBehaviour
 
         
 
-        IsLevelLoaded = true;
+        IsWorldLoaded = true;
 
         //bikeInst.SetActive(true);
     }
 
 
-    void PopulateLevel()
+    void PopulateWorld()
     {
         // TODO: Scale GUI appopriate to device.
 
@@ -707,13 +707,13 @@ public class Game : MonoBehaviour
 
     void Update()
     {
-        if (!IsLevelLoaded)
+        if (!IsWorldLoaded)
             return;
 
-        if (!IsLevelPopulated)
+        if (!IsWorldPopulated)
         {
-            PopulateLevel();
-            IsLevelPopulated = true;
+            PopulateWorld();
+            IsWorldPopulated = true;
             return;
         }
 
@@ -779,9 +779,6 @@ public class Game : MonoBehaviour
         {
             GameBike.Pedaled(bikeSpeed);
         }
-
-        //SpeedGaugeImage.color = new Color(0, 0, 0, 0.7f);
-
 
 #if UNITY_TOUCH_SUPPORTED
         if (Input.touchCount > 0 && Input.touches[0].phase != TouchPhase.Canceled)
@@ -892,7 +889,6 @@ public class Game : MonoBehaviour
                 if (!isSailing)
                 {
                     //GameBike.JumpedFall();
-
                     //GameBike.StartWind();
                 }
 
@@ -1081,6 +1077,12 @@ public class Game : MonoBehaviour
         GameGui.LoseStarFlags();
     }
 
+    public void BikeWon()
+    {
+        GameBike.StartShine();
+        GameBike.StartDance();
+    }
+
     public void Swerve()
     {
         swerveApplied = true;
@@ -1100,6 +1102,7 @@ public class Game : MonoBehaviour
         GameBike.transform.localPosition = Vector3.zero;
         ResetBikeRotation();
         GameBike.ResetMovingCars();
+        GameBike.StopShine();
 
         // Reset bouncing animals.
         for (int c = 0; c < obstacleFolder.childCount; c++)

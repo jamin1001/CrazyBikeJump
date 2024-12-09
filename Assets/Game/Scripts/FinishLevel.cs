@@ -19,6 +19,7 @@ public class FinishLevel : MonoBehaviour
     {
         Game.Inst.IsBikeFinished = true;
         Game.Inst.BikeStopped();
+        Game.Inst.BikeWon();
         FinishLineAudio.Play();
         StartCoroutine(PopPopPop(collision.gameObject)); 
     }

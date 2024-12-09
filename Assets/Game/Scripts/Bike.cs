@@ -39,6 +39,8 @@ public class Bike : MonoBehaviour
     public ParticleSystem CollectFlagCoinParticlesPrefab; // world
     public ParticleSystem WindParticlesPrefab;  // local to bike
 
+    public GameObject FinishShine;
+
     public float CarAccel = 20f;
     public float CarStartSpeed = 5f;
 
@@ -127,6 +129,27 @@ public class Bike : MonoBehaviour
     {
         WindParticlesPrefab.Stop();
     }
+
+    public void StartShine()
+    {
+        FinishShine.SetActive(true);
+    }
+
+    public void StopShine()
+    {
+        FinishShine.SetActive(false);
+    }
+
+    public void StartDance()
+    {
+        
+    }
+
+    public void StopDance()
+    {
+
+    }
+
 
     private void Update()
     {
