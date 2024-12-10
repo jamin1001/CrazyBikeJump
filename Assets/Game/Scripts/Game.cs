@@ -26,102 +26,18 @@ public class Game : MonoBehaviour
     // For instancing the terrain parts. Size is preset in editor already, in case fixed prefabs are assigned.
     public List<GameObject> TerrainPartPrefabs;
 
-
-    // Object Refs
-    public Bike GameBike;
-    public GameObject GameBikeBase;
-    public GameObject FrontWheel;
-    public GameObject BackWheel;
-    public GameObject HandleBars;
-    public GameObject FinishBlock;
-    public GameObject FrontWheelProj;
-    public GameObject BackWheelProj;
-
-    // Gui Params
-    public RectTransform SpeedGaugeAdjuster;
-
-    // Bike Params
-    public float BikeAccel = 10;
-    public float BikeDecel = 5;
-    public float BikeSwerveDecel = 12; // Should be greater than BikeAccel, since we are overcompensating.
-    public float BikeMaxSpeed = 40;
-    public float BikeMaxSpeed2 = 42;
-    public float BikeMaxSpeedGaugePercent = 60;
-    public float BikeTurn = 3;
-    public float BikeTurnTranslation = 3;
-    public float BikeHandleTurn = 20;
-    public float BikeSteerScreenWidth = 50;
-    public float BikeSteerSwipeScale = 0.2f;
-    public float BikeSteerPercentEasyJump = 0.4f;
-    public int BikeSteerSwipeScaleLimit = 20;
-
-    public float BikeJumpStartSpeed = 30f;
-    public float BikeJumpDecelRise = 0.02f;
-    public float BikeJumpDecelFall = 0.02f;
-    public float BikeJumpDecelForward = 2f;
-    public float BikeJumpLandingSlowdown = 5f;
-
-    public float BikeJumpTilt = 0.5f;
-    public float BikeJumpTiltThreshold = 0.8f;
-    public float BikeJumpSailTimeout = 1.2f;
-    public float BikeJump2Wait = 0.8f;
-    public float BikeJump2Timeout = 1.2f; // should be more than wait
-    public float BikeJump2SpeedBoost = 12f;
-    public float BikeJump2DecelRise = 0.005f;
-    public float BikeJump2DecelFall = 0.005f;
-    public float BikeJump3Wait = 0.8f;
-    public float BikeJump3Timeout = 1.2f; // should be more than wait
-    public float BikeJump3SpeedBoost = 12f;
-    public float BikeJump3DecelRise = 0.005f;
-    public float BikeJump3DecelFall = 0.005f;
-    public float BikeJumpUntiltSpeed = 20f;
-
-    public float BikeJumpFlipSpeed = 10f;
-    public float BikeJumpFlipAmount = 400;
-    public float BikeJumpFlipSpeedBoost = 30f;
-    public float BikeJumpFlipDecelRise = 0.01f;
-    public float BikeJumpFlipDecelFall = 0.01f;
-
-    public float BikeWheelSpeedVisualFactor = 0.2f;
-
-    public float CamFollowDistX = 0f;
-    public float CamFollowDistY = 2f;
-    public float CamFollowDistZ = 2f;
-    public float CamFollowSpeedX = 6.0f;
-    public float CamFollowSpeedY = 4.0f;
-    public float CamFollowSpeedZ = 6.0f;
-    public float CamTiltScaleJump = 30f;
-    public float CamStillAdjustingRange = 5.0f;
-
-    // Bike Controls
-    float originalBikeEulerY;
-    float originalHandleBarEulerY;
-    float bikeSpeed = 0f;
-    float bikeJumpSpeed = 0;
-    bool isJumping = false;
-    bool isSailing = false;
-    bool isOkToScreechAgain = true;
-    int currentLevel = -1;
+    public float CarAccel = 20f;
+    public float CarStartSpeed = 5f;
 
     public bool IsWorldLoaded { get; set; }
     public bool IsWorldPopulated { get; set; }
-    public int JumpCount { get; set; }
-    public bool IsBikeRestarting { get; set; }
-    public bool IsBikeFinished { get; set; }
-    public bool IsBikeCrashed { get; set; }
-    public bool IsCameraAdjusting { get; set; }
+    public bool IsLevelRestarting { get; set; }
 
     public int[] StarsThisLevel { get; set; } = new int[3];
 
-    float sailElapsed = 0f;
-    float jumpElapsed = 0f;
-    float savedBikeTilt = 0f;
-    bool swerveApplied = false;
-
     GridPicker gridPicker;
     public GameGui GameGui { get; set; }
-    public object Quaterion { get; private set; }
-
+    
     // Game Layout
     int levelCount;
     List<int> gridCounts;
@@ -143,7 +59,8 @@ public class Game : MonoBehaviour
     List<List<GameObject>> seaPools = new();
     List<List<GameObject>> terrainPartsPools = new();
 
-    GameObject bikeInst = null;
+    public Bike TheBike;
+    public GameObject FinishBlock;
 
     Transform worldFolder;
     Transform obstacleFolder;
@@ -151,19 +68,23 @@ public class Game : MonoBehaviour
     Transform seaFolder;
     Transform terrainPartsFolder;
 
+    private List<GameObject> movingCars = new();
+    private List<float> movingCarsSpeed = new();
+    private List<Vector3> originalCarPositions = new();
+
     // Game State
+    int currentLevel = -1;
     int[] starCount = new int[3];
     int[] flagCount = new int[3];
     int coinCount = 0;
 
-    // Bike State
-    int wheelLevel = 0; // 0 = same, 1 = front down, 2 = back down too, 3 = front up 
-
+    
     // Timings
     public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
     public WaitForSecondsRealtime WaitRestartFinish = new WaitForSecondsRealtime(2.0f);
     public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(1.4f);
     public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(1.0f);
+    public WaitForSecondsRealtime WaitCheck = new WaitForSecondsRealtime(0.1f);
     public WaitForSecondsRealtime JumpTextBonus = new WaitForSecondsRealtime(0.4f);
     public WaitForSecondsRealtime JumpTextDisappear = new WaitForSecondsRealtime(1.0f);
 
@@ -225,15 +146,12 @@ public class Game : MonoBehaviour
         Inst = this;
         GameGui = GetComponent<GameGui>();
 
-        // Get fixed references that do not change ever, such as between world loads. 
-        bikeInst = GameObject.Find("BikeBase").transform.gameObject;
-
         worldFolder = GameObject.Find("LoadedWorld").transform;
         obstacleFolder = GameObject.Find("Obstacles").transform;
         landFolder = GameObject.Find("Lands").transform; ;
         seaFolder = GameObject.Find("Seas").transform; ;
         terrainPartsFolder = GameObject.Find("TerrainParts").transform;
-        bikeInst.SetActive(false);
+        TheBike.gameObject.SetActive(false);
         gridPicker = worldFolder.GetChild(0).GetComponent<GridPicker>();
 
         Addressables.LoadAssetsAsync<Object>("CityPackAsset", OnAssetLoaded).Completed += OnLoadComplete;
@@ -242,9 +160,6 @@ public class Game : MonoBehaviour
 
     void Start()
     {
-        originalBikeEulerY = GameBike.transform.localEulerAngles.y;
-        originalHandleBarEulerY = HandleBars.transform.localEulerAngles.y;
-
         ResetGui();
         //StartTheNextLevel();
     }
@@ -691,9 +606,11 @@ public class Game : MonoBehaviour
 
         // Leave one grid past finish for nothing.
         // TODO: May need to adjust this Y based on terrain Y. 
-        FinishBlock.transform.position = new Vector3(0, 0, (grids - 1) * 15f); // Update 2: x2 in z direction
+        FinishBlock.transform.position = new Vector3(0, 0, grids * 15f); // Update 2: x2 in z direction
     }
 
+    /* DEBUG
+     
     public KeyCode pauseKey = KeyCode.P; // The key to toggle pause
     private bool isPaused = false;
 
@@ -703,10 +620,18 @@ public class Game : MonoBehaviour
         Time.timeScale = isPaused ? 0f : 1f;
         Debug.Log("Game " + (isPaused ? "Paused" : "Resumed"));
     }
-
+    */
 
     void Update()
     {
+        /*
+        if (Input.GetKeyDown(pauseKey))
+        {
+            TogglePause();
+        }
+        */
+
+
         if (!IsWorldLoaded)
             return;
 
@@ -717,9 +642,9 @@ public class Game : MonoBehaviour
             return;
         }
 
-        if (!bikeInst.activeSelf)
+        if (!TheBike.gameObject.activeSelf)
         {
-            bikeInst.SetActive(true);
+            TheBike.gameObject.SetActive(true);
 
             for (int c = 0; c < obstacleFolder.childCount; c++)
             {
@@ -738,372 +663,58 @@ public class Game : MonoBehaviour
             }
         }
 
-        /*
-        if (Input.GetKeyDown(pauseKey))
-        {
-            TogglePause();
-        }
-        */
 
-        // Cache some values.
         float dt = Time.deltaTime;
-        //Vector3 mousePos = Input.mousePosition;
-        float pixelsAwayFromMiddle = 0;
-        float fromMiddle = 0;
-        Vector3 oldPos = GameBike.transform.localPosition;
 
-        if (IsBikeCrashed)
-            return;
-
-        else if (IsBikeRestarting)
-            return;
-
-        else if (IsBikeFinished)
-            return;
-
-        float newGaugeHeight;
-        if (bikeSpeed < BikeMaxSpeed)
+        for (int c = 0; c < movingCars.Count; c++)
         {
-            // partial up to BikeMaxSpeed
-            newGaugeHeight = SpeedGaugeAdjuster.rect.height * ((BikeMaxSpeedGaugePercent / 100f) * (bikeSpeed / BikeMaxSpeed));
+            GameObject car = movingCars[c];
+            float carSpeed = movingCarsSpeed[c];
+            carSpeed += CarAccel * dt;
+            movingCarsSpeed[c] = carSpeed;
+
+            car.transform.position = new Vector3(
+               car.transform.position.x,
+               car.transform.position.y,
+               car.transform.position.z - carSpeed * dt);
         }
-        else
-        {
-            newGaugeHeight = SpeedGaugeAdjuster.rect.height * (BikeMaxSpeedGaugePercent / 100f) + SpeedGaugeAdjuster.rect.height * ((1f - BikeMaxSpeedGaugePercent / 100f) * ((bikeSpeed - BikeMaxSpeed) / (BikeMaxSpeed2 - BikeMaxSpeed)));
-        }
+
         
-        SpeedGaugeAdjuster.localPosition = new Vector3(0, newGaugeHeight, 0);
 
-        // Bike chug sound mechanism.
-        if (!isJumping && bikeSpeed > 2f)
-        {
-            GameBike.Pedaled(bikeSpeed);
-        }
-
-#if UNITY_TOUCH_SUPPORTED
-        if (Input.touchCount > 0 && Input.touches[0].phase != TouchPhase.Canceled)
-#else
-        if (Input.GetMouseButton(0)) // button is being held down now
-#endif
-        {
-            // Accel & Steering (pressed while not in air).
-            if (!isJumping)// && mousePos.x > screenMiddleBorderLeft && mousePos.x < screenMiddleBorderRight)
-            {
-                if(bikeSpeed > 0 && isOkToScreechAgain)
-                {
-                    GameBike.Screech();
-                    isOkToScreechAgain = false;
-                }
-                if(bikeSpeed < 3.5f)
-                {
-                    isOkToScreechAgain = true;
-                }
-
-
-#if UNITY_TOUCH_SUPPORTED
-                Touch firstTouch = Input.GetTouch(0);
-                Vector2 contactPos = firstTouch.position;
-                Vector2 contactDelta = firstTouch.deltaPosition;
-#else
-                Vector2 contactPos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-#endif
-                pixelsAwayFromMiddle = contactPos.x - Screen.width / 2;
-
-                //Debug.Log($"Accel contact from mid: {pixelsAwayFromMiddle}             X: {contactPos.x}");
-                fromMiddle = Mathf.Sign(pixelsAwayFromMiddle) * Mathf.Min(BikeSteerSwipeScaleLimit, BikeSteerSwipeScale * Mathf.Abs(pixelsAwayFromMiddle));
-
-                Vector3 currentHandleEulers = HandleBars.transform.localEulerAngles;
-                currentHandleEulers.y = originalHandleBarEulerY - BikeHandleTurn * fromMiddle; // rot y is opposite of bike direction so need minus sign
-                HandleBars.transform.localEulerAngles = currentHandleEulers;
-
-                Vector3 currentBikeEulers = GameBike.transform.localEulerAngles;
-                currentBikeEulers.y = originalBikeEulerY + BikeTurn * fromMiddle;
-                GameBike.transform.localEulerAngles = currentBikeEulers;
-
-                if (swerveApplied)
-                {
-                    bikeSpeed -= BikeSwerveDecel * dt;
-
-                    if(bikeSpeed < BikeMaxSpeed)
-                    {
-                        bikeSpeed = BikeMaxSpeed;
-                        swerveApplied = false;
-                    }
-                }
-                else
-                {
-                    bikeSpeed += BikeAccel * dt;
-
-                    if (bikeSpeed > BikeMaxSpeed)
-                        bikeSpeed = BikeMaxSpeed;
-                }
-
-            }
-        }
-
-#if UNITY_TOUCH_SUPPORTED
-        if (Input.touchCount > 0 && Input.touches[0].phase == TouchPhase.Ended)
-#else
-        if (Input.GetMouseButtonUp(0)) // button is let go now
-#endif
-        {
-            if (!isJumping)
-            {
-                GameBike.Jumped1();
-                isJumping = true;
-                JumpCount++;
-                bikeJumpSpeed = BikeJumpStartSpeed;
-            }
-        }
-
-        // Jumping sail.
-        if (isJumping)
-        {
-            jumpElapsed += dt;
-            //Debug.Log("jumpElapsed: " + jumpElapsed);
-            if (JumpCount == 1 && jumpElapsed > BikeJump2Wait && Input.GetMouseButtonDown(0) && jumpElapsed < BikeJump2Timeout)
-            {
-                GameBike.Jumped2();
-                bikeJumpSpeed += BikeJump2SpeedBoost;
-                JumpCount++;
-                jumpElapsed = 0;
-            }
-            else if(JumpCount == 2 && jumpElapsed > BikeJump3Wait && Input.GetMouseButtonDown(0) && jumpElapsed < BikeJump3Timeout)
-            {
-                GameBike.Jumped3();
-                bikeJumpSpeed += BikeJump3SpeedBoost;
-                JumpCount++;
-                jumpElapsed = 0;
-                savedBikeTilt = BikeJumpTilt * GameBike.transform.localPosition.y;
-
-                // Special FX since this is the 3RD jump after all...
-                GameBike.StartWind();
-            }
-            else if (sailElapsed > BikeJump2Timeout && sailElapsed < BikeJumpSailTimeout &&
-#if UNITY_TOUCH_SUPPORTED
-                Input.touchCount > 0 && Input.touches[0].phase != TouchPhase.Canceled)
-#else
-                Input.GetMouseButton(0)) // button is being held down now
-#endif
-            {
-                if (!isSailing)
-                {
-                    //GameBike.JumpedFall();
-                    //GameBike.StartWind();
-                }
-
-                isSailing = true;
-            }
-            else
-            {
-                if (isSailing)
-                {
-                    GameBike.StopWind();
-                }
-
-                isSailing = false;
-            }
-        }
-        else
-        {
-            // Grounded and slowing down.
-            bikeSpeed -= BikeDecel * dt;
-            if (bikeSpeed < 0)
-                bikeSpeed = 0;
-
-            // Tilt bike if wheels are on different levels.
-            int layerMask = LayerMask.GetMask("Terrain");
-            Ray frontRay = new Ray(FrontWheel.transform.position, Vector3.down);
-            if (Physics.Raycast(frontRay, out RaycastHit frontHit, Mathf.Infinity, layerMask))
-            {
-                FrontWheelProj.transform.position = frontHit.point;
-            }
-            Ray backRay = new Ray(BackWheel.transform.position, Vector3.down);
-            if (Physics.Raycast(backRay, out RaycastHit backHit, Mathf.Infinity, layerMask))
-            {
-                BackWheelProj.transform.position = backHit.point;
-            }
-
-            Vector3 eulers = GameBike.transform.localRotation.eulerAngles;
-            eulers.x = -(90f - (180f / Mathf.PI) * (Mathf.Atan2(frontHit.point.z - backHit.point.z, frontHit.point.y - backHit.point.y)));
-            GameBike.transform.localRotation = Quaternion.Euler(eulers);
-
-            // TODO: Fix hard code 0.25
-            GameBikeBase.transform.localPosition = new Vector3(0,
-                0.25f + (BackWheelProj.transform.position.y + FrontWheelProj.transform.position.y) / 2f, 0);
-
-            int oldWheelLevel = wheelLevel;
-
-            if (BackWheelProj.transform.position.y - FrontWheelProj.transform.position.y > 0.01f)
-                wheelLevel = 1;
-            else if (FrontWheelProj.transform.position.y - BackWheelProj.transform.position.y > 0.01f)
-                wheelLevel = 2;
-            else
-                wheelLevel = 0;
-
-            if(wheelLevel != oldWheelLevel)
-            {
-                // first tire down
-                if(wheelLevel == 1)
-                    GameBike.WheelThud(0);
-                // back tire down too
-                else if(wheelLevel == 0 && oldWheelLevel == 1)
-                    GameBike.WheelThud(1);
-                // first tire up
-                else if(wheelLevel == 2)
-                    GameBike.WheelThud(2);
-                // back tire up too
-                else if(wheelLevel == 0 && oldWheelLevel == 2)
-                    GameBike.WheelThud(3);
-
-            } 
-        }
-
-        // Jumping Vertical Accel/Decel.
-        if (isJumping)
-        {
-            GameBike.transform.localPosition += new Vector3(0, dt * bikeJumpSpeed, 0);
-
-            if (GameBike.transform.localPosition.y > oldPos.y) // rising
-            {
-                if(JumpCount == 1)
-                    bikeJumpSpeed += dt * -BikeJumpDecelRise;
-                else if(JumpCount == 2)
-                    bikeJumpSpeed += dt * -BikeJump2DecelRise;
-                else if(JumpCount == 3)
-                    bikeJumpSpeed += dt * -BikeJump3DecelRise;
-            }
-            else // falling
-            {
-                if (isSailing)
-                {
-                    sailElapsed += dt;
-                    //if (sailElapsed > BikeJumpSailTimeout)
-                    //    isSailing = false;
-                }
-                else
-                {
-                    if (JumpCount == 1)
-                        bikeJumpSpeed += dt * -BikeJumpDecelFall;
-                    else if (JumpCount == 2)
-                        bikeJumpSpeed += dt * -BikeJump2DecelFall;
-                    else if (JumpCount == 3)
-                        bikeJumpSpeed += dt * -BikeJump3DecelFall;
-
-                    bikeSpeed -= BikeJumpDecelForward * dt;
-                    if (bikeSpeed < 0)
-                        bikeSpeed = 0;
-                }
-            }
-
-            // Tilting back.
-            float bikeTilt = 0;
-            if (GameBike.transform.localPosition.y > BikeJumpTiltThreshold || JumpCount == 3)
-            {
-                if (JumpCount == 3)
-                {
-                    bikeTilt = savedBikeTilt; // Tilt down more for the 3rd one.
-                    savedBikeTilt += BikeJumpUntiltSpeed * dt; // Will continue to keep tilting forward.
-                }
-                else
-                    bikeTilt = BikeJumpTilt * GameBike.transform.localPosition.y;
-            }
-
-            // Hitting the ground.            
-            if (GameBike.transform.localPosition.y < 0)
-            {
-                GameBike.transform.localPosition = new Vector3(GameBike.transform.localPosition.x, 0, GameBike.transform.localPosition.z);
-                bikeJumpSpeed = 0f;
-                isJumping = false;
-                JumpCount = 0;
-                bikeTilt = 0f;
-                savedBikeTilt = 0f;
-                jumpElapsed = 0f;
-                sailElapsed = 0f;
-                bikeSpeed -= BikeJumpLandingSlowdown; // Skitter slow as you hit the ground.
-                if (bikeSpeed < 0f)
-                    bikeSpeed = 0f;
-
-                GameBike.StopWind();
-                GameBike.LandThud();
-            }
-
-            // Apply jump tilt (if any).
-            Vector3 currentBikeEulers = GameBike.transform.localEulerAngles;
-            currentBikeEulers.x = bikeTilt;
-            GameBike.transform.localEulerAngles = currentBikeEulers;
-        }
-
-        // Moving.
-        if (bikeSpeed > 0)
-        {
-            GameBike.transform.localPosition += new Vector3(dt * BikeTurnTranslation * fromMiddle, 0, dt * bikeSpeed + transform.position.z);
-
-            FrontWheel.transform.localRotation *= Quaternion.Euler(dt * BikeWheelSpeedVisualFactor * bikeSpeed, 0, 0);
-            BackWheel.transform.localRotation *= Quaternion.Euler(dt * BikeWheelSpeedVisualFactor * bikeSpeed, 0, 0);
-        }
     }
 
-    public void ResetBikeRotation()
+    public void ResetMovingCars()
     {
-        Vector3 currentHandleEulers = HandleBars.transform.localEulerAngles;
-        currentHandleEulers.y = originalHandleBarEulerY;
-        HandleBars.transform.localEulerAngles = currentHandleEulers;
+        for (int c = 0; c < originalCarPositions.Count; c++)
+            movingCars[c].transform.position = originalCarPositions[c];
 
-        //Vector3 currentBikeEulers = GameBike.transform.localEulerAngles;
-        //currentBikeEulers.y = originalBikeEulerY;
-        //GameBike.transform.localEulerAngles = currentBikeEulers;
-
-        GameBike.transform.localEulerAngles = Vector3.zero;
+        movingCars.Clear();
+        movingCarsSpeed.Clear();
+        originalCarPositions.Clear();
     }
 
-    public void BikeStopped()
+    public void CarDanger(GameObject carOb)
     {
-        bikeSpeed = 0f;
-        jumpElapsed = 0f;
-        sailElapsed = 0f;
-        
-        GameGui.StopTime();
+        movingCars.Add(carOb);
+        movingCarsSpeed.Add(CarStartSpeed);
+        originalCarPositions.Add(carOb.transform.position);
+
+        carOb.GetComponent<AudioSource>().Play();
     }
 
-    public void BikeCrashed()
+    public void LevelRestart(bool nextLevel)
     {
-        IsBikeCrashed = true;
-        StarsThisLevel[0] = 0;
-        StarsThisLevel[1] = 0;
-        StarsThisLevel[2] = 0;
-        swerveApplied = false;
-        BikeStopped();
-        GameGui.LoseStarFlags();
+        StartCoroutine(DoLevelRestart(nextLevel));
     }
 
-    public void BikeWon()
+    IEnumerator DoLevelRestart(bool nextLevel)
     {
-        GameBike.StartShine();
-        GameBike.StartDance();
-    }
+        IsLevelRestarting = true;
 
-    public void Swerve()
-    {
-        swerveApplied = true;
-        //Debug.LogError("Swerve Applied... bikeSpeed is: " + bikeSpeed);
-        bikeSpeed = BikeMaxSpeed2;
-    }
-
-    public void Restart(bool nextLevel)
-    {
-        StartCoroutine(DoRestart(nextLevel));
-    }
-
-    IEnumerator DoRestart(bool nextLevel)
-    { 
-        IsBikeRestarting = true;
         yield return Game.Inst.WaitRestartFinish;
-        GameBike.transform.localPosition = Vector3.zero;
-        ResetBikeRotation();
-        GameBike.ResetMovingCars();
-        GameBike.StopShine();
 
+        ResetMovingCars();
+        
         // Reset bouncing animals.
         for (int c = 0; c < obstacleFolder.childCount; c++)
         {
@@ -1124,7 +735,6 @@ public class Game : MonoBehaviour
                 {
                     tr.localPosition = downHit.point;
                 }
-
             }
         }
 
@@ -1132,15 +742,29 @@ public class Game : MonoBehaviour
         {
             StartTheNextLevel();
         }
-        IsBikeRestarting = false;
-        IsBikeCrashed = false;
+
+        IsLevelRestarting = false;
     }
 
-    //// GUI HANDLING
-    /// <summary>
-    /// 
-    /// 
+    public void BikeCrashed()
+    {
+        StarsThisLevel[0] = 0;
+        StarsThisLevel[1] = 0;
+        StarsThisLevel[2] = 0;
+        GameGui.LoseStarFlags();
+    }
 
+    public void FinishStarted()
+    {
+        GameGui.StopTime();
+        TheBike.FinishStart();
+    }
+
+    public void FinishEnded()
+    {
+        TheBike.FinishEnd();
+        //LevelRestart(true);
+    }
 
     public int StarCount(int kind) // 0-2
     {
@@ -1188,8 +812,6 @@ public class Game : MonoBehaviour
         for (int i = 0; i < 3; i++) { flagCount[i] = 0; GameGui.ShowFlag(i, 0); }
     }
 
-    /// </summary>
-    /// <param name="kind"></param>
     public void CollectStar(int kind) // 0-2
     {
         if (!GameGui.LosingTransaction)

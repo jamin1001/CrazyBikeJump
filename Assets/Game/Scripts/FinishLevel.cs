@@ -14,13 +14,21 @@ public class FinishLevel : MonoBehaviour
     public AudioSource FinishGoodAudio;
     public AudioSource FinishGreatAudio;
 
+    public Material FinishAreaOnMaterial;
+
+    Material finishAreaOffMaterial;
+
+    void Start()
+    {
+        finishAreaOffMaterial = transform.GetChild(6).GetComponent<Renderer>().sharedMaterial;
+    }
+
     // Start is called before the first frame update
     void OnCollisionEnter(Collision collision)
     {
-        Game.Inst.IsBikeFinished = true;
-        Game.Inst.BikeStopped();
-        Game.Inst.BikeWon();
+        Game.Inst.FinishStarted();
         FinishLineAudio.Play();
+        transform.GetChild(6).GetComponent<Renderer>().sharedMaterial = FinishAreaOnMaterial;
         StartCoroutine(PopPopPop(collision.gameObject)); 
     }
 
@@ -135,8 +143,7 @@ public class FinishLevel : MonoBehaviour
         else
             FinishGoodAudio.Play();
 
-        Game.Inst.IsBikeFinished = false;
-        Game.Inst.Restart(true);
+        Game.Inst.FinishEnded();
 
         confettiParent.GetChild(0).gameObject.SetActive(false);
         confettiParent.GetChild(1).gameObject.SetActive(false);
@@ -144,6 +151,8 @@ public class FinishLevel : MonoBehaviour
 
         yield return Game.Inst.JumpTextDisappear;
         Game.Inst.GameGui.JumpText.text = "";
+
+        transform.GetChild(6).GetComponent<Renderer>().sharedMaterial = finishAreaOffMaterial;
     }
 
 }

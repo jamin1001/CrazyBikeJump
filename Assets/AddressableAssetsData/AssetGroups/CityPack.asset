@@ -81,12 +81,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - CityPackAsset
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 313d024c21fba5641b369eaffec5cec9
-    m_Address: Assets/Game/Levels/City/Terrain/02A.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 37e2827b00326574a9a0e7eb67fe2d7c
     m_Address: Assets/Game/Levels/City/Animal/3stegosaurus.fbx
     m_ReadOnly: 0
@@ -129,12 +123,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - CityPackAsset
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 776ae302e46eda54e823c2972c1ec1d0
-    m_Address: Assets/Game/Levels/City/Jump/2jump-hexring.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7ecf61f3611009a4599ca77a0a1fe0da
     m_Address: Assets/Game/Levels/City/Barrier/3barrier-concrete.fbx
     m_ReadOnly: 0
@@ -159,12 +147,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - CityPackAsset
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8e80587b2b2c51d4198b1d2937da352a
-    m_Address: Assets/Game/Levels/City/Jump/3jump-hexring.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a3a86e8d1721c0b46a77863cca0ee8da
     m_Address: Assets/Game/Levels/City/Scenery/2scenery-talltree.fbx
     m_ReadOnly: 0
@@ -173,12 +155,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a45b810e289c175438be8e46d473dde8
     m_Address: Assets/Game/Levels/City/Vehicle/3vehicle-car-truck-cement.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a8a352e14f37b194e9cc2bed67bc147e
-    m_Address: Assets/Game/Levels/City/Terrain/01A.fbx
     m_ReadOnly: 0
     m_SerializedLabels:
     - CityPackAsset
@@ -219,32 +195,8 @@ MonoBehaviour:
     m_SerializedLabels:
     - CityPackAsset
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cd53a120225a3a04f8244f259df959ba
-    m_Address: Assets/Game/Levels/City/Terrain/03A.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d178f56817dc86342809e2ac06d3f95d
-    m_Address: Assets/Game/Levels/City/Terrain/02B.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d1f8ba2ad4976ff4fad8801e4ce9c2ab
     m_Address: Assets/Game/Levels/City/Animal/2dog.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d6151a1000f752547ae0a092681ef156
-    m_Address: Assets/Game/Levels/City/Terrain/03B.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dd7975356d1ded848a573356007d3854
-    m_Address: Assets/Game/Levels/City/Terrain/05B.fbx
     m_ReadOnly: 0
     m_SerializedLabels:
     - CityPackAsset
@@ -255,20 +207,14 @@ MonoBehaviour:
     m_SerializedLabels:
     - CityPackAsset
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: df6704b1ded73b14baa0302afc018309
-    m_Address: Assets/Game/Levels/City/Terrain/01B.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e528aa0fe5dec184698e736a09fa5018
-    m_Address: Assets/Game/Levels/City/Terrain/04B.fbx
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e799b03104f75214a90969c9a76c7e4f
     m_Address: Assets/Game/Levels/City/Scenery/1scenery-burger.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - CityPackAsset
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e7a84418b729c6f49bb7d883fd504fad
+    m_Address: Assets/Game/Worlds/City/Jump/2jump_hexring.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - CityPackAsset
@@ -279,8 +225,8 @@ MonoBehaviour:
     m_SerializedLabels:
     - CityPackAsset
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: edb06bf08913000419f9e27165096fba
-    m_Address: Assets/Game/Levels/City/Terrain/05A.fbx
+  - m_GUID: f0cdd8151c1a72248aac04896236a176
+    m_Address: Assets/Game/Worlds/City/Jump/3jump_hexring.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - CityPackAsset
@@ -311,12 +257,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f96bcbc4f3f89544b88e18aee88b75d2
     m_Address: Assets/Game/Levels/City/Barrier/2barrier-barrel.prefab
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - CityPackAsset
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f9daf6b334b34ab4b8fb95abda41502f
-    m_Address: Assets/Game/Levels/City/Terrain/04A.fbx
     m_ReadOnly: 0
     m_SerializedLabels:
     - CityPackAsset

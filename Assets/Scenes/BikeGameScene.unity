@@ -705,6 +705,115 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &151599083
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 151599084}
+  - component: {fileID: 151599087}
+  - component: {fileID: 151599086}
+  - component: {fileID: 151599085}
+  m_Layer: 0
+  m_Name: FinishArea
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 2147483647
+  m_IsActive: 1
+--- !u!4 &151599084
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151599083}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: -0, z: -3.5}
+  m_LocalScale: {x: 14, y: 8, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1333551499}
+  m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!64 &151599085
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151599083}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &151599086
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151599083}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 01d5d7ba5b8a70c498a7a9d2ea946c2d, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &151599087
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 151599083}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &221256364
 GameObject:
   m_ObjectHideFlags: 3
@@ -1081,7 +1190,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!82 &266241997
 AudioSource:
@@ -2414,9 +2523,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarExplosionSilverFireworks
       objectReference: {fileID: 0}
+    - target: {fileID: 164832, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 192652, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 192652, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 419440, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
       propertyPath: m_LocalScale.x
@@ -2965,12 +3082,17 @@ PrefabInstance:
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'LevelOpen.Array.data[1]'
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
+        type: 3}
+      propertyPath: 'LevelNames.Array.data[0]'
+      value: Level One
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'LevelNames.Array.data[1]'
-      value: The Level Name
+      value: Level Two
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
@@ -3035,17 +3157,22 @@ PrefabInstance:
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridChoices.Array.data[22]'
-      value: 5
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridChoices.Array.data[31]'
-      value: 4
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
       propertyPath: 'GridChoices.Array.data[40]'
-      value: 4
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
+        type: 3}
+      propertyPath: 'GridChoices.Array.data[49]'
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3498004615319723268, guid: d489720108895ba40a268b7a45339a04,
         type: 3}
@@ -5076,7 +5203,7 @@ GameObject:
   - component: {fileID: 978018977}
   - component: {fileID: 978018976}
   m_Layer: 7
-  m_Name: BikeFrame
+  m_Name: Bike
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5142,8 +5269,51 @@ MonoBehaviour:
   CollectFlagCoinParticlesPrefab: {fileID: 2042941637}
   WindParticlesPrefab: {fileID: 2099602759}
   FinishShine: {fileID: 2127308039}
-  CarAccel: 20
-  CarStartSpeed: 5
+  GameBikeBase: {fileID: 919132147535965292}
+  FrontWheel: {fileID: 2374484433774683584}
+  BackWheel: {fileID: 495474314207808091}
+  HandleBars: {fileID: 4910362148479473397}
+  FrontWheelProj: {fileID: 1704510943}
+  BackWheelProj: {fileID: 722129460}
+  SpeedGaugeAdjuster: {fileID: 726359347}
+  BikeAccel: 20
+  BikeDecel: 5
+  BikeSwerveDecel: 0.05
+  BikeMaxSpeed: 14
+  BikeMaxSpeed2: 32
+  BikeMaxSpeedGaugePercent: 70
+  BikeTurn: 1.5
+  BikeTurnTranslation: 0.25
+  BikeHandleTurn: 3
+  BikeSteerScreenWidth: 50
+  BikeSteerSwipeScale: 0.1
+  BikeSteerPercentEasyJump: 0.7
+  BikeSteerSwipeScaleLimit: 20
+  BikeJumpStartSpeed: 12
+  BikeJumpDecelRise: 40
+  BikeJumpDecelFall: 20
+  BikeJumpDecelForward: 4
+  BikeJumpLandingSlowdown: 2
+  BikeJumpTilt: -10
+  BikeJumpTiltThreshold: 0.8
+  BikeJumpSailTimeout: 1.2
+  BikeJump2Wait: 0.25
+  BikeJump2Timeout: 0.5
+  BikeJump2SpeedBoost: 8.4
+  BikeJump2DecelRise: 20
+  BikeJump2DecelFall: 10
+  BikeJump3Wait: 0.4
+  BikeJump3Timeout: 1
+  BikeJump3SpeedBoost: 12
+  BikeJump3DecelRise: 20
+  BikeJump3DecelFall: 11
+  BikeJumpUntiltSpeed: 44
+  BikeJumpFlipSpeed: -100
+  BikeJumpFlipAmount: 90
+  BikeJumpFlipSpeedBoost: 12
+  BikeJumpFlipDecelRise: 0.01
+  BikeJumpFlipDecelFall: 0.01
+  BikeWheelSpeedVisualFactor: 80
 --- !u!54 &978018977
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -5298,9 +5468,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarExplosionGoldFireworks
       objectReference: {fileID: 0}
+    - target: {fileID: 164832, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 192652, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 192652, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 419440, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
       propertyPath: m_LocalScale.x
@@ -5524,7 +5702,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!82 &1027234119
 AudioSource:
@@ -5708,62 +5886,10 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  GameBike: {fileID: 978018976}
-  GameBikeBase: {fileID: 919132147535965292}
-  FrontWheel: {fileID: 2374484433774683584}
-  BackWheel: {fileID: 495474314207808091}
-  HandleBars: {fileID: 4910362148479473397}
+  CarAccel: 20
+  CarStartSpeed: 5
+  TheBike: {fileID: 978018976}
   FinishBlock: {fileID: 1333551494}
-  FrontWheelProj: {fileID: 1704510943}
-  BackWheelProj: {fileID: 722129460}
-  SpeedGaugeAdjuster: {fileID: 726359347}
-  BikeAccel: 20
-  BikeDecel: 5
-  BikeSwerveDecel: 0.05
-  BikeMaxSpeed: 14
-  BikeMaxSpeed2: 32
-  BikeMaxSpeedGaugePercent: 70
-  BikeTurn: 1.5
-  BikeTurnTranslation: 0.25
-  BikeHandleTurn: 3
-  BikeSteerScreenWidth: 50
-  BikeSteerSwipeScale: 0.1
-  BikeSteerPercentEasyJump: 0.7
-  BikeSteerSwipeScaleLimit: 20
-  BikeJumpStartSpeed: 12
-  BikeJumpDecelRise: 40
-  BikeJumpDecelFall: 20
-  BikeJumpDecelForward: 4
-  BikeJumpLandingSlowdown: 2
-  BikeJumpTilt: -10
-  BikeJumpTiltThreshold: 0.8
-  BikeJumpSailTimeout: 1.2
-  BikeJump2Wait: 0.25
-  BikeJump2Timeout: 0.5
-  BikeJump2SpeedBoost: 8.4
-  BikeJump2DecelRise: 20
-  BikeJump2DecelFall: 10
-  BikeJump3Wait: 0.4
-  BikeJump3Timeout: 1
-  BikeJump3SpeedBoost: 12
-  BikeJump3DecelRise: 20
-  BikeJump3DecelFall: 11
-  BikeJumpUntiltSpeed: 44
-  BikeJumpFlipSpeed: -200
-  BikeJumpFlipAmount: 90
-  BikeJumpFlipSpeedBoost: 12
-  BikeJumpFlipDecelRise: 0.01
-  BikeJumpFlipDecelFall: 0.01
-  BikeWheelSpeedVisualFactor: 80
-  CamFollowDistX: 0
-  CamFollowDistY: 4
-  CamFollowDistZ: -12
-  CamFollowSpeedX: 20
-  CamFollowSpeedY: 2
-  CamFollowSpeedZ: 2
-  CamTiltScaleJump: 0
-  CamStillAdjustingRange: 5
-  pauseKey: 112
 --- !u!4 &1029705818
 Transform:
   m_ObjectHideFlags: 0
@@ -6295,6 +6421,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 127810, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 129898, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_Name
       value: ConfettiBlastRainbow (2)
@@ -6303,9 +6433,17 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 129898, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 192986, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 192986, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 420096, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_LocalScale.x
@@ -6949,7 +7087,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!23 &1132966753
 MeshRenderer:
@@ -7880,7 +8018,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!114 &1333551495
 MonoBehaviour:
@@ -7901,6 +8039,8 @@ MonoBehaviour:
   FinishBadAudio: {fileID: 266241997}
   FinishGoodAudio: {fileID: 1027234119}
   FinishGreatAudio: {fileID: 1828656707}
+  FinishAreaOnMaterial: {fileID: 2100000, guid: 16a17e03d2bec4f4fb3a9761c1915fcd,
+    type: 2}
 --- !u!65 &1333551496
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7949,6 +8089,7 @@ Transform:
   - {fileID: 266241998}
   - {fileID: 1027234120}
   - {fileID: 1828656708}
+  - {fileID: 151599084}
   m_Father: {fileID: 1346634163}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1339889111
@@ -10529,9 +10670,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: StarExplosionBronzeFirework
       objectReference: {fileID: 0}
+    - target: {fileID: 164832, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 192652, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 192652, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 419440, guid: 0120f9cb8c755c441a94e44eaf7cc1dd, type: 3}
       propertyPath: m_LocalScale.x
@@ -11984,7 +12133,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!82 &1828656707
 AudioSource:
@@ -12383,6 +12532,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 127810, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 129898, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_Name
       value: ConfettiBlastRainbow
@@ -12391,9 +12544,17 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 129898, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 192986, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 192986, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 420096, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_LocalScale.x
@@ -13225,13 +13386,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2040792994}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.14845252, y: 0.7912401, z: -0.21201217, w: 0.55403227}
+  m_LocalRotation: {x: 0.3686878, y: 0.6275069, z: -0.52654076, w: 0.4393851}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 954442539}
-  m_LocalEulerAnglesHint: {x: 30, y: 110, z: 0}
+  m_LocalEulerAnglesHint: {x: 80, y: 110, z: 0}
 --- !u!114 &2040792996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13678,7 +13839,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 2147483647
   m_IsActive: 1
 --- !u!4 &2103784944
 Transform:
@@ -13807,6 +13968,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 127810, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 129898, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_Name
       value: ConfettiBlastRainbow (1)
@@ -13815,9 +13980,17 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 129898, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 192986, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_IsActive
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 192986, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     - target: {fileID: 420096, guid: 0d0995181bff8c04fbd24234a7ae054f, type: 3}
       propertyPath: m_LocalScale.x
@@ -15354,6 +15527,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1333551499}
     m_Modifications:
+    - target: {fileID: 784482820311844491, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 799724971062352289, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 1786349789070964858, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 2140662060820624492, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.88
+      objectReference: {fileID: 0}
     - target: {fileID: 2140662060820624492, guid: ff0071d259ceb4f41afea36400bcf843,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -15367,7 +15560,7 @@ PrefabInstance:
     - target: {fileID: 2140662060820624492, guid: ff0071d259ceb4f41afea36400bcf843,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.5
+      value: -7
       objectReference: {fileID: 0}
     - target: {fileID: 2140662060820624492, guid: ff0071d259ceb4f41afea36400bcf843,
         type: 3}
@@ -15404,10 +15597,55 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2333472876593155554, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 2398082392112013220, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 2509052972477695930, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: 3552089007032470346, guid: ff0071d259ceb4f41afea36400bcf843,
         type: 3}
       propertyPath: m_Name
       value: FinishFlag
+      objectReference: {fileID: 0}
+    - target: {fileID: 3552089007032470346, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 6149349421544108440, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 6291006099058466339, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 7168290956638460334, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 8321242341776583279, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: 8716773585202129148, guid: ff0071d259ceb4f41afea36400bcf843,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
