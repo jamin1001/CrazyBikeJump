@@ -1,7 +1,3 @@
-using JetBrains.Annotations;
-using MoreMountains.FeedbacksForThirdParty;
-using System.Data;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Scaler : MonoBehaviour
@@ -15,7 +11,7 @@ public class Scaler : MonoBehaviour
     [Tooltip("How fast it scales.")]
     public float ScaleSpeed = 0.1f;
 
-    [Tooltip("How much it will be scaled at the end.")]
+    [Tooltip("How much it will be scaled at the beginning.")]
     public Vector3 ScaleBegin = Vector3.zero;
     
     [Tooltip("How much it will be scaled at the end.")]
@@ -51,6 +47,6 @@ public class Scaler : MonoBehaviour
         // Note: there is only local, no global scale possible in Unity, for reasons.
         transform.localScale = adjustedScale;
 
-        Debug.Log($"Normal is: {normalValue}, Adjusted is: {adjustedValue}, Curve is: {curveValue}, AdjustedScale is: {adjustedScale}");
+        //Debug.Log($"Normal is: {normalValue}, Adjusted is: {adjustedValue}, Curve is: {curveValue}, AdjustedScale is: {adjustedScale}");
     }
 }

@@ -1,3 +1,4 @@
+using Cinemachine;
 using JetBrains.Annotations;
 using MoreMountains.Tools;
 using System.Collections;
@@ -61,6 +62,7 @@ public class Game : MonoBehaviour
 
     public Bike TheBike;
     public GameObject FinishBlock;
+    public CinemachineVirtualCamera VirtualCam;
 
     Transform worldFolder;
     Transform obstacleFolder;
@@ -77,7 +79,7 @@ public class Game : MonoBehaviour
     int[] starCount = new int[3];
     int[] flagCount = new int[3];
     int coinCount = 0;
-
+    Vector3 virtualCamInitPosition;
     
     // Timings
     public WaitForSecondsRealtime WaitParticlesStop = new WaitForSecondsRealtime(2.0f);
@@ -85,6 +87,7 @@ public class Game : MonoBehaviour
     public WaitForSecondsRealtime WaitConfettiStart = new WaitForSecondsRealtime(1.4f);
     public WaitForSecondsRealtime WaitConfettiStop = new WaitForSecondsRealtime(1.0f);
     public WaitForSecondsRealtime WaitCheck = new WaitForSecondsRealtime(0.1f);
+    public WaitForSecondsRealtime WaitCheck2 = new WaitForSecondsRealtime(0.2f);
     public WaitForSecondsRealtime JumpTextBonus = new WaitForSecondsRealtime(0.4f);
     public WaitForSecondsRealtime JumpTextDisappear = new WaitForSecondsRealtime(1.0f);
 
@@ -161,7 +164,7 @@ public class Game : MonoBehaviour
     void Start()
     {
         ResetGui();
-        //StartTheNextLevel();
+        virtualCamInitPosition = VirtualCam.transform.position;
     }
 
     private List<Object> loadedAssets = new List<Object>();
@@ -411,7 +414,7 @@ public class Game : MonoBehaviour
 
             return;
         }
-
+        
         // Reset awards.
         StarsThisLevel[0] = 0;
         StarsThisLevel[1] = 0;
@@ -419,8 +422,7 @@ public class Game : MonoBehaviour
 
         // Reset GUI.
         GameGui.ResetRaceTime();
-        GameGui.StartAnimatedText(gridPicker.LevelNames[currentLevel], Color.white);
-
+        
         // Disable all obstacles to prepare for the next level. Also prep the obstacle counter.
         // This is just a way to enable the objects of the level (the "next" one per type) in
         // order since the queried objects over a given set of grids will not be in any
@@ -746,6 +748,19 @@ public class Game : MonoBehaviour
         IsLevelRestarting = false;
     }
 
+    public void ActivateCamera(bool active)
+    {
+        VirtualCam.gameObject.SetActive(active);
+    }
+
+    public void ResetCamera()
+    {
+        // This prevents weird stretch behavior back to beginning of level.
+        
+        VirtualCam.transform.position = virtualCamInitPosition;
+        //VirtualCam.gameObject.SetActive(true);
+    }
+
     public void BikeCrashed()
     {
         StarsThisLevel[0] = 0;
@@ -810,6 +825,11 @@ public class Game : MonoBehaviour
     {
         for (int i = 0; i < 3; i++) { starCount[i] = 0; GameGui.ShowStar(i, 0); }
         for (int i = 0; i < 3; i++) { flagCount[i] = 0; GameGui.ShowFlag(i, 0); }
+    }
+
+    public void StartGuiLevelText()
+    {
+        GameGui.StartAnimatedText(gridPicker.LevelNames[currentLevel], Color.white);
     }
 
     public void CollectStar(int kind) // 0-2

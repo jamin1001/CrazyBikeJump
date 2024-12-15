@@ -99,6 +99,8 @@ public class Bike : MonoBehaviour
 
 
     public int JumpCount { get; set; }
+
+    public bool IsReset { get; set; }
     public bool IsRestarting { get; set; }
     public bool IsFinished { get; set; }
     public bool IsCrashed { get; set; }
@@ -213,7 +215,7 @@ public class Bike : MonoBehaviour
 
     }
 
-    public void ResetBikeRotation()
+    public void ResetRotation()
     {
         Vector3 currentHandleEulers = HandleBars.transform.localEulerAngles;
         currentHandleEulers.y = originalHandleBarEulerY;
@@ -222,11 +224,17 @@ public class Bike : MonoBehaviour
         transform.localEulerAngles = Vector3.zero;
     }
 
+    public void ResetPosition()
+    {
+        transform.localPosition = Vector3.zero;
+    }
+
     public void Stop()
     {
         bikeSpeed = 0f;
         jumpElapsed = 0f;
         sailElapsed = 0f;
+        swerveApplied = false;
     }
 
     public void Crash()
@@ -239,8 +247,8 @@ public class Bike : MonoBehaviour
 
     public void FinishStart()
     {
-        IsFinished = true;
         Stop();
+        IsFinished = true;
         StartShine();
         StartDance();
     }
@@ -547,7 +555,11 @@ public class Bike : MonoBehaviour
                     bikeSpeed = 0f;
 
                 StopWind();
-                LandThud();
+
+                if (!IsReset)
+                {
+                    LandThud();
+                }
             }
 
             // Apply jump tilt (if any).
@@ -560,6 +572,8 @@ public class Bike : MonoBehaviour
         // Moving.
         if (bikeSpeed > 0)
         {
+            IsReset = false;
+
             transform.localPosition += new Vector3(dt * BikeTurnTranslation * fromMiddle, 0, dt * bikeSpeed);// + transform.position.z);
 
             FrontWheel.transform.localRotation *= Quaternion.Euler(dt * BikeWheelSpeedVisualFactor * bikeSpeed, 0, 0);
@@ -770,34 +784,54 @@ public class Bike : MonoBehaviour
     {
         yield return Game.Inst.WaitParticlesStop;
 
-        ResetBikeRotation();
         IsCrashed = false;
         IsRestarting = true;
         Game.Inst.LevelRestart(false);
-        transform.localPosition = Vector3.zero;
+        IsReset = true;
+        ResetRotation();
+        ResetPosition();
         IsRestarting = false;
     }
 
     IEnumerator ResetEverything()
     {
-        yield return Game.Inst.WaitParticlesStop;
+        //yield return Game.Inst.WaitParticlesStop;
 
         IsFinished = false;
         IsRestarting = true;
         Game.Inst.LevelRestart(true);
 
+        // Wait for signal that level restart all done.
         while (Game.Inst.IsLevelRestarting)
         {
             yield return Game.Inst.WaitCheck;
         }
+        IsReset = true;
 
-        // Signal when done.
         StopShine();
         StopDance();
 
-        ResetBikeRotation();
-        transform.localPosition = Vector3.zero;
+        
+
         IsRestarting = false;
+
+        Game.Inst.ActivateCamera(false);
+
+        //yield return Game.Inst.WaitCheck2;
+
+        ResetRotation();
+        ResetPosition();
+        // Now camera can reset to where bike is, since we have just stopped.
+        Game.Inst.ResetCamera();
+
+        yield return null;// Game.Inst.WaitCheck;
+
+        Game.Inst.ActivateCamera(true);
+
+
+        Game.Inst.StartGuiLevelText();
+
+        
     }
 
     //////////////// BIKE COLLISION EXIT
